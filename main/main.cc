@@ -11,7 +11,5 @@ extern "C" void app_main()
         printf("Hello tamagotchi!\n");
 
         ESP_ERROR_CHECK(nvs_flash_init());
-        ESP_LOGI("TAG", "ESP_WIFI_MODE_STA");
-        WifiModule::wifiConnect("foo", "bar");
 
     }

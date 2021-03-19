@@ -1,8 +1,11 @@
+#pragma once
 #include <string>
 #include <cstring>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "semphr.h"
+#include "esp_now.h"
 #include "esp_system.h"
 #include "esp_log.h"
 #include "esp_netif.h"
@@ -12,15 +15,19 @@
 #include "nvs_flash.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "espNowConfigurations"
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
 class WifiModule {
-    public:
 
+    public:
+    enum class WifiMode { ESP_NOW, STATION, ACCESS_POINT };
+    static void wifiInit(WifiMode mode);
     static void wifiConnect(std::string wifiSSID, std::string wifiPassword);
-    
+    static void wifiDeinit();
+
     private:
     WifiModule(std::string wifiSSID, std::string wifiPassword) : wifiSSID(wifiSSID), 
                                                                 wifiPassword(wifiPassword)
@@ -28,9 +35,13 @@ class WifiModule {
     void connect();
     static void eventHandler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data);
+    
+    static SemaphoreHandle_t wifiMutex; 
     static int maximumRetry;
-    const std::string wifiSSID;
-    const std::string wifiPassword;
+    static bool ifWifiInit;
     static EventGroupHandle_t wifiEventGroup;
     static std::string TAG;
+    
+    const std::string wifiSSID;
+    const std::string wifiPassword;
 };

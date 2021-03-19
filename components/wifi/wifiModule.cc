@@ -1,8 +1,51 @@
 #include "wifiModule.hpp"
 
+bool WifiModule::ifWifiInit = false;
 int WifiModule::maximumRetry = 3;
-std::string WifiModule::TAG = "ESP wifi station";
+SemaphoreHandle_t WifiModule::wifiMutex = xSemaphoreCreateMutex();
+std::string WifiModule::TAG = "ESP8266 wifi";
 EventGroupHandle_t WifiModule::wifiEventGroup = xEventGroupCreate();
+
+
+
+void WifiModule::wifiInit(WifiMode mode){
+    if(wifiMutex != NULL){
+        if(xSemaphoreTake( wifiMutex, ( TickType_t ) 10 ) == pdTRUE){
+            tcpip_adapter_init();
+            ESP_ERROR_CHECK(esp_event_loop_create_default());
+            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+            ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
+            ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
+
+                if(mode == WifiMode::ESP_NOW){
+
+                    ESP_ERROR_CHECK( esp_wifi_set_mode(ESPNOW_WIFI_MODE) );
+                    ESP_ERROR_CHECK(esp_wifi_start());
+
+                } else if (mode == WifiMode::STATION){
+
+                    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &WifiModule::eventHandler, NULL));
+                    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &WifiModule::eventHandler, NULL));
+                }
+            ifWifiInit = true;
+            xSemaphoreGive( wifiMutex );
+        }else{
+            ESP_LOGE(TAG.c_str(), "CANNOT INIT WIFI - RESOURCE NOT AVAILABLE");
+        }
+    }
+}
+
+void WifiModule::wifiDeinit(){
+        if(wifiMutex != NULL){
+        if(xSemaphoreTake( wifiMutex, ( TickType_t ) 10 ) == pdTRUE){
+            esp_now_deinit();
+            ifWifiInit = false;
+            xSemaphoreGive( wifiMutex );
+        }else{
+            ESP_LOGE(TAG.c_str(), "CANNOT DEINIT WIFI - RESOURCE NOT AVAILABLE");
+        }
+    }
+}
 
 void WifiModule::wifiConnect(std::string wifiSSID, std::string wifiPassword){
     WifiModule instance(wifiSSID, wifiPassword);
@@ -36,14 +79,7 @@ void WifiModule::connect(){
 
     wifiEventGroup = xEventGroupCreate();
 
-    tcpip_adapter_init();
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-
-    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &WifiModule::eventHandler, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &WifiModule::eventHandler, NULL));
-
+    wifiInit(WifiMode::STATION);
 
     wifi_config_t wifi_config = {};
     strcpy((char *)wifi_config.sta.ssid, wifiSSID.c_str());
@@ -51,14 +87,10 @@ void WifiModule::connect(){
 
     if (strlen((char *)wifi_config.sta.password)) {
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
-    }
-
-
+                    }
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
+    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
-
-    ESP_LOGI(TAG.c_str(), "wifi_init_sta finished.");
 
     EventBits_t bits = xEventGroupWaitBits(wifiEventGroup,
         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
