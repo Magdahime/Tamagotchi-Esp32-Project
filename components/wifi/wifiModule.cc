@@ -1,25 +1,35 @@
 #include "wifiModule.hpp"
 
-bool WifiModule::ifWifiInit = false;
-int WifiModule::maximumRetry = 3;
-SemaphoreHandle_t WifiModule::wifiMutex = xSemaphoreCreateMutex();
+WifiModule* WifiModule::instance = nullptr;
+const int WifiModule::maximumRetry = 3;
 std::string WifiModule::TAG = "ESP8266 wifi";
 EventGroupHandle_t WifiModule::wifiEventGroup = xEventGroupCreate();
 
+WifiModule::WifiModule() {
+    this->wifiMutex = xSemaphoreCreateMutex();
+    this->ifWifiInit = false;
+}
 
+WifiModule* WifiModule::getInstance()
+{
+    if(instance == nullptr){
+        instance = new WifiModule();
+    }
+    return instance;
+}
 
 void WifiModule::wifiInit(WifiMode mode){
     if(wifiMutex != NULL){
-        if(xSemaphoreTake( wifiMutex, ( TickType_t ) 10 ) == pdTRUE){
+        if(xSemaphoreTake( wifiMutex, ( TickType_t ) 10 ) == pdTRUE && ifWifiInit == false){
+
             tcpip_adapter_init();
             ESP_ERROR_CHECK(esp_event_loop_create_default());
             wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
             ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
-            ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
 
                 if(mode == WifiMode::ESP_NOW){
-
-                    ESP_ERROR_CHECK( esp_wifi_set_mode(ESPNOW_WIFI_MODE) );
+                    ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM));
+                    ESP_ERROR_CHECK(esp_wifi_set_mode(ESPNOW_WIFI_MODE));
                     ESP_ERROR_CHECK(esp_wifi_start());
 
                 } else if (mode == WifiMode::STATION){
@@ -48,13 +58,15 @@ void WifiModule::wifiDeinit(){
 }
 
 void WifiModule::wifiConnect(std::string wifiSSID, std::string wifiPassword){
-    WifiModule instance(wifiSSID, wifiPassword);
-    instance.connect();
+    WifiModule* instance = WifiModule::getInstance();
+    instance->setPassword(wifiPassword);
+    instance->setSSID(wifiSSID);
+    instance->connect();
 }
 
 void WifiModule::eventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data){
-    int s_retry_num = 0;
 
+    int s_retry_num = 0;
       if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
@@ -76,7 +88,7 @@ void WifiModule::eventHandler(void* arg, esp_event_base_t event_base, int32_t ev
 }
 
 void WifiModule::connect(){
-
+    printf("CONNECT");
     wifiEventGroup = xEventGroupCreate();
 
     wifiInit(WifiMode::STATION);
@@ -112,3 +124,6 @@ void WifiModule::connect(){
     ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &WifiModule::eventHandler));
     vEventGroupDelete(wifiEventGroup);
 }
+
+void WifiModule::setPassword(std::string wifiPassword){ this->wifiPassword = wifiPassword;}
+void WifiModule::setSSID(std::string wifiSSID){ this->wifiSSID = wifiSSID;}

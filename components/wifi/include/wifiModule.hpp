@@ -1,4 +1,6 @@
-#pragma once
+#ifndef WIFI_MODULE
+#define WIFI_MODULE
+
 #include <string>
 #include <cstring>
 #include "freertos/FreeRTOS.h"
@@ -15,7 +17,7 @@
 #include "nvs_flash.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
-#include "espNowConfigurations"
+#include "espNowStructs.hpp"
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
@@ -24,24 +26,29 @@ class WifiModule {
 
     public:
     enum class WifiMode { ESP_NOW, STATION, ACCESS_POINT };
-    static void wifiInit(WifiMode mode);
-    static void wifiConnect(std::string wifiSSID, std::string wifiPassword);
-    static void wifiDeinit();
+    static WifiModule* getInstance();
+    void wifiInit(WifiMode mode);
+    void wifiConnect(std::string wifiSSID, std::string wifiPassword);
+    void wifiDeinit();
+    void operator=(WifiModule const&) = delete;
 
     private:
-    WifiModule(std::string wifiSSID, std::string wifiPassword) : wifiSSID(wifiSSID), 
-                                                                wifiPassword(wifiPassword)
-                                                                {}
+    WifiModule();
     void connect();
     static void eventHandler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data);
     
-    static SemaphoreHandle_t wifiMutex; 
-    static int maximumRetry;
-    static bool ifWifiInit;
+    void setPassword(std::string wifiPassword);
+    void setSSID(std::string wifiSSID);
+    static const int maximumRetry;
     static EventGroupHandle_t wifiEventGroup;
     static std::string TAG;
-    
-    const std::string wifiSSID;
-    const std::string wifiPassword;
+    static WifiModule* instance;
+
+    bool ifWifiInit;
+    SemaphoreHandle_t wifiMutex; 
+    std::string wifiSSID;
+    std::string wifiPassword;
 };
+
+#endif

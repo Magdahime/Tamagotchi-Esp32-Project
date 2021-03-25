@@ -1,4 +1,5 @@
-#pragma once 
+#ifndef ESP_NOW_STRUCTS
+#define ESP_NOW_STRUCTS
 
 /* ESPNOW can work in both station and softap mode. It is configured in menuconfig. */
 #if CONFIG_STATION_MODE
@@ -13,9 +14,9 @@
 
 #define IS_BROADCAST_ADDR(addr) (memcmp(addr, example_broadcast_mac, ESP_NOW_ETH_ALEN) == 0)
 
-enum class espNowEvents {
-    espNowSend,
-    espNowReceive,
+enum class espNowEventID {
+    espNowSendCallback,
+    espNowReceiveCallback,
 };
 
 typedef struct {
@@ -34,19 +35,17 @@ typedef union {
     espNowEventReceiveCallback receiveCallback;
 } espNowEventInfo;
 
-/* When ESPNOW sending or receiving callback function is called, post event to ESPNOW task. */
 typedef struct {
-    example_espnow_event_id_t id;
+    espNowEventID id;
     espNowEventInfo info;
 } espNowEvent;
 
-enum espNowCommunicationType{
+enum class espNowCommunicationType{
     ESPNOW_DATA_BROADCAST,
     ESPNOW_DATA_UNICAST,
     ESPNOW_DATA_MAX,
 };
 
-/* User defined field of ESPNOW data in this example. */
 typedef struct {
     uint8_t type;                         //Broadcast or unicast ESPNOW data.
     uint8_t state;                        //Indicate that if has received broadcast ESPNOW data or not.
@@ -56,7 +55,7 @@ typedef struct {
     uint8_t payload[0];                   //Real payload of ESPNOW data.
 } __attribute__((packed)) espNowData;
 
-/* Parameters of sending ESPNOW data. */
+
 typedef struct {
     bool unicast;                         //Send unicast ESPNOW data.
     bool broadcast;                       //Send broadcast ESPNOW data.
@@ -68,3 +67,5 @@ typedef struct {
     uint8_t *buffer;                      //Buffer pointing to ESPNOW data.
     uint8_t dest_mac[ESP_NOW_ETH_ALEN];   //MAC address of destination device.
 } espNowParams;
+
+#endif

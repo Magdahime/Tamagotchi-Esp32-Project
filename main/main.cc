@@ -8,8 +8,7 @@
 
 extern "C" void app_main()
     {
-        printf("Hello tamagotchi!\n");
-
         ESP_ERROR_CHECK(nvs_flash_init());
-
+        printf("Hello tamagotchi!\n");
+        WifiModule::getInstance()->wifiConnect("UPC121667", "pGx63cPyysu3");
     }
