@@ -1,4 +1,4 @@
-PROJECT_NAME := hello-world
+PROJECT_NAME := tamagotchi
 
 include $(IDF_PATH)/make/project.mk
 
