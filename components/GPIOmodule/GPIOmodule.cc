@@ -1,20 +1,19 @@
 #include "GPIOmodule.hpp"
 namespace tamagotchi {
 namespace GPIOModule {
-void GPIOinit(gpio_num_t GPIOnum, GPIOPullMode pull, GPIOIOmode mode,
-              GPIOedge edge) {
-
+void GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
+              const GPIOIOmode mode, const GPIOedge edge) {
   gpio_config_t gpioConfig;
   switch (edge) {
-  case GPIOedge::ANY:
-    gpioConfig.intr_type = GPIO_INTR_ANYEDGE;
-    break;
-  case GPIOedge::RISING:
-    gpioConfig.intr_type = GPIO_INTR_POSEDGE;
-    break;
-  case GPIOedge::FALLING:
-    gpioConfig.intr_type = GPIO_INTR_NEGEDGE;
-    break;
+    case GPIOedge::ANY:
+      gpioConfig.intr_type = GPIO_INTR_ANYEDGE;
+      break;
+    case GPIOedge::RISING:
+      gpioConfig.intr_type = GPIO_INTR_POSEDGE;
+      break;
+    case GPIOedge::FALLING:
+      gpioConfig.intr_type = GPIO_INTR_NEGEDGE;
+      break;
   }
 
   gpioConfig.mode =
@@ -34,11 +33,27 @@ void GPIOinit(gpio_num_t GPIOnum, GPIOPullMode pull, GPIOIOmode mode,
   ESP_LOGI(GPIOConsts::TAG, "GPIO[%d] configured", GPIOnum);
 }
 
-void setHandler(gpio_num_t GPIOnum, gpio_isr_t isrHandler) {
+void GPIOinit(const std::vector<gpio_num_t>& GPIOnum, const GPIOPullMode pull,
+              const GPIOIOmode mode, const GPIOedge edge) {
+  for (const auto& num : GPIOnum) {
+    GPIOinit(num, pull, mode, edge);
+  }
+}
+
+void setHandler(const std::vector<gpio_num_t>& GPIOnum,
+                const gpio_isr_t isrHandler) {
+  for (const auto& num : GPIOnum) {
+    setHandler(num, isrHandler);
+  }
+}
+
+void setHandler(const gpio_num_t GPIOnum, const gpio_isr_t isrHandler) {
   gpio_isr_handler_add(GPIOnum, isrHandler, NULL);
 }
 
-void removeHandler(gpio_num_t GPIOnum) { gpio_isr_handler_remove(GPIOnum); }
-} // namespace GPIOModule
+void removeHandler(const gpio_num_t GPIOnum) {
+  gpio_isr_handler_remove(GPIOnum);
+}
+}  // namespace GPIOModule
 
-} // namespace tamagotchi
+}  // namespace tamagotchi
