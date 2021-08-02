@@ -2,9 +2,12 @@
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include <stdio.h>
+
+#include <cstdio>
+
 #include "ESPNOWmodule.hpp"
 #include "GPIOmodule.hpp"
+#include "Joystick.hpp"
 
 extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
@@ -15,6 +18,6 @@ extern "C" void app_main() {
     ret = nvs_flash_init();
   }
   //tamagotchi::EspNowModule::init();
-  tamagotchi::GPIOModule::GPIOinit();
-
+  tamagotchi::Joystick joystick;
+  joystick.init();
 }
