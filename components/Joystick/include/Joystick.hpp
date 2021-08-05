@@ -1,5 +1,4 @@
-#ifndef JOYSTICK
-#define JOYSTICK
+#pragma once
 #include "GPIOmodule.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -21,9 +20,6 @@ private:
   static void task(void *arg);
   static void handler(void *arg);
   static xQueueHandle joystickEventQueue;
-  static uint32_t counter;
 };
 
 } // namespace tamagotchi
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef GPIOMODULE
-#define GPIOMODULE
+#pragma once
 
 #include <esp_log.h>
 
@@ -23,5 +22,3 @@ void removeHandler(const gpio_num_t GPIOnum);
 };  // namespace GPIOModule
 
 }  // namespace tamagotchi
-
-#endif

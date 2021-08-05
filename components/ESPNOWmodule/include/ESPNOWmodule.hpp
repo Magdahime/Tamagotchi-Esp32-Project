@@ -1,5 +1,4 @@
-#ifndef ESP_NOW_MODULE
-#define ESP_NOW_MODULE
+#pragma once
 
 #include "ESPNOWspec.hpp"
 #include "esp_crc.h"
@@ -38,4 +37,3 @@ static int64_t messageCounter[consts::ESPNOW_COMMUNICATION_METHODS] = {0, 0};
 }; // namespace EspNowModule
 } // namespace tamagotchi
 
-#endif

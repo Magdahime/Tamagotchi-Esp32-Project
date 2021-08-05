@@ -1,5 +1,4 @@
-#ifndef ESP_NOW_STRUCTS
-#define ESP_NOW_STRUCTS
+#pragma once
 
 #include "esp_now.h"
 #include <cstring>
@@ -90,4 +89,3 @@ typedef struct {
 
 } // namespace tamagotchi
 
-#endif

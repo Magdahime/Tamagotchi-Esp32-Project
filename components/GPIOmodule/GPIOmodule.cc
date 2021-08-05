@@ -38,6 +38,7 @@ void GPIOinit(const std::vector<gpio_num_t>& GPIOnum, const GPIOPullMode pull,
   for (const auto& num : GPIOnum) {
     GPIOinit(num, pull, mode, edge);
   }
+  ESP_LOGI(GPIOConsts::TAG, "End of GPIOInit");
 }
 
 void setHandler(const std::vector<gpio_num_t>& GPIOnum,
@@ -45,10 +46,12 @@ void setHandler(const std::vector<gpio_num_t>& GPIOnum,
   for (const auto& num : GPIOnum) {
     setHandler(num, isrHandler);
   }
+  ESP_LOGI(GPIOConsts::TAG, "End of setting handlers");
 }
 
 void setHandler(const gpio_num_t GPIOnum, const gpio_isr_t isrHandler) {
-  gpio_isr_handler_add(GPIOnum, isrHandler, NULL);
+  gpio_isr_handler_add(GPIOnum, isrHandler, (void*)GPIOnum);
+  ESP_LOGI(GPIOConsts::TAG, "End of setting handler");
 }
 
 void removeHandler(const gpio_num_t GPIOnum) {
