@@ -57,6 +57,13 @@ void setHandler(const gpio_num_t GPIOnum, const gpio_isr_t isrHandler) {
 void removeHandler(const gpio_num_t GPIOnum) {
   gpio_isr_handler_remove(GPIOnum);
 }
+
+bool getLevel(const gpio_num_t GPIOnum) { return gpio_get_level(GPIOnum); }
+
+void setLevel(const gpio_num_t GPIOnum, bool state) {
+  gpio_set_level(GPIOnum, state);
+}
+
 }  // namespace GPIOModule
 
 }  // namespace tamagotchi
