@@ -28,7 +28,7 @@ static const std::unordered_map<gpio_num_t, const char*> gpio2string = {
 
 namespace GPIOConsts {
 constexpr int DEBOUNCE_TIME = 10;
-constexpr int SUCCESS_DELAY = 15 / portTICK_PERIOD_MS;
+constexpr int SUCCESS_DELAY = 10 / portTICK_PERIOD_MS;
 constexpr int FAILURE_DELAY = 10 / portTICK_PERIOD_MS;
 constexpr int ESP_INTR_FLAG_DEFAULT = 0;
 constexpr char TAG[] = "ESP32 GPIOModule";

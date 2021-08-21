@@ -17,7 +17,7 @@ extern "C" void app_main() {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
-  //tamagotchi::EspNowModule::init();
-  tamagotchi::Joystick joystick;
-  joystick.init();
+  tamagotchi::ESPNOWModule::init();
+  //tamagotchi::Joystick joystick;
+  //joystick.init();
 }

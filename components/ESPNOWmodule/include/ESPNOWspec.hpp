@@ -6,17 +6,18 @@
 
 /* ESPNOW can work in both station and softap mode. It is configured in
  * menuconfig. */
-#if CONFIG_STATION_MODE
-#define ESPNOW_WIFI_MODE WIFI_MODE_STA
-#define ESPNOW_WIFI_IF ESP_IF_WIFI_STA
-#else
 #define ESPNOW_WIFI_MODE WIFI_MODE_AP
 #define ESPNOW_WIFI_IF ESP_IF_WIFI_AP
-#endif
 
 namespace tamagotchi {
 
 namespace consts {
+constexpr char ESPNOW_PMK[]="pmk1234567890123";
+constexpr char ESPNOW_LMK[]="lmk1234567890123";
+constexpr int ESPNOW_CHANNEL= 1;
+constexpr int ESPNOW_SEND_COUNT= 100;
+constexpr int ESPNOW_SEND_DELAY=1000;
+constexpr int ESPNOW_SEND_LEN=200;
 constexpr int ESPNOW_QUEUE_SIZE = 6;
 constexpr int ESPNOW_MAXDELAY = 512;
 constexpr int ESPNOW_DATA_MAX = 2;

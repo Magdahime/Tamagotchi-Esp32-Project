@@ -35,7 +35,7 @@ void Joystick::task(void *arg) {
   uint32_t saveDebounceTimeout;
   gpio_num_t saveGpioNum;
   bool save;
-
+  
   for (;;) {
     taskENTER_CRITICAL(&mux);
 
@@ -62,10 +62,6 @@ void Joystick::task(void *arg) {
       vTaskDelay(GPIOConsts::SUCCESS_DELAY);
     }
     vTaskDelay(GPIOConsts::FAILURE_DELAY);
-    // if (xQueueReceive(joystickEventQueue, &io_num, portMAX_DELAY)) {
-    //   ESP_LOGI("JOYSTICK MODULE", "Pressed %s",
-    //            GPIOInputs::gpio2string.at(io_num));
-    // }
   }
 }
 
@@ -76,7 +72,6 @@ void IRAM_ATTR Joystick::handler(void *arg) {
   numberOfButtonInterrupts++;
   lastState = GPIOModule::getLevel(static_cast<gpio_num_t>(gpioNum));
   debounceTimeout = xTaskGetTickCountFromISR();
-  // xQueueSendFromISR(joystickEventQueue, &gpioNum, NULL);
   taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
 }
 
