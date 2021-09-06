@@ -1,8 +1,10 @@
 #include "GPIOmodule.hpp"
+
 namespace tamagotchi {
-namespace GPIOModule {
-void GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
-              const GPIOIOmode mode, const GPIOedge edge) {
+const char* GPIOModule::TAG_ = "ESP32 GPIOModule";
+
+void GPIOModule::GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
+                          const GPIOIOmode mode, const GPIOedge edge) {
   gpio_config_t gpioConfig;
   switch (edge) {
     case GPIOedge::ANY:
@@ -30,40 +32,42 @@ void GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
   }
 
   gpio_config(&gpioConfig);
-  ESP_LOGI(GPIOConsts::TAG, "GPIO[%d] configured", GPIOnum);
+  ESP_LOGI(TAG_, "GPIO[%d] configured", GPIOnum);
 }
 
-void GPIOinit(const std::vector<gpio_num_t>& GPIOnum, const GPIOPullMode pull,
-              const GPIOIOmode mode, const GPIOedge edge) {
+void GPIOModule::GPIOinit(const std::vector<gpio_num_t>& GPIOnum,
+                          const GPIOPullMode pull, const GPIOIOmode mode,
+                          const GPIOedge edge) {
   for (const auto& num : GPIOnum) {
     GPIOinit(num, pull, mode, edge);
   }
-  ESP_LOGI(GPIOConsts::TAG, "End of GPIOInit");
+  ESP_LOGI(TAG_, "End of GPIOInit");
 }
 
-void setHandler(const std::vector<gpio_num_t>& GPIOnum,
-                const gpio_isr_t isrHandler) {
+void GPIOModule::setHandler(const std::vector<gpio_num_t>& GPIOnum,
+                            const gpio_isr_t isrHandler) {
   for (const auto& num : GPIOnum) {
     setHandler(num, isrHandler);
   }
-  ESP_LOGI(GPIOConsts::TAG, "End of setting handlers");
+  ESP_LOGI(TAG_, "End of setting handlers");
 }
 
-void setHandler(const gpio_num_t GPIOnum, const gpio_isr_t isrHandler) {
+void GPIOModule::setHandler(const gpio_num_t GPIOnum,
+                            const gpio_isr_t isrHandler) {
   gpio_isr_handler_add(GPIOnum, isrHandler, (void*)GPIOnum);
-  ESP_LOGI(GPIOConsts::TAG, "End of setting handler");
+  ESP_LOGI(TAG_, "End of setting handler");
 }
 
-void removeHandler(const gpio_num_t GPIOnum) {
+void GPIOModule::removeHandler(const gpio_num_t GPIOnum) {
   gpio_isr_handler_remove(GPIOnum);
 }
 
-bool getLevel(const gpio_num_t GPIOnum) { return gpio_get_level(GPIOnum); }
-
-void setLevel(const gpio_num_t GPIOnum, bool state) {
-  gpio_set_level(GPIOnum, state);
+bool GPIOModule::getLevel(const gpio_num_t GPIOnum) {
+  return gpio_get_level(GPIOnum);
 }
 
-}  // namespace GPIOModule
+void GPIOModule::setLevel(const gpio_num_t GPIOnum, bool state) {
+  gpio_set_level(GPIOnum, state);
+}
 
 }  // namespace tamagotchi

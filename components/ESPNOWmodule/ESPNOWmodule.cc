@@ -1,15 +1,14 @@
 #include "ESPNOWmodule.hpp"
 
-#include "ESPNOWspec.hpp"
 
 namespace tamagotchi {
-xQueueHandle ESPNOWModule::ESPNOWqueue = nullptr;
-int64_t ESPNOWModule::messageCounter[consts::ESPNOW_COMMUNICATION_METHODS] = {
+xQueueHandle ESPNOWModule::ESPNOWqueue_ = nullptr;
+int64_t ESPNOWModule::messageCounter_[consts::ESPNOW_COMMUNICATION_METHODS] = {
     0, 0};
 int ESPNOWModule::init() {
   wifiInit();
-  ESPNOWqueue = xQueueCreate(consts::ESPNOW_QUEUE_SIZE, sizeof(espNowEvent));
-  if (ESPNOWqueue == NULL) {
+  ESPNOWqueue_ = xQueueCreate(consts::ESPNOW_QUEUE_SIZE, sizeof(espNowEvent));
+  if (ESPNOWqueue_ == NULL) {
     ESP_LOGE(consts::TAG, "CREATE MUTEX FAIL");
     return ESP_FAIL;
   }
@@ -41,7 +40,7 @@ int ESPNOWModule::init() {
 void ESPNOWModule::deinit(espNowParams *params) {
   delete params->buffer;
   delete params;
-  vSemaphoreDelete(ESPNOWqueue);
+  vSemaphoreDelete(ESPNOWqueue_);
   esp_now_deinit();
 }
 
@@ -68,7 +67,7 @@ void ESPNOWModule::sendData(const uint8_t *macAddress,
   event.id = espNowEventID::espNowSendCallback;
   memcpy(sendCallback->macAddress, macAddress, ESP_NOW_ETH_ALEN);
   sendCallback->status = status;
-  if (xQueueSend(ESPNOWqueue, &event, consts::ESPNOW_MAXDELAY) != pdTRUE) {
+  if (xQueueSend(ESPNOWqueue_, &event, consts::ESPNOW_MAXDELAY) != pdTRUE) {
     ESP_LOGW(consts::TAG, "SEND QUEUE FAIL");
   }
 }
@@ -92,7 +91,7 @@ void ESPNOWModule::receiveData(const uint8_t *macAddress, const uint8_t *data,
 
   memcpy(receiveCallback->data, data, length);
   receiveCallback->dataLength = length;
-  if (xQueueSend(ESPNOWqueue, &event, consts::ESPNOW_MAXDELAY) != pdTRUE) {
+  if (xQueueSend(ESPNOWqueue_, &event, consts::ESPNOW_MAXDELAY) != pdTRUE) {
     ESP_LOGW(consts::TAG, "RECEIVE QUEUE FAIL");
     delete[] receiveCallback->data;
   }
@@ -131,7 +130,7 @@ void ESPNOWModule::prepareData(espNowParams *sendParams) {
                   ? espNowCommunicationType::ESPNOW_DATA_BROADCAST
                   : espNowCommunicationType::ESPNOW_DATA_UNICAST;
   buf->state = sendParams->state;
-  buf->sequenceNumber = messageCounter[static_cast<int>(buf->type)]++;
+  buf->sequenceNumber = messageCounter_[static_cast<int>(buf->type)]++;
   buf->crc = 0;
   buf->magic = sendParams->magic;
   /* Fill all remaining bytes after the data with random values */
@@ -159,7 +158,7 @@ void ESPNOWModule::ESPNOWtask(void *pvParameter) {
     vTaskDelete(NULL);
   }
 
-  while (xQueueReceive(ESPNOWqueue, &event, portMAX_DELAY) == pdTRUE) {
+  while (xQueueReceive(ESPNOWqueue_, &event, portMAX_DELAY) == pdTRUE) {
     switch (event.id) {
       case espNowEventID::espNowSendCallback: {
         espNowEventSendCallback *sendCallback = &event.info.sendCallback;
@@ -307,7 +306,7 @@ espNowParams *ESPNOWModule::initializeSendingParameters(
   espNowParams *sendParam = new espNowParams;
   if (sendParam == NULL) {
     ESP_LOGE(consts::TAG, "MALLOC SEND PARAMETER FAILURE");
-    vSemaphoreDelete(ESPNOWqueue);
+    vSemaphoreDelete(ESPNOWqueue_);
     esp_now_deinit();
     return nullptr;
   }
@@ -329,7 +328,7 @@ espNowParams *ESPNOWModule::initializeSendingParameters(
   if (sendParam->buffer == NULL) {
     ESP_LOGE(consts::TAG, "MALLOC SEND BUFFER FAIL");
     delete sendParam;
-    vSemaphoreDelete(ESPNOWqueue);
+    vSemaphoreDelete(ESPNOWqueue_);
     esp_now_deinit();
     return nullptr;
   }

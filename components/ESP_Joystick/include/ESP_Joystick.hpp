@@ -5,20 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <vector>
-
 #include "GPIOmodule.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "hal/gpio_types.h"
 
-
 namespace tamagotchi {
-class Joystick {
+class ESP_Joystick {
  public:
-  Joystick(){}
-  void init();
+  ESP_Joystick();
   int32_t checkButtonPress();
 
  private:
@@ -26,10 +22,12 @@ class Joystick {
   static void handler(void *arg);
   static xQueueHandle joystickEventQueue;
 
-  static volatile int numberOfButtonInterrupts;
-  static volatile bool lastState;
-  static volatile uint32_t debounceTimeout;
-  static volatile gpio_num_t gpioNum;
+  static volatile int numberOfButtonInterrupts_;
+  static volatile bool lastState_;
+  static volatile uint32_t debounceTimeout_;
+  static volatile gpio_num_t gpioNum_;
+  static const char* TAG_;
 };
+
 
 }  // namespace tamagotchi

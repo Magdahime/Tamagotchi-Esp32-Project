@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <vector>
 
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
@@ -24,6 +25,11 @@ static const std::unordered_map<gpio_num_t, const char*> gpio2string = {
 
 };
 
+static const std::vector<gpio_num_t> gpios = {
+    GPIOInputs::GPIO_RST,   GPIOInputs::GPIO_SET, GPIOInputs::GPIO_LEFT,
+    GPIOInputs::GPIO_RIGHT, GPIOInputs::GPIO_UP,  GPIOInputs::GPIO_DOWN,
+    GPIOInputs::GPIO_MIDDLE};
+
 }  // namespace GPIOInputs
 
 namespace GPIOConsts {
@@ -31,7 +37,7 @@ constexpr int DEBOUNCE_TIME = 10;
 constexpr int SUCCESS_DELAY = 10 / portTICK_PERIOD_MS;
 constexpr int FAILURE_DELAY = 10 / portTICK_PERIOD_MS;
 constexpr int ESP_INTR_FLAG_DEFAULT = 0;
-constexpr char TAG[] = "ESP32 GPIOModule";
+
 }  // namespace GPIOConsts
 
 enum class GPIOPullMode { PULLUP, PULLDOWN };

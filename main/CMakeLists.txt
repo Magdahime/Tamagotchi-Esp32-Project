@@ -1,2 +1,2 @@
 idf_component_register(SRCS "main.cc"
-                    REQUIRES GPIOmodule ESPNOWmodule Joystick spi_flash)
+                    REQUIRES GPIOmodule ESPNOWmodule ESP_Joystick spi_flash SPIDriver)

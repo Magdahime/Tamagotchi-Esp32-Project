@@ -6,7 +6,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "ESPNOWspec.hpp"
+#include "ESPNOWconf.hpp"
 #include "esp_crc.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -43,7 +43,7 @@ class ESPNOWModule {
   static void wifiInit();
   static void addBroadcastPeer();
   static void addPeer(const uint8_t *macAddress, espNowParams *params);
-  static xQueueHandle ESPNOWqueue;
-  static int64_t messageCounter[consts::ESPNOW_COMMUNICATION_METHODS];
+  static xQueueHandle ESPNOWqueue_;
+  static int64_t messageCounter_[consts::ESPNOW_COMMUNICATION_METHODS];
 };  // namespace EspNowModule
 }  // namespace tamagotchi
