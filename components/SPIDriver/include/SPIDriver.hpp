@@ -7,7 +7,7 @@
 #include "freertos/semphr.h"
 
 
-#include "SPIContainer.hpp"
+#include "RecyclingContainer.hpp"
 
 namespace tamagotchi {
 
