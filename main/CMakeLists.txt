@@ -1,3 +1,3 @@
 idf_component_register(SRCS "main.cc"
-                    REQUIRES GPIOmodule ESPNOWmodule ESP_Joystick spi_flash SPIDriver)
+                    REQUIRES GpioDriver EspnowDriver Joystick spi_flash SpiDriver)
 component_compile_options(-std=gnu++17)

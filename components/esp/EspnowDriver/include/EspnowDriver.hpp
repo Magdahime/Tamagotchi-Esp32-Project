@@ -20,7 +20,7 @@
 #include "nvs_flash.h"
 
 namespace tamagotchi {
-class ESPNOWModule {
+class EspnowDriver {
  public:
   static int init();
   static void deinit(espNowParams *params);
@@ -45,5 +45,5 @@ class ESPNOWModule {
   static void addPeer(const uint8_t *macAddress, espNowParams *params);
   static xQueueHandle ESPNOWqueue_;
   static int64_t messageCounter_[consts::ESPNOW_COMMUNICATION_METHODS];
-};  // namespace EspNowModule
+};  // namespace EspnowDriver
 }  // namespace tamagotchi

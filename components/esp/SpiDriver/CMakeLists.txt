@@ -1,4 +1,4 @@
-idf_component_register(SRCS "SPIDriver.cpp"
+idf_component_register(SRCS "SpiDriver.cpp"
                     INCLUDE_DIRS "include"
                     REQUIRES RecyclingContainer)
 component_compile_options(-std=gnu++17)

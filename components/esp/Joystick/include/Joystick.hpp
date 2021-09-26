@@ -5,16 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "GPIOmodule.hpp"
+#include "GpioDriver.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "hal/gpio_types.h"
 
 namespace tamagotchi {
-class ESP_Joystick {
+class Joystick {
  public:
-  ESP_Joystick();
+  Joystick();
   int32_t checkButtonPress();
 
  private:

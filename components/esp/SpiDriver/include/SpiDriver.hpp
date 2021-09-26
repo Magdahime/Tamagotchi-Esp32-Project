@@ -11,12 +11,12 @@
 
 namespace tamagotchi {
 
-class SPIDriver {
+class SpiDriver {
  public:
-  SPIDriver(spi_host_device_t host)
+  SpiDriver(spi_host_device_t host)
       : host_(host),
         transactionSem_(xSemaphoreCreateMutex()){};
-  ~SPIDriver() { spi_bus_free(host_); };
+  ~SpiDriver() { spi_bus_free(host_); };
 
   esp_err_t initialize(int mosiNum, int misoNum, int sclkNum,
                        int quadwpNum = -1, int quadhdNum = -1,
@@ -32,7 +32,6 @@ class SPIDriver {
                               const spi_transaction_t& transaction);
 
  private:
-  static uint8_t deviceCounter;
   spi_host_device_t host_;
   SemaphoreHandle_t transactionSem_;
   static const char* TAG_;

@@ -1,9 +1,9 @@
-#include "GPIOmodule.hpp"
+#include "GpioDriver.hpp"
 
 namespace tamagotchi {
-const char* GPIOModule::TAG_ = "ESP32 GPIOModule";
+const char* GpioDriver::TAG_ = "ESP32 GpioDriver";
 
-void GPIOModule::GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
+void GpioDriver::GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
                           const GPIOIOmode mode, const GPIOedge edge) {
   gpio_config_t gpioConfig;
   switch (edge) {
@@ -35,7 +35,7 @@ void GPIOModule::GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
   ESP_LOGI(TAG_, "GPIO[%d] configured", GPIOnum);
 }
 
-void GPIOModule::GPIOinit(const std::vector<gpio_num_t>& GPIOnum,
+void GpioDriver::GPIOinit(const std::vector<gpio_num_t>& GPIOnum,
                           const GPIOPullMode pull, const GPIOIOmode mode,
                           const GPIOedge edge) {
   for (const auto& num : GPIOnum) {
@@ -44,7 +44,7 @@ void GPIOModule::GPIOinit(const std::vector<gpio_num_t>& GPIOnum,
   ESP_LOGI(TAG_, "End of GPIOInit");
 }
 
-void GPIOModule::setHandler(const std::vector<gpio_num_t>& GPIOnum,
+void GpioDriver::setHandler(const std::vector<gpio_num_t>& GPIOnum,
                             const gpio_isr_t isrHandler) {
   for (const auto& num : GPIOnum) {
     setHandler(num, isrHandler);
@@ -52,21 +52,21 @@ void GPIOModule::setHandler(const std::vector<gpio_num_t>& GPIOnum,
   ESP_LOGI(TAG_, "End of setting handlers");
 }
 
-void GPIOModule::setHandler(const gpio_num_t GPIOnum,
+void GpioDriver::setHandler(const gpio_num_t GPIOnum,
                             const gpio_isr_t isrHandler) {
   gpio_isr_handler_add(GPIOnum, isrHandler, (void*)GPIOnum);
   ESP_LOGI(TAG_, "End of setting handler");
 }
 
-void GPIOModule::removeHandler(const gpio_num_t GPIOnum) {
+void GpioDriver::removeHandler(const gpio_num_t GPIOnum) {
   gpio_isr_handler_remove(GPIOnum);
 }
 
-bool GPIOModule::getLevel(const gpio_num_t GPIOnum) {
+bool GpioDriver::getLevel(const gpio_num_t GPIOnum) {
   return gpio_get_level(GPIOnum);
 }
 
-void GPIOModule::setLevel(const gpio_num_t GPIOnum, bool state) {
+void GpioDriver::setLevel(const gpio_num_t GPIOnum, bool state) {
   gpio_set_level(GPIOnum, state);
 }
 

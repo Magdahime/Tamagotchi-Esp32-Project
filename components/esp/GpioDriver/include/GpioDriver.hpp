@@ -9,7 +9,7 @@
 #include "hal/gpio_types.h"
 
 namespace tamagotchi {
-class GPIOModule {
+class GpioDriver {
  public:
   static void GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
                        const GPIOIOmode mode, const GPIOedge edge);

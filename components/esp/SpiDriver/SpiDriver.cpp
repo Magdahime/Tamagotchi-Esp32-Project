@@ -1,14 +1,14 @@
-#include "SPIDriver.hpp"
+#include "SpiDriver.hpp"
 
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
 #include "esp_err.h"
 
 namespace tamagotchi {
-uint8_t SPIDriver::deviceCounter = 0;
-const char* SPIDriver::TAG_ = "ESP32 SPIDriver";
+uint8_t SpiDriver::deviceCounter = 0;
+const char* SpiDriver::TAG_ = "ESP32 SpiDriver";
 
-esp_err_t SPIDriver::initialize(int mosiNum, int misoNum, int sclkNum,
+esp_err_t SpiDriver::initialize(int mosiNum, int misoNum, int sclkNum,
                                 int quadwpNum, int quadhdNum, int maxTransfer) {
   spi_bus_config_t config;
   config.mosi_io_num = mosiNum;

@@ -1,11 +1,11 @@
-#include "ESPNOWmodule.hpp"
+#include "EspnowDriver.hpp"
 
 
 namespace tamagotchi {
-xQueueHandle ESPNOWModule::ESPNOWqueue_ = nullptr;
-int64_t ESPNOWModule::messageCounter_[consts::ESPNOW_COMMUNICATION_METHODS] = {
+xQueueHandle EspnowDriver::ESPNOWqueue_ = nullptr;
+int64_t EspnowDriver::messageCounter_[consts::ESPNOW_COMMUNICATION_METHODS] = {
     0, 0};
-int ESPNOWModule::init() {
+int EspnowDriver::init() {
   wifiInit();
   ESPNOWqueue_ = xQueueCreate(consts::ESPNOW_QUEUE_SIZE, sizeof(espNowEvent));
   if (ESPNOWqueue_ == NULL) {
@@ -37,14 +37,14 @@ int ESPNOWModule::init() {
   return ESP_OK;
 }
 
-void ESPNOWModule::deinit(espNowParams *params) {
+void EspnowDriver::deinit(espNowParams *params) {
   delete params->buffer;
   delete params;
   vSemaphoreDelete(ESPNOWqueue_);
   esp_now_deinit();
 }
 
-void ESPNOWModule::wifiInit() {
+void EspnowDriver::wifiInit() {
   ESP_ERROR_CHECK(esp_netif_init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -54,7 +54,7 @@ void ESPNOWModule::wifiInit() {
   ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-void ESPNOWModule::sendData(const uint8_t *macAddress,
+void EspnowDriver::sendData(const uint8_t *macAddress,
                             esp_now_send_status_t status) {
   espNowEvent event;
   espNowEventSendCallback *sendCallback = &event.info.sendCallback;
@@ -72,7 +72,7 @@ void ESPNOWModule::sendData(const uint8_t *macAddress,
   }
 }
 
-void ESPNOWModule::receiveData(const uint8_t *macAddress, const uint8_t *data,
+void EspnowDriver::receiveData(const uint8_t *macAddress, const uint8_t *data,
                                const int length) {
   espNowEvent event;
   espNowEventReceiveCallback *receiveCallback = &event.info.receiveCallback;
@@ -97,7 +97,7 @@ void ESPNOWModule::receiveData(const uint8_t *macAddress, const uint8_t *data,
   }
 }
 
-espNowCommunicationType ESPNOWModule::parseData(espNowData *data,
+espNowCommunicationType EspnowDriver::parseData(espNowData *data,
                                                 uint16_t dataLength,
                                                 uint8_t *state,
                                                 uint16_t *sequence,
@@ -123,7 +123,7 @@ espNowCommunicationType ESPNOWModule::parseData(espNowData *data,
   return espNowCommunicationType::ESPNOW_ERROR;
 }
 
-void ESPNOWModule::prepareData(espNowParams *sendParams) {
+void EspnowDriver::prepareData(espNowParams *sendParams) {
   espNowData *buf = (espNowData *)sendParams->buffer;
   assert(sendParams->len >= sizeof(espNowData));
   buf->type = isBroadcastAddress(sendParams->destinationMac)
@@ -138,7 +138,7 @@ void ESPNOWModule::prepareData(espNowParams *sendParams) {
   buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, sendParams->len);
 }
 
-void ESPNOWModule::ESPNOWtask(void *pvParameter) {
+void EspnowDriver::ESPNOWtask(void *pvParameter) {
   espNowEvent event;
   uint8_t recv_state = 0;
   uint16_t recv_seq = 0;
@@ -279,7 +279,7 @@ void ESPNOWModule::ESPNOWtask(void *pvParameter) {
   }
 }
 
-void ESPNOWModule::addPeer(const uint8_t *macAddress, espNowParams *params) {
+void EspnowDriver::addPeer(const uint8_t *macAddress, espNowParams *params) {
   esp_now_peer_info_t peer;
   peer.channel = consts::ESPNOW_CHANNEL;
   peer.ifidx = static_cast<wifi_interface_t>(ESPNOW_WIFI_IF);
@@ -289,7 +289,7 @@ void ESPNOWModule::addPeer(const uint8_t *macAddress, espNowParams *params) {
   ESP_ERROR_CHECK(esp_now_add_peer(&peer));
   ESP_LOGE(consts::TAG, "ADD PEER SUCCESS");
 }
-void ESPNOWModule::addBroadcastPeer() {
+void EspnowDriver::addBroadcastPeer() {
   /* Add broadcast peer information to peer list. */
   esp_now_peer_info_t peer;
   peer.channel = consts::ESPNOW_CHANNEL;
@@ -299,7 +299,7 @@ void ESPNOWModule::addBroadcastPeer() {
   ESP_ERROR_CHECK(esp_now_add_peer(&peer));
 }
 
-espNowParams *ESPNOWModule::initializeSendingParameters(
+espNowParams *EspnowDriver::initializeSendingParameters(
     const bool unicast, const uint8_t state, const uint8_t destinationMac[],
     const uint32_t magic, const uint16_t count, const uint16_t delay,
     const int len) {

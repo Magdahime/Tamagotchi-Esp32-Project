@@ -22,7 +22,7 @@ constexpr int ESPNOW_QUEUE_SIZE = 6;
 constexpr int ESPNOW_MAXDELAY = 512;
 constexpr int ESPNOW_DATA_MAX = 2;
 constexpr int ESPNOW_COMMUNICATION_METHODS = 2;
-constexpr char TAG[] = "ESP32 ESPNOWModule";
+constexpr char TAG[] = "ESP32 EspnowDriver";
 constexpr uint8_t EXAMPLE_BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF,
                                                              0xFF, 0xFF, 0xFF};
 constexpr uint16_t espnow_seq[ESPNOW_DATA_MAX] = {0, 0};

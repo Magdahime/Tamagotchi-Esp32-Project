@@ -5,8 +5,8 @@
 
 #include <cstdio>
 
-#include "ESPNOWmodule.hpp"
-#include "ESP_Joystick.hpp"
+#include "EspnowDriver.hpp"
+#include "Joystick.hpp"
 
 extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
@@ -16,7 +16,7 @@ extern "C" void app_main() {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
-  //tamagotchi::ESPNOWModule::init();
+  //tamagotchi::EspnowDriver::init();
   //tamagotchi::Joystick joystick;
   //joystick.init();
 }
