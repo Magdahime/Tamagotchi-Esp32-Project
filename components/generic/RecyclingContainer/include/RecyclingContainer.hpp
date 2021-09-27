@@ -1,7 +1,7 @@
 #pragma once
-#include <stdint.h>
-
+#include <cstdint>
 #include <deque>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -85,25 +85,28 @@ class RecyclingContainer {
       RECYCLING CONTAINER METHODS
   */
 
-  RecyclingContainer() : maxSize_(S), counter_(0){};
+  RecyclingContainer() : maxSize_(S){};
   ~RecyclingContainer() = default;
 
   bool empty() const { return (items_.size() - freeSlots_.size() == 0); }
-  bool full() const { return counter_ == maxSize_ && freeSlots_.empty(); }
+  bool full() const { return size() == maxSize_; }
   size_t size() const { return items_.size() - freeSlots_.size(); }
-  size_t getCounter() const { return counter_; }
-  size_t max_size() const { return maxSize_; }
+  size_t maxSize() const { return maxSize_; }
   int64_t insert(T toAdd) {
-    auto freeSpace = get_free_place();
-    if (freeSpace != items_.end()) {
-      items_.insert(freeSpace, std::make_unique<T>(toAdd));
-      return std::distance(items_.begin, freeSpace);
+    auto freeSpace = getFreeSpace();
+    if (freeSpace == items_.end()) {
+      if (items_.size() == maxSize_) {
+        return -1;
+      }
+      items_.emplace_back(std::make_unique<T>(std::move(toAdd)));
+      return items_.size() - 1;
     }
-    return -1;
+    *freeSpace = std::make_unique<T>(std::move(toAdd));
+    return std::distance(items_.begin(), freeSpace);
   }
   bool remove(uint64_t elemPosition) {
     if (elemPosition < items_.size() && items_[elemPosition]) {
-      items_.erase(items_.begin() + elemPosition);
+      items_[elemPosition] = {};
       freeSlots_.push_back(elemPosition);
       return true;
     }
@@ -125,16 +128,15 @@ class RecyclingContainer {
 
  private:
   size_t maxSize_;
-  size_t counter_;
 
   typename std::vector<std::unique_ptr<T>> items_;
   typename std::deque<uint64_t> freeSlots_;
 
-  typename std::vector<std::unique_ptr<T>>::iterator get_free_place() {
-    if (freeSlots_.empty() && counter_ < maxSize_) {
-      return items_.begin() + (counter_++);
-    } else if (!freeSlots_.empty()) {
-      return items_.begin() + freeSlots_.pop_front();
+  typename std::vector<std::unique_ptr<T>>::iterator getFreeSpace() {
+    if (!freeSlots_.empty()) {
+      const auto result = items_.begin() + freeSlots_.front();
+      freeSlots_.pop_front();
+      return result;
     }
     return items_.end();
   }
@@ -142,7 +144,7 @@ class RecyclingContainer {
   friend bool operator==(RecyclingContainer const& lhs,
                          RecyclingContainer const& rhs) {
     return lhs.deviceHandles == rhs.deviceHandles &&
-           lhs.freeSlots_ == rhs.freeSlots_ && lhs.counter_ == rhs.counter_;
+           lhs.freeSlots_ == rhs.freeSlots_;
   }
   friend bool operator!=(RecyclingContainer const& lhs,
                          RecyclingContainer const& rhs) {
