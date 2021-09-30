@@ -8,76 +8,79 @@
 
 namespace tamagotchi {
 
-template <typename T, size_t S>
-class RecyclingContainer {
- public:
+template <typename T, size_t S> class RecyclingContainer {
+public:
   /*
      ITERATORS
  */
 
   class Iterator {
-   public:
+  public:
     using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = void;
     using value_type = T;
-    using pointer = T*;    // or also value_type*
-    using reference = T&;  // or also value_type&
+    using pointer = T *;   // or also value_type*
+    using reference = T &; // or also value_type&
 
     Iterator(typename std::vector<std::unique_ptr<T>>::iterator itr)
-        : vecIterator(std::move(itr)) {}
-    reference operator*() const { return *(vecIterator->get()); }
-    pointer operator->() { return vecIterator->get(); }
+        : vecIterator_(std::move(itr)) {}
+    reference operator*() const { return *(vecIterator_->get()); }
+    pointer operator->() { return vecIterator_->get(); }
 
     // Prefix increment
-    Iterator& operator++() {
-      while ((vecIterator++)->get() == nullptr) {
-      };
+    Iterator &operator++() {
+      do {
+        ++vecIterator_;
+      } while (*vecIterator_ == nullptr);
       return *this;
     }
 
     // Postfix increment
     Iterator operator++(int) {
       Iterator tmp = *this;
-      while (++(*this) == nullptr) {
-      }
+      do {
+        ++vecIterator_;
+      } while (*vecIterator_ == nullptr);
       return tmp;
     }
 
     // Prefix decrement
-    Iterator& operator--() {
-      while ((vecIterator--)->get() == nullptr) {
-      };
+    Iterator &operator--() {
+      do {
+        vecIterator_--;
+      } while (*vecIterator_ == nullptr);
       return *this;
     }
 
     // Postfix decrement
     Iterator operator--(int) {
       Iterator tmp = *this;
-      while (--(*this) == nullptr) {
-      }
+      do {
+        vecIterator_--;
+      } while (*vecIterator_ == nullptr);
       return tmp;
     }
 
-    friend bool operator==(const Iterator& a, const Iterator& b) {
-      return a.vecIterator == b.vecIterator;
+    friend bool operator==(const Iterator &a, const Iterator &b) {
+      return a.vecIterator_ == b.vecIterator_;
     };
-    friend bool operator!=(const Iterator& a, const Iterator& b) {
-      return a.vecIterator != b.vecIterator;
+    friend bool operator!=(const Iterator &a, const Iterator &b) {
+      return a.vecIterator_ != b.vecIterator_;
     };
 
-   protected:
-    typename std::vector<std::unique_ptr<T>>::iterator vecIterator;
+  protected:
+    typename std::vector<std::unique_ptr<T>>::iterator vecIterator_;
   };
 
   class ConstIterator : public Iterator {
     using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = void;
     using value_type = T;
-    using pointer = T*;    // or also value_type*
-    using reference = T&;  // or also value_type&
+    using pointer = T *;   // or also value_type*
+    using reference = T &; // or also value_type&
 
     const reference operator*() const override {
-      return *(Iterator::vecIterator->get());
+      return *(Iterator::vecIterator_->get());
     }
   };
 
@@ -121,12 +124,7 @@ class RecyclingContainer {
   Iterator end() { return Iterator(items_.end()); }
   ConstIterator cbegin() { return ConstIterator(items_.begin())++; }
   ConstIterator cend() { return ConstIterator(items_.end()); }
-  Iterator rbegin() { return end(); }
-  Iterator rend() { return begin(); }
-  ConstIterator crbegin() { return cend(); }
-  ConstIterator crend() { return cbegin(); }
-
- private:
+private:
   size_t maxSize_;
 
   typename std::vector<std::unique_ptr<T>> items_;
@@ -141,15 +139,15 @@ class RecyclingContainer {
     return items_.end();
   }
 
-  friend bool operator==(RecyclingContainer const& lhs,
-                         RecyclingContainer const& rhs) {
+  friend bool operator==(RecyclingContainer const &lhs,
+                         RecyclingContainer const &rhs) {
     return lhs.deviceHandles == rhs.deviceHandles &&
            lhs.freeSlots_ == rhs.freeSlots_;
   }
-  friend bool operator!=(RecyclingContainer const& lhs,
-                         RecyclingContainer const& rhs) {
+  friend bool operator!=(RecyclingContainer const &lhs,
+                         RecyclingContainer const &rhs) {
     return !(rhs == lhs);
   }
 };
 
-}  // namespace tamagotchi
+} // namespace tamagotchi
