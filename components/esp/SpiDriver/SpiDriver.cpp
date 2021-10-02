@@ -1,12 +1,8 @@
 #include "SpiDriver.hpp"
 
-#include "driver/spi_common.h"
-#include "driver/spi_master.h"
-#include "esp_err.h"
-
 namespace tamagotchi {
-uint8_t SpiDriver::deviceCounter = 0;
-const char* SpiDriver::TAG_ = "ESP32 SpiDriver";
+namespace Spi {
+const char *SpiDriver::TAG_ = "ESP32 SpiDriver";
 
 esp_err_t SpiDriver::initialize(int mosiNum, int misoNum, int sclkNum,
                                 int quadwpNum, int quadhdNum, int maxTransfer) {
@@ -20,6 +16,14 @@ esp_err_t SpiDriver::initialize(int mosiNum, int misoNum, int sclkNum,
   return spi_bus_initialize(host_, &config, 0);
 }
 
+int8_t SpiDriver::addDevice(const spi_device_interface_config_t *dev_config) {
+  spi_device_handle_t handle;
+  if (spi_bus_add_device(host_, dev_config, &handle) != ESP_FAIL && !devices.full()) {
+    auto result = devices.insert(handle);
+    return result;
+  }
+  return ESP_FAIL;
+}
 
-
-}  // namespace tamagotchi
+} // namespace Spi
+} // namespace tamagotchi

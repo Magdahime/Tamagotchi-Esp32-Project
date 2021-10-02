@@ -8,6 +8,7 @@
 
 namespace tamagotchi {
 
+constexpr int INSERT_ERROR = -1;
 template <typename T, size_t S> class RecyclingContainer {
 public:
   /*
@@ -99,7 +100,7 @@ public:
     auto freeSpace = getFreeSpace();
     if (freeSpace == items_.end()) {
       if (items_.size() == maxSize_) {
-        return -1;
+        return INSERT_ERROR;
       }
       items_.emplace_back(std::make_unique<T>(std::move(toAdd)));
       return items_.size() - 1;
@@ -124,6 +125,7 @@ public:
   Iterator end() { return Iterator(items_.end()); }
   ConstIterator cbegin() { return ConstIterator(items_.begin())++; }
   ConstIterator cend() { return ConstIterator(items_.end()); }
+
 private:
   size_t maxSize_;
 

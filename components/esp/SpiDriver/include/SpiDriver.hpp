@@ -6,35 +6,35 @@
 #include "esp_log.h"
 #include "freertos/semphr.h"
 
-
+#include "SpiConf.hpp"
 #include "RecyclingContainer.hpp"
 
 namespace tamagotchi {
 
+namespace Spi {
 class SpiDriver {
- public:
+public:
   SpiDriver(spi_host_device_t host)
-      : host_(host),
-        transactionSem_(xSemaphoreCreateMutex()){};
+      : host_(host), transactionSem_(xSemaphoreCreateMutex()){};
   ~SpiDriver() { spi_bus_free(host_); };
 
   esp_err_t initialize(int mosiNum, int misoNum, int sclkNum,
                        int quadwpNum = -1, int quadhdNum = -1,
                        int maxTransfer = SPI_MAX_DMA_LEN);
-  spi_device_t addDevice(const spi_device_interface_config_t* dev_config,
-                         spi_device_handle_t* handle);
+  int8_t addDevice(const spi_device_interface_config_t *dev_config);
   esp_err_t removeDevice(spi_device_t handle);
   esp_err_t selectDevice(spi_device_t handle);
   esp_err_t deselectDevice(spi_device_t handle);
   esp_err_t transferData(spi_device_t handle,
-                         const spi_transaction_t& transaction);
+                         const spi_transaction_t &transaction);
   esp_err_t sync_transferData(spi_device_t handle,
-                              const spi_transaction_t& transaction);
+                              const spi_transaction_t &transaction);
 
- private:
+private:
   spi_host_device_t host_;
   SemaphoreHandle_t transactionSem_;
-  static const char* TAG_;
+  RecyclingContainer<spi_device_handle_t, consts::MAX_NUMBER_SPI_DEVICES> devices;
+  static const char *TAG_;
 };
-
-}  // namespace tamagotchi
+} // namespace Spi
+} // namespace tamagotchi

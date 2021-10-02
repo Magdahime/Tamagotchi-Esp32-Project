@@ -1,25 +1,28 @@
 #include "GpioDriver.hpp"
 
 namespace tamagotchi {
-const char* GpioDriver::TAG_ = "ESP32 GpioDriver";
+
+namespace Gpio {
+
+const char *GpioDriver::TAG_ = "ESP32 GpioDriver";
 
 void GpioDriver::GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
                           const GPIOIOmode mode, const GPIOedge edge) {
   gpio_config_t gpioConfig;
   switch (edge) {
-    case GPIOedge::ANY:
-      gpioConfig.intr_type = GPIO_INTR_ANYEDGE;
-      break;
-    case GPIOedge::RISING:
-      gpioConfig.intr_type = GPIO_INTR_POSEDGE;
-      break;
-    case GPIOedge::FALLING:
-      gpioConfig.intr_type = GPIO_INTR_NEGEDGE;
-      break;
+  case Gpio::GPIOedge::ANY:
+    gpioConfig.intr_type = GPIO_INTR_ANYEDGE;
+    break;
+  case Gpio::GPIOedge::RISING:
+    gpioConfig.intr_type = GPIO_INTR_POSEDGE;
+    break;
+  case Gpio::GPIOedge::FALLING:
+    gpioConfig.intr_type = GPIO_INTR_NEGEDGE;
+    break;
   }
 
   gpioConfig.mode =
-      mode == GPIOIOmode::INPUT ? GPIO_MODE_INPUT : GPIO_MODE_OUTPUT;
+      mode == Gpio::GPIOIOmode::INPUT ? GPIO_MODE_INPUT : GPIO_MODE_OUTPUT;
   gpioConfig.pin_bit_mask = (1ULL << GPIOnum);
 
   // SET PULL MODE
@@ -35,18 +38,18 @@ void GpioDriver::GPIOinit(const gpio_num_t GPIOnum, const GPIOPullMode pull,
   ESP_LOGI(TAG_, "GPIO[%d] configured", GPIOnum);
 }
 
-void GpioDriver::GPIOinit(const std::vector<gpio_num_t>& GPIOnum,
+void GpioDriver::GPIOinit(const std::vector<gpio_num_t> &GPIOnum,
                           const GPIOPullMode pull, const GPIOIOmode mode,
                           const GPIOedge edge) {
-  for (const auto& num : GPIOnum) {
+  for (const auto &num : GPIOnum) {
     GPIOinit(num, pull, mode, edge);
   }
   ESP_LOGI(TAG_, "End of GPIOInit");
 }
 
-void GpioDriver::setHandler(const std::vector<gpio_num_t>& GPIOnum,
+void GpioDriver::setHandler(const std::vector<gpio_num_t> &GPIOnum,
                             const gpio_isr_t isrHandler) {
-  for (const auto& num : GPIOnum) {
+  for (const auto &num : GPIOnum) {
     setHandler(num, isrHandler);
   }
   ESP_LOGI(TAG_, "End of setting handlers");
@@ -54,7 +57,7 @@ void GpioDriver::setHandler(const std::vector<gpio_num_t>& GPIOnum,
 
 void GpioDriver::setHandler(const gpio_num_t GPIOnum,
                             const gpio_isr_t isrHandler) {
-  gpio_isr_handler_add(GPIOnum, isrHandler, (void*)GPIOnum);
+  gpio_isr_handler_add(GPIOnum, isrHandler, (void *)GPIOnum);
   ESP_LOGI(TAG_, "End of setting handler");
 }
 
@@ -70,4 +73,5 @@ void GpioDriver::setLevel(const gpio_num_t GPIOnum, bool state) {
   gpio_set_level(GPIOnum, state);
 }
 
-}  // namespace tamagotchi
+} // namespace Gpio
+} // namespace tamagotchi

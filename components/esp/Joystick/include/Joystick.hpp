@@ -12,12 +12,13 @@
 #include "hal/gpio_types.h"
 
 namespace tamagotchi {
+namespace Joystick {
 class Joystick {
- public:
+public:
   Joystick();
   int32_t checkButtonPress();
 
- private:
+private:
   static void task(void *arg);
   static void handler(void *arg);
   static xQueueHandle joystickEventQueue;
@@ -26,8 +27,7 @@ class Joystick {
   static volatile bool lastState_;
   static volatile uint32_t debounceTimeout_;
   static volatile gpio_num_t gpioNum_;
-  static const char* TAG_;
+  static const char *TAG_;
 };
-
-
-}  // namespace tamagotchi
+} // namespace Joystick
+} // namespace tamagotchi

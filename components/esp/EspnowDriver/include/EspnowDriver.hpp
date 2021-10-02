@@ -20,30 +20,34 @@
 #include "nvs_flash.h"
 
 namespace tamagotchi {
+namespace EspNow {
 class EspnowDriver {
- public:
+public:
   static int init();
-  static void deinit(espNowParams *params);
+  static void deinit(structs::espNowParams *params);
   static void sendData(const uint8_t *macAddress, esp_now_send_status_t status);
   static void receiveData(const uint8_t *macAddress, const uint8_t *data,
                           const int length);
-  static espNowCommunicationType parseData(espNowData *data,
+  static structs::espNowCommunicationType parseData(structs::espNowData *data,
                                            uint16_t dataLength, uint8_t *state,
                                            uint16_t *sequence, int *magic);
-  static void prepareData(espNowParams *sendParams);
+  static void prepareData(structs::espNowParams *sendParams);
   static void ESPNOWtask(void *pvParameter);
-  static espNowParams * initializeSendingParameters(const bool unicast, const uint8_t state,
-                                          const uint8_t destinationMac[],
-                                          const uint32_t magic =  esp_random(),
-                                          const uint16_t count = consts::ESPNOW_SEND_COUNT,
-                                          const uint16_t delay = consts::ESPNOW_SEND_DELAY,
-                                          const int len = consts::ESPNOW_SEND_LEN);
+  static structs::espNowParams *
+  initializeSendingParameters(const bool unicast, const uint8_t state,
+                              const uint8_t destinationMac[],
+                              const uint32_t magic = esp_random(),
+                              const uint16_t count = consts::ESPNOW_SEND_COUNT,
+                              const uint16_t delay = consts::ESPNOW_SEND_DELAY,
+                              const int len = consts::ESPNOW_SEND_LEN);
 
- private:
+private:
   static void wifiInit();
   static void addBroadcastPeer();
-  static void addPeer(const uint8_t *macAddress, espNowParams *params);
+  static void addPeer(const uint8_t *macAddress, structs::espNowParams *params);
   static xQueueHandle ESPNOWqueue_;
   static int64_t messageCounter_[consts::ESPNOW_COMMUNICATION_METHODS];
-};  // namespace EspnowDriver
-}  // namespace tamagotchi
+};
+
+} // namespace EspNow
+} // namespace tamagotchi

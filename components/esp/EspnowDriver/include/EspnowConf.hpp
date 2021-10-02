@@ -10,14 +10,14 @@
 #define ESPNOW_WIFI_IF ESP_IF_WIFI_AP
 
 namespace tamagotchi {
-
+namespace EspNow {
 namespace consts {
-constexpr char ESPNOW_PMK[]="pmk1234567890123";
-constexpr char ESPNOW_LMK[]="lmk1234567890123";
-constexpr int ESPNOW_CHANNEL= 1;
-constexpr int ESPNOW_SEND_COUNT= 100;
-constexpr int ESPNOW_SEND_DELAY=1000;
-constexpr int ESPNOW_SEND_LEN=200;
+constexpr char ESPNOW_PMK[] = "pmk1234567890123";
+constexpr char ESPNOW_LMK[] = "lmk1234567890123";
+constexpr int ESPNOW_CHANNEL = 1;
+constexpr int ESPNOW_SEND_COUNT = 100;
+constexpr int ESPNOW_SEND_DELAY = 1000;
+constexpr int ESPNOW_SEND_LEN = 200;
 constexpr int ESPNOW_QUEUE_SIZE = 6;
 constexpr int ESPNOW_MAXDELAY = 512;
 constexpr int ESPNOW_DATA_MAX = 2;
@@ -32,6 +32,7 @@ inline bool isBroadcastAddress(const void *address) {
   return memcmp(address, consts::EXAMPLE_BROADCAST_MAC, ESP_NOW_ETH_ALEN) == 0;
 }
 
+namespace structs {
 enum class espNowEventID {
   espNowSendCallback,
   espNowReceiveCallback,
@@ -87,6 +88,8 @@ typedef struct {
   uint8_t
       destinationMac[ESP_NOW_ETH_ALEN]; // MAC address of destination device.
 } espNowParams;
+} // namespace structs
+
+} // namespace EspNow
 
 } // namespace tamagotchi
-
