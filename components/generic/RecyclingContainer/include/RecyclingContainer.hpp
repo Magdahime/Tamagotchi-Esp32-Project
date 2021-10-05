@@ -4,6 +4,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 namespace tamagotchi {
@@ -120,6 +121,11 @@ public:
     items_.clear(items_.begin(), items_.end());
     freeSlots_.clear();
   }
+
+  const T &operator[](size_t n) const { return *items_[n]; }
+  const T &at(size_t n) const { return *items_.at(n); }
+  const T &front() const { return *items_.front(); }
+  const T &back() const { return *items_.front(); }
 
   Iterator begin() { return Iterator(items_.begin()); }
   Iterator end() { return Iterator(items_.end()); }
