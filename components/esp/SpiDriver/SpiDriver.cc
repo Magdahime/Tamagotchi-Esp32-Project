@@ -4,8 +4,9 @@ namespace tamagotchi {
 namespace Spi {
 const char *SpiDriver::TAG_ = "ESP32 SpiDriver";
 
-esp_err_t SpiDriver::initialize(int mosiNum, int misoNum, int sclkNum,
-                                int quadwpNum, int quadhdNum, int maxTransfer) {
+esp_err_t SpiDriver::initialize(const int mosiNum, const int misoNum,
+                                const int sclkNum, const int quadwpNum,
+                                const int quadhdNum, const int maxTransfer) {
   spi_bus_config_t config;
   config.mosi_io_num = mosiNum;
   config.miso_io_num = misoNum;
@@ -13,7 +14,16 @@ esp_err_t SpiDriver::initialize(int mosiNum, int misoNum, int sclkNum,
   config.quadwp_io_num = quadwpNum;
   config.quadhd_io_num = quadhdNum;
   config.max_transfer_sz = maxTransfer;
-  esp_err_t err = spi_bus_initialize(host_, &config, 0);
+  esp_err_t err = spi_bus_initialize(host_, &config, SPI_DMA_CH_AUTO);
+  if (err == ESP_OK)
+    ESP_LOGI(TAG_, "Successfully initialized SPI bus");
+  else
+    ESP_LOGE(TAG_, "FAIL: Cannot initialize SPI bus");
+  return err;
+}
+
+esp_err_t SpiDriver::initialize(const spi_bus_config_t &config) {
+  esp_err_t err = spi_bus_initialize(host_, &config, SPI_DMA_CH_AUTO);
   if (err == ESP_OK)
     ESP_LOGI(TAG_, "Successfully initialized SPI bus");
   else
@@ -33,7 +43,7 @@ size_t SpiDriver::addDevice(const spi_device_interface_config_t *dev_config) {
   return ESP_FAIL;
 }
 
-esp_err_t SpiDriver::removeDevice(uint64_t descriptor) {
+esp_err_t SpiDriver::removeDevice(const uint64_t descriptor) {
   esp_err_t err = spi_bus_remove_device(devices_[descriptor]);
   if (err == ESP_OK)
     ESP_LOGI(TAG_, "Removing SPI device at: %llu", descriptor);
@@ -42,7 +52,7 @@ esp_err_t SpiDriver::removeDevice(uint64_t descriptor) {
   return err;
 }
 
-esp_err_t SpiDriver::transatcion(uint64_t descriptor,
+esp_err_t SpiDriver::transaction(const uint64_t descriptor,
                                  spi_transaction_t *transaction) {
   esp_err_t err = spi_device_transmit(devices_[descriptor], transaction);
   if (err == ESP_OK)
@@ -52,6 +62,38 @@ esp_err_t SpiDriver::transatcion(uint64_t descriptor,
   else
     ESP_LOGE(TAG_, "FAIL! Command:%d", transaction->cmd);
   return err;
+}
+
+esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
+                                const size_t dataLength) {
+  if (dataLength > 0 && devices_[descriptor]) {
+    spi_transaction_t spiTransaction;
+    memset(&spiTransaction, 0, sizeof(spi_transaction_t));
+    spiTransaction.length = dataLength * consts::BYTE;
+    spiTransaction.tx_buffer = data;
+    esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
+    if (err == ESP_OK)
+      ESP_LOGI(TAG_, "Successfully transmitted %d bits", dataLength);
+    else
+      ESP_LOGE(TAG_, "FAIL! Cannot transmit %d bits", dataLength);
+  }
+  ESP_LOGE(TAG_, "FAIL! Incorrect data provided to writeBytes()");
+  return ESP_FAIL;
+}
+
+esp_err_t SpiDriver::writeDataWords(const uint64_t descriptor, uint16_t *data,
+                                    const size_t dataLength) {
+  if (dataLength > 0 && devices_[descriptor]) {
+    uint8_t *bytes = reinterpret_cast<uint8_t *>(data);
+    writeBytes(descriptor, bytes, dataLength * consts::DATA_WORD_BYTES);
+  }
+  ESP_LOGE(TAG_, "FAIL! Incorrect data provided to writeBytes()");
+  return ESP_FAIL;
+}
+
+esp_err_t SpiDriver::writeCommand(const uint64_t descriptor,
+                                  const uint8_t command) {
+  return writeBytes(descriptor, &command, 1);
 }
 
 } // namespace Spi

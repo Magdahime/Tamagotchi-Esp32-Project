@@ -17,9 +17,11 @@ typedef struct {
 
 } // namespace structs
 
-namespace consts{
+namespace consts {
 constexpr int MAX_NUMBER_SPI_DEVICES = 10;
-}
+constexpr char BYTE = 8;
+constexpr char DATA_WORD_BYTES = 2;
+} // namespace consts
 
 } // namespace Spi
 
