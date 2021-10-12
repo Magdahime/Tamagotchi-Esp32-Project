@@ -7,6 +7,7 @@
 
 #include "EspnowDriver.hpp"
 #include "Joystick.hpp"
+#include "ST7789Driver.hpp"
 
 extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
@@ -16,7 +17,22 @@ extern "C" void app_main() {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
-  //tamagotchi::EspnowDriver::init();
-  //tamagotchi::Joystick joystick;
-  //joystick.init();
+  // tamagotchi::EspnowDriver::init();
+  // tamagotchi::Joystick joystick;
+  // joystick.init();
+
+  tamagotchi::ST7789::structs::gpio_config_t gpio = {.gpioMosi = 13,
+                                                     .gpioSclk = 14,
+                                                     .gpioCs = 15,
+                                                     .gpioDc = 2,
+                                                     .gpioReset = 4,
+                                                     .gpioBl = -1};
+
+  tamagotchi::ST7789::structs::lcd_config_t lcd{
+      .width = 240, .height = 320, .offsetx = 0, .offsety = 0};
+
+  tamagotchi::ST7789::structs::st7789_config_t config = {.gpio = gpio,
+                                                         .lcd = lcd};
+
+  tamagotchi::ST7789::ST7789VWDriver st7789Driver(config);
 }

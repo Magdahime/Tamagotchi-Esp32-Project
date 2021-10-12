@@ -1,7 +1,22 @@
-#include "st7789vwDriver.hpp"
+#include "ST7789Driver.hpp"
 
 namespace tamagotchi {
 namespace ST7789 {
+
+const char *ST7789VWDriver::TAG_ = "ESP32 ST7789Driver";
+
+void ST7789VWDriver::delay(uint32_t ms) {
+  TickType_t delay = ms / portTICK_PERIOD_MS;
+  ESP_LOGD(TAG_, "Delay for: %dms, %d ticks", ms, delay);
+  vTaskDelay(delay);
+}
+
+inline void ST7789VWDriver::startCommand() {
+  Gpio::GpioDriver::setLevel(static_cast<gpio_num_t>(dataCommand_), 0);
+}
+inline void ST7789VWDriver::startDataTransfer() {
+  Gpio::GpioDriver::setLevel(static_cast<gpio_num_t>(dataCommand_), 1);
+}
 
 ST7789VWDriver::ST7789VWDriver(structs::st7789_config_t config)
     : spiDriver(consts::LCD_HOST) {
@@ -44,6 +59,13 @@ esp_err_t ST7789VWDriver::lcdInit(structs::lcd_config_t lcd) {
   height_ = lcd.height;
   offsetx_ = lcd.offsetx;
   offsety_ = lcd.offsety;
+
+  spiDriver.writeCommand(spiHandle_, commands::softwareReset);
+  spiDriver.writeCommand(spiHandle_, commands::partialModeOff);
+  spiDriver.writeCommand(spiHandle_, commands::interfacePixelFormat);
+  spiDriver.writeCommand(spiHandle_, commands::memoryDataAccessControl);
+  spiDriver.writeCommand(spiHandle_, commands::displayOn);
+
   return ESP_OK;
 }
 

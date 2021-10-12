@@ -1,6 +1,7 @@
+#pragma once
 #include "GpioDriver.hpp"
 #include "SpiDriver.hpp"
-#include "st7789vwConf.hpp"
+#include "ST7789Conf.hpp"
 
 namespace tamagotchi {
 namespace ST7789 {
@@ -30,6 +31,10 @@ public:
                        uint16_t w, uint16_t color);
 
 private:
+  static const char *TAG_;
+  void delay(uint32_t ms);
+  inline void startCommand();
+  inline void startDataTransfer();
   esp_err_t gpioInit(structs::gpio_config_t gpio);
   esp_err_t lcdInit(structs::lcd_config_t lcd);
   Spi::SpiDriver spiDriver;

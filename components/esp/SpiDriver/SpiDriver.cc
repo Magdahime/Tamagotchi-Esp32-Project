@@ -73,9 +73,10 @@ esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
     spiTransaction.tx_buffer = data;
     esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
     if (err == ESP_OK)
-      ESP_LOGI(TAG_, "Successfully transmitted %d bits", dataLength);
+      ESP_LOGI(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
     else
-      ESP_LOGE(TAG_, "FAIL! Cannot transmit %d bits", dataLength);
+      ESP_LOGE(TAG_, "FAIL! Cannot transmit %d bits", spiTransaction.length);
+    return err;
   }
   ESP_LOGE(TAG_, "FAIL! Incorrect data provided to writeBytes()");
   return ESP_FAIL;
