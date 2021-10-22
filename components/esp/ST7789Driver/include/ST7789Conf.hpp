@@ -9,12 +9,12 @@ namespace ST7789 {
 namespace structs {
 
 struct gpio_config_t {
-  int8_t gpioMosi;
-  int8_t gpioSclk;
-  int8_t gpioCs;
-  int8_t gpioDc;
-  int8_t gpioReset;
-  int8_t gpioBl;
+  gpio_num_t gpioMosi;
+  gpio_num_t gpioSclk;
+  gpio_num_t gpioCs;
+  gpio_num_t gpioDc;
+  gpio_num_t gpioReset;
+  gpio_num_t gpioBl;
 };
 
 struct lcd_config_t {
@@ -36,6 +36,13 @@ constexpr spi_host_device_t LCD_HOST = HSPI_HOST;
 constexpr int QUEUE_SIZE = 7;
 constexpr int SPI_FREQUENCY = SPI_MASTER_FREQ_20M;
 constexpr int MODE = 2;
+constexpr bool DATA_TRANSFER = 1;
+constexpr bool COMMAND = 0;
+constexpr uint8_t PIXEL_FORMAT = 0b01010101;
+constexpr uint8_t MEMORY_ACCESS_FORMAT = 0b00000000;
+constexpr uint8_t SHORT_PAUSE = 10;
+constexpr uint8_t MEDIUM_PAUSE = 100;
+constexpr uint8_t LONG_PAUSE = 250;
 } // namespace consts
 
 namespace commands {

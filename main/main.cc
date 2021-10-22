@@ -21,12 +21,12 @@ extern "C" void app_main() {
   // tamagotchi::Joystick joystick;
   // joystick.init();
 
-  tamagotchi::ST7789::structs::gpio_config_t gpio = {.gpioMosi = 13,
-                                                     .gpioSclk = 14,
-                                                     .gpioCs = 15,
-                                                     .gpioDc = 2,
-                                                     .gpioReset = 4,
-                                                     .gpioBl = -1};
+  tamagotchi::ST7789::structs::gpio_config_t gpio = {.gpioMosi = (gpio_num_t)13,
+                                                     .gpioSclk = (gpio_num_t)14,
+                                                     .gpioCs = (gpio_num_t)15,
+                                                     .gpioDc = (gpio_num_t)2,
+                                                     .gpioReset = (gpio_num_t)4,
+                                                     .gpioBl = (gpio_num_t)-1};
 
   tamagotchi::ST7789::structs::lcd_config_t lcd{
       .width = 240, .height = 320, .offsetx = 0, .offsety = 0};
@@ -35,4 +35,9 @@ extern "C" void app_main() {
                                                          .lcd = lcd};
 
   tamagotchi::ST7789::ST7789VWDriver st7789Driver(config);
+  for (int x = 0; x < 200; x++) {
+    for (int y = 0; y < 200; y++) {
+      st7789Driver.drawPixel(x, y, 0x07e0);
+    }
+  }
 }

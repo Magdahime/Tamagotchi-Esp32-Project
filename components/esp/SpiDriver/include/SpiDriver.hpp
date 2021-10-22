@@ -27,8 +27,10 @@ public:
                         spi_transaction_t *transaction);
   esp_err_t writeBytes(const uint64_t descriptor, const uint8_t *data,
                        const size_t dataLength);
-  esp_err_t writeDataWords(const uint64_t descriptor, uint16_t *data,
+  esp_err_t writeByte(const uint64_t descriptor, const uint8_t data);
+  esp_err_t writeDataWords(const uint64_t descriptor, const uint16_t *data,
                            const size_t dataLength);
+  esp_err_t writeDataWord(const uint64_t descriptor, const uint16_t data);
   esp_err_t writeCommand(const uint64_t descriptor, const uint8_t command);
 
 private:
