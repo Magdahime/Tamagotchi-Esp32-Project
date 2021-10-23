@@ -35,9 +35,6 @@ extern "C" void app_main() {
                                                          .lcd = lcd};
 
   tamagotchi::ST7789::ST7789VWDriver st7789Driver(config);
-  for (int x = 0; x < 200; x++) {
-    for (int y = 0; y < 200; y++) {
-      st7789Driver.drawPixel(x, y, 0x07e0);
-    }
-  }
+  st7789Driver.fillScreen(0xFFFF);
+  st7789Driver.fillScreen(0x2137);
 }

@@ -40,9 +40,9 @@ constexpr bool DATA_TRANSFER = 1;
 constexpr bool COMMAND = 0;
 constexpr uint8_t PIXEL_FORMAT = 0b01010101;
 constexpr uint8_t MEMORY_ACCESS_FORMAT = 0b00000000;
-constexpr uint8_t SHORT_PAUSE = 10;
-constexpr uint8_t MEDIUM_PAUSE = 100;
-constexpr uint8_t LONG_PAUSE = 250;
+constexpr uint32_t SHORT_PAUSE = 1000;
+constexpr uint32_t MEDIUM_PAUSE = 2000;
+constexpr uint32_t LONG_PAUSE = 3000;
 } // namespace consts
 
 namespace commands {

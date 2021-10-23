@@ -19,7 +19,13 @@ inline void ST7789VWDriver::startDataTransfer() {
   Gpio::GpioDriver::setLevel(static_cast<gpio_num_t>(dataCommand_),
                              consts::DATA_TRANSFER);
 }
-
+void ST7789VWDriver::setDisplayAddress(uint16_t beginX, uint16_t endX,
+                                       uint16_t beginY, uint16_t endY) {
+  writeCommand(commands::columnAddressSet);
+  writeAddress(beginX, endX);
+  writeCommand(commands::rowAddressSet);
+  writeAddress(beginY, endY);
+}
 ST7789VWDriver::ST7789VWDriver(structs::st7789_config_t config)
     : spiDriver_(consts::LCD_HOST) {
   gpioInit(config.gpio);
@@ -31,7 +37,6 @@ ST7789VWDriver::~ST7789VWDriver() { spiDriver_.removeDevice(spiHandle_); }
 esp_err_t ST7789VWDriver::gpioInit(structs::gpio_config_t gpio) {
   ESP_LOGI(TAG_, "GPIO_CS=%d", gpio.gpioCs);
   if (gpio.gpioCs >= 0) {
-    // gpio_pad_select_gpio( GPIO_CS );
     gpio_reset_pin(gpio.gpioCs);
     gpio_set_direction(gpio.gpioCs, GPIO_MODE_OUTPUT);
     gpio_set_level(gpio.gpioCs, 0);
@@ -44,7 +49,6 @@ esp_err_t ST7789VWDriver::gpioInit(structs::gpio_config_t gpio) {
 
   ESP_LOGI(TAG_, "GPIO_RESET=%d", gpio.gpioReset);
   if (gpio.gpioReset >= 0) {
-    // gpio_pad_select_gpio( GPIO_RESET );
     gpio_reset_pin(gpio.gpioReset);
     gpio_set_direction(gpio.gpioReset, GPIO_MODE_OUTPUT);
     gpio_set_level(gpio.gpioReset, 1);
@@ -123,7 +127,7 @@ esp_err_t ST7789VWDriver::lcdInit(structs::lcd_config_t lcd) {
   writeByte(0x00);
   writeByte(0xF0);
 
-  writeCommand(commands::displayInversionOn);
+  writeCommand(commands::displayInversionOff);
   delay(consts::SHORT_PAUSE);
 
   writeCommand(commands::partialModeOff);
@@ -146,6 +150,7 @@ void ST7789VWDriver::writeAddress(uint16_t address1, uint16_t address2) {
 
 void ST7789VWDriver::writeCommand(uint8_t command) {
   startCommand();
+  ESP_LOGI(TAG_, "Writing command: 0x%X", command);
   spiDriver_.writeCommand(spiHandle_, command);
 }
 
@@ -160,21 +165,78 @@ void ST7789VWDriver::writeColour(uint16_t colour) {
   spiDriver_.writeDataWords(spiHandle_, &colour, 1);
 }
 
+void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
+  uint16_t data[size];
+  for (auto counter = 0; counter < size; counter++) {
+    data[counter] = colour;
+  }
+  startDataTransfer();
+  spiDriver_.writeDataWords(spiHandle_, data, size);
+}
+
 void ST7789VWDriver::drawPixel(uint16_t x, uint16_t y, uint16_t colour) {
-  if (x >= width_ || y >= height_)
+  if (x >= width_ || y >= height_) {
+    ESP_LOGE(TAG_, "Incorrect data were provided to drawPixel()! Pixel "
+                   "coordinates are out of bound!");
     return;
+  }
 
   uint16_t finalX = x + offsetx_;
   uint16_t finalY = y + offsety_;
-  writeCommand(commands::columnAddressSet);
-  writeAddress(finalX, finalX);
-  writeCommand(commands::rowAddressSet);
-  writeAddress(finalY, finalY);
+  ESP_LOGI(TAG_, "Drawing pixel at: %d:%d in colour: 0x%X", x, y, colour);
+  setDisplayAddress(finalX, finalX, finalY, finalY);
   writeCommand(commands::memoryWrite);
   writeColour(colour);
 }
 
+void ST7789VWDriver::drawPixelLine(uint16_t x, uint16_t y, uint16_t size,
+                                   uint16_t colour) {
+  if (x + size > width_ || y >= height_) {
+    ESP_LOGE(TAG_, "Incorrect data were provided to drawPixelLine()! Pixel "
+                   "coordinates are out of bound!");
+    return;
+  }
 
+  uint16_t beginX = x + offsetx_;
+  uint16_t endX = beginX + size;
+  uint16_t beginY = y + offsety_;
+  ESP_LOGI(TAG_, "Drawing line of pixels: %d:%d  in %d line in colour: 0x%X",
+           beginX, endX, beginY, colour);
+  setDisplayAddress(beginX, endX, beginY, beginY);
+  writeCommand(commands::memoryWrite);
+  writeColour(colour);
+}
 
+void ST7789VWDriver::drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2,
+                                         uint16_t y2, uint16_t colour) {
+  if (x1 >= width_ || y1 >= height_) {
+    ESP_LOGE(TAG_, "Incorrect data were provided to drawPixel()! Rectangle "
+                   "vertices are out of bound!");
+    return;
+  }
+  if (x2 >= width_)
+    x2 = width_ - 1;
+  if (y2 >= height_)
+    y2 = height_ - 1;
+
+  uint16_t beginX = x1 + offsetx_;
+  uint16_t endX = x2 + offsetx_;
+  uint16_t beginY = y1 + offsety_;
+  uint16_t endY = y2 + offsety_;
+  uint16_t size = endX - beginX;
+  ESP_LOGI(TAG_,
+           "Drawing rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) (%d,%d) in "
+           "colour: 0x%X",
+           beginX, beginY, endX, beginY, endX, endY, beginX, endY, colour);
+  ESP_LOGI(TAG_, "Length of the side: %d ", size);
+  setDisplayAddress(beginX, endX, beginY, endY);
+  writeCommand(commands::memoryWrite);
+  for (auto y = beginY; y < endY; y++) {
+    writeColour(colour, size);
+  }
+}
+void ST7789VWDriver::fillScreen(uint16_t colour) {
+  drawFilledRectangle(0, 0, width_ - 1, height_ - 1, colour);
+}
 } // namespace ST7789
 } // namespace tamagotchi

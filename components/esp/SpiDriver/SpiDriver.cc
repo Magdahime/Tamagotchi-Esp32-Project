@@ -66,7 +66,7 @@ esp_err_t SpiDriver::transaction(const uint64_t descriptor,
 
 esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
                                 const size_t dataLength) {
-  if (dataLength > 0 && devices_[descriptor]) {
+  if (dataLength > 0 && devices_[descriptor] && data != nullptr) {
     spi_transaction_t spiTransaction;
     memset(&spiTransaction, 0, sizeof(spi_transaction_t));
     spiTransaction.length = dataLength * consts::BYTE;
@@ -89,7 +89,7 @@ esp_err_t SpiDriver::writeByte(const uint64_t descriptor, const uint8_t data) {
 esp_err_t SpiDriver::writeDataWords(const uint64_t descriptor,
                                     const uint16_t *data,
                                     const size_t dataLength) {
-  if (dataLength > 0 && devices_[descriptor]) {
+  if (dataLength > 0 && devices_[descriptor] && data != nullptr) {
     const uint8_t *bytes = reinterpret_cast<const uint8_t *>(data);
     writeBytes(descriptor, bytes, dataLength * consts::DATA_WORD_BYTES);
     return ESP_OK;
