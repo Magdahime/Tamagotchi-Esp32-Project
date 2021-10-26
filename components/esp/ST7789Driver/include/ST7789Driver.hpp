@@ -17,7 +17,7 @@ public:
   void fillScreen(uint16_t colour);
   void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
                 uint16_t colour);
-  void drawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
+  void drawRectangle(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2,
                      uint16_t colour);
   void drawRectAngle(uint16_t xc, uint16_t yc, uint16_t w, uint16_t h,
                      uint16_t angle, uint16_t colour);

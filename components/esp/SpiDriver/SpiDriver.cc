@@ -89,19 +89,11 @@ esp_err_t SpiDriver::writeByte(const uint64_t descriptor, const uint8_t data) {
 esp_err_t SpiDriver::writeDataWords(const uint64_t descriptor,
                                     const uint16_t *data,
                                     const size_t dataLength) {
-  if (dataLength > 0 && devices_[descriptor] && data != nullptr) {
-    const uint8_t *bytes = reinterpret_cast<const uint8_t *>(data);
-    writeBytes(descriptor, bytes, dataLength * consts::DATA_WORD_BYTES);
-    return ESP_OK;
-  }
-  ESP_LOGE(TAG_, "FAIL! Incorrect data provided to writeDataWords()");
-  return ESP_FAIL;
+  const uint8_t *bytes = reinterpret_cast<const uint8_t *>(data);
+  writeBytes(descriptor, bytes, dataLength * consts::DATA_WORD_BYTES);
+  return ESP_OK;
 }
 
-esp_err_t SpiDriver::writeDataWord(const uint64_t descriptor,
-                                   const uint16_t data) {
-  return writeDataWords(descriptor, &data, 1);
-}
 
 esp_err_t SpiDriver::writeCommand(const uint64_t descriptor,
                                   const uint8_t command) {

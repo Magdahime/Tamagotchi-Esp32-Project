@@ -6,6 +6,18 @@
 namespace tamagotchi {
 namespace ST7789 {
 
+namespace colours {
+constexpr uint16_t RED = 0xf800;
+constexpr uint16_t GREEN = 0x07e0;
+constexpr uint16_t BLUE = 0x001f;
+constexpr uint16_t BLACK = 0x0000;
+constexpr uint16_t WHITE = 0xffff;
+constexpr uint16_t GRAY = 0x8c51;
+constexpr uint16_t YELLOW = 0xFFE0;
+constexpr uint16_t CYAN = 0x07FF;
+constexpr uint16_t PURPLE = 0xF81F;
+} // namespace colours
+
 namespace structs {
 
 struct gpio_config_t {
@@ -39,7 +51,7 @@ constexpr int MODE = 2;
 constexpr bool DATA_TRANSFER = 1;
 constexpr bool COMMAND = 0;
 constexpr uint8_t PIXEL_FORMAT = 0b01010101;
-constexpr uint8_t MEMORY_ACCESS_FORMAT = 0b00000000;
+constexpr uint8_t MEMORY_ACCESS_FORMAT = 0;
 constexpr uint32_t SHORT_PAUSE = 1000;
 constexpr uint32_t MEDIUM_PAUSE = 2000;
 constexpr uint32_t LONG_PAUSE = 3000;

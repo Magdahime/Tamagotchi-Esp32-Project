@@ -127,7 +127,7 @@ esp_err_t ST7789VWDriver::lcdInit(structs::lcd_config_t lcd) {
   writeByte(0x00);
   writeByte(0xF0);
 
-  writeCommand(commands::displayInversionOff);
+  writeCommand(commands::displayInversionOn);
   delay(consts::SHORT_PAUSE);
 
   writeCommand(commands::partialModeOff);
@@ -142,6 +142,8 @@ esp_err_t ST7789VWDriver::lcdInit(structs::lcd_config_t lcd) {
 }
 
 void ST7789VWDriver::writeAddress(uint16_t address1, uint16_t address2) {
+  address1 = (address1 << 8) + (address1 >> 8);
+  address2 = (address2 << 8) + (address2 >> 8);
   struct {
     uint16_t a1, a2;
   } data{address1, address2};
@@ -161,11 +163,13 @@ void ST7789VWDriver::writeBytes(uint8_t *bytes, size_t size) {
 void ST7789VWDriver::writeByte(uint8_t byte) { writeBytes(&byte, 1); }
 
 void ST7789VWDriver::writeColour(uint16_t colour) {
+  colour = (colour << 8) + (colour >> 8);
   startDataTransfer();
   spiDriver_.writeDataWords(spiHandle_, &colour, 1);
 }
 
 void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
+  colour = (colour << 8) + (colour >> 8);
   uint16_t data[size];
   for (auto counter = 0; counter < size; counter++) {
     data[counter] = colour;
@@ -180,7 +184,6 @@ void ST7789VWDriver::drawPixel(uint16_t x, uint16_t y, uint16_t colour) {
                    "coordinates are out of bound!");
     return;
   }
-
   uint16_t finalX = x + offsetx_;
   uint16_t finalY = y + offsety_;
   ESP_LOGI(TAG_, "Drawing pixel at: %d:%d in colour: 0x%X", x, y, colour);
@@ -223,7 +226,7 @@ void ST7789VWDriver::drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2,
   uint16_t endX = x2 + offsetx_;
   uint16_t beginY = y1 + offsety_;
   uint16_t endY = y2 + offsety_;
-  uint16_t size = endX - beginX;
+  uint16_t size = endX - beginX + 1;
   ESP_LOGI(TAG_,
            "Drawing rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) (%d,%d) in "
            "colour: 0x%X",
@@ -231,7 +234,7 @@ void ST7789VWDriver::drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2,
   ESP_LOGI(TAG_, "Length of the side: %d ", size);
   setDisplayAddress(beginX, endX, beginY, endY);
   writeCommand(commands::memoryWrite);
-  for (auto y = beginY; y < endY; y++) {
+  for (auto y = beginY; y <= endY; y++) {
     writeColour(colour, size);
   }
 }

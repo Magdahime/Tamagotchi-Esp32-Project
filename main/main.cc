@@ -35,6 +35,5 @@ extern "C" void app_main() {
                                                          .lcd = lcd};
 
   tamagotchi::ST7789::ST7789VWDriver st7789Driver(config);
-  st7789Driver.fillScreen(0xFFFF);
-  st7789Driver.fillScreen(0x2137);
+  st7789Driver.fillScreen(tamagotchi::ST7789::colours::RED);
 }
