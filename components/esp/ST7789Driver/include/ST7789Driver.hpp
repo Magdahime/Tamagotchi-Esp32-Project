@@ -2,6 +2,7 @@
 #include "GpioDriver.hpp"
 #include "ST7789Conf.hpp"
 #include "SpiDriver.hpp"
+#include <cmath>
 
 namespace tamagotchi {
 namespace ST7789 {

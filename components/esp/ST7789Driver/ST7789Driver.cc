@@ -241,5 +241,39 @@ void ST7789VWDriver::drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2,
 void ST7789VWDriver::fillScreen(uint16_t colour) {
   drawFilledRectangle(0, 0, width_ - 1, height_ - 1, colour);
 }
+
+// Implementation of Bresenham Algorithm
+void ST7789VWDriver::drawLine(uint16_t x1, uint16_t y1, uint16_t x2,
+                              uint16_t y2, uint16_t colour) {
+  ESP_LOGI(TAG_,
+           "Drawing line: (%d,%d) -> (%d,%d) in "
+           "colour: 0x%X",
+           x1, y1, x2, y2, colour);
+  uint16_t kx = x2 >= x1 ? 1 : -1;
+  uint16_t ky = y2 >= y1 ? 1 : -1;
+  uint16_t dx = abs(x1 - x2);
+  uint16_t dy = abs(y1 - y2);
+  drawPixel(x1, y1, colour);
+
+  auto bresenhamLoop = [&](uint16_t &v1, uint16_t &v2, uint16_t &k1,
+                           uint16_t &k2, uint16_t &d1, uint16_t &d2) {
+    double err = d1 / 2;
+    for (auto i = 0; i < d1; ++i) {
+      v1 = v1 + k1;
+      err = err - d2;
+      if (err < 0) {
+        v2 = v2 + k2;
+        err = err + d1;
+      }
+      drawPixel(v1, v2, colour);
+    }
+  };
+  if (dx >= dy) {
+    bresenhamLoop(x1, y1, kx, ky, dx, dy);
+  } else {
+    bresenhamLoop(y1, x1, ky, kx, dy, dx);
+  }
+}
+
 } // namespace ST7789
 } // namespace tamagotchi
