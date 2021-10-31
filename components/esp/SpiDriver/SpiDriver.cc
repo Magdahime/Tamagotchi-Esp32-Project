@@ -56,7 +56,7 @@ esp_err_t SpiDriver::transaction(const uint64_t descriptor,
                                  spi_transaction_t *transaction) {
   esp_err_t err = spi_device_transmit(devices_[descriptor], transaction);
   if (err == ESP_OK)
-    ESP_LOGI(TAG_,
+    ESP_LOGD(TAG_,
              "Command %d: Successfully received %d bits transmitted %d bits",
              transaction->cmd, transaction->rxlength, transaction->length);
   else
@@ -73,7 +73,7 @@ esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
     spiTransaction.tx_buffer = data;
     esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
     if (err == ESP_OK)
-      ESP_LOGI(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
+      ESP_LOGD(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
     else
       ESP_LOGE(TAG_, "FAIL! Cannot transmit %d bits", spiTransaction.length);
     return err;

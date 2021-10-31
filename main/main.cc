@@ -11,7 +11,7 @@
 
 extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
-  esp_log_level_set("*", ESP_LOG_DEBUG);
+  // esp_log_level_set("*", ESP_LOG_DEBUG);
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES ||
       ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -36,7 +36,11 @@ extern "C" void app_main() {
                                                          .lcd = lcd};
 
   tamagotchi::ST7789::ST7789VWDriver st7789Driver(config);
-  st7789Driver.fillScreen(tamagotchi::ST7789::colours::RED);
-  st7789Driver.drawLine(0, 0, 239, 160, tamagotchi::ST7789::colours::BLACK);
-  st7789Driver.drawLine(0, 160, 239, 0, tamagotchi::ST7789::colours::BLACK);
+  st7789Driver.fillScreen(tamagotchi::ST7789::colours::BLACK);
+  //st7789Driver.drawLine({50, 50}, {50, 150}, tamagotchi::ST7789::colours::RED);
+  st7789Driver.drawLine({70, 170}, {70, 70}, tamagotchi::ST7789::colours::RED);
+  st7789Driver.drawLine({100, 100}, {200, 300},
+                        tamagotchi::ST7789::colours::PURPLE);
+  st7789Driver.drawRectangle({0, 100}, {100, 200},
+                             tamagotchi::ST7789::colours::BLUE);
 }

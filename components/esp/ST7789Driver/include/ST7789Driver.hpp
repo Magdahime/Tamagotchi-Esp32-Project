@@ -6,35 +6,42 @@
 
 namespace tamagotchi {
 namespace ST7789 {
+
+struct Point {
+  uint16_t x;
+  uint16_t y;
+};
+
 class ST7789VWDriver {
 public:
   ST7789VWDriver(structs::st7789_config_t config);
   ~ST7789VWDriver();
   void delay(uint32_t ms);
-  void drawPixel(uint16_t x, uint16_t y, uint16_t colour);
-  void drawPixelLine(uint16_t x, uint16_t y, uint16_t size, uint16_t colour);
-  void drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
+  void drawPixel(const Point& point, uint16_t colour);
+  void drawPixelLine(const Point &point, uint16_t size, uint16_t colour);
+  void drawFilledRectangle(const Point &point1, const Point &point2,
                            uint16_t colour);
   void fillScreen(uint16_t colour);
-  void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
+  void drawLine(const Point &point1, const Point &point2,
                 uint16_t colour);
-  void drawRectangle(uint16_t x1, uint16_t x2, uint16_t y1, uint16_t y2,
+  void drawRectangle(const Point &point1, const Point &point2,
                      uint16_t colour);
-  void drawRectAngle(uint16_t xc, uint16_t yc, uint16_t w, uint16_t h,
-                     uint16_t angle, uint16_t colour);
-  void drawTriangle(uint16_t xc, uint16_t yc, uint16_t w, uint16_t h,
-                    uint16_t angle, uint16_t colour);
-  void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t colour);
-  void drawFilledCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t colour);
-  void drawRoundRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2,
-                          uint16_t r, uint16_t colour);
-  void drawArrow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t w,
-                 uint16_t colour);
-  void drawFilledArrow(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
-                       uint16_t w, uint16_t colour);
+  void drawTriangle(const Point &point1, const Point &point2,
+                    const Point &point3, uint16_t colour);
+  void drawFilledTriangle(const Point &point1, const Point &point2,
+                          const Point &point3, uint16_t colour);
+  void drawCircle(const Point &center, uint16_t r, uint16_t colour);
+  void drawFilledCircle(uint16_t x0, uint16_t y0, uint16_t r,
+                        uint16_t colour);
+  void drawPolygon(const Point &center, uint16_t r, uint16_t colour,
+                   double rotation);
+  void drawFilledPolygon(const Point &center, uint16_t r, uint16_t colour,
+                         double rotation);
+  uint16_t convertColour(uint8_t r, uint8_t g, uint8_t b);
 
 private:
   static const char *TAG_;
+
   inline void startCommand();
   inline void startDataTransfer();
   esp_err_t gpioInit(structs::gpio_config_t gpio);
@@ -47,6 +54,7 @@ private:
                          uint16_t endY);
   void writeColour(uint16_t colour);
   void writeColour(uint16_t colour, size_t size);
+
   Spi::SpiDriver spiDriver_;
   uint16_t width_;
   uint16_t height_;

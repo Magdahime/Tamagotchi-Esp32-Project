@@ -50,7 +50,7 @@ void Joystick::task(void *arg) {
         (xTaskGetTickCount() - savedebounceTimeout_ >
          Gpio::consts::DEBOUNCE_TIME) &&
         savegpioNum_ == gpioNum_) {
-      ESP_LOGI("Joystick MODULE", "Pressed %s",
+      ESP_LOGD("Joystick MODULE", "Pressed %s",
                Gpio::GpioInputs::gpio2string.at(savegpioNum_));
       taskENTER_CRITICAL(&mux);
       numberOfButtonInterrupts_ = 0;

@@ -115,18 +115,6 @@ esp_err_t ST7789VWDriver::lcdInit(structs::lcd_config_t lcd) {
   writeCommand(commands::memoryDataAccessControl);
   writeByte(consts::MEMORY_ACCESS_FORMAT);
 
-  writeCommand(commands::columnAddressSet);
-  writeByte(0x00);
-  writeByte(0x00);
-  writeByte(0x00);
-  writeByte(0xF0);
-
-  writeCommand(commands::rowAddressSet);
-  writeByte(0x00);
-  writeByte(0x00);
-  writeByte(0x00);
-  writeByte(0xF0);
-
   writeCommand(commands::displayInversionOn);
   delay(consts::SHORT_PAUSE);
 
@@ -152,7 +140,7 @@ void ST7789VWDriver::writeAddress(uint16_t address1, uint16_t address2) {
 
 void ST7789VWDriver::writeCommand(uint8_t command) {
   startCommand();
-  ESP_LOGI(TAG_, "Writing command: 0x%X", command);
+  ESP_LOGD(TAG_, "Writing command: 0x%X", command);
   spiDriver_.writeCommand(spiHandle_, command);
 }
 
@@ -178,60 +166,61 @@ void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
   spiDriver_.writeDataWords(spiHandle_, data, size);
 }
 
-void ST7789VWDriver::drawPixel(uint16_t x, uint16_t y, uint16_t colour) {
-  if (x >= width_ || y >= height_) {
-    ESP_LOGE(TAG_, "Incorrect data were provided to drawPixel()! Pixel "
+void ST7789VWDriver::drawPixel(const Point &point, uint16_t colour) {
+  if (point.x >= width_ || point.y >= height_) {
+    ESP_LOGE(TAG_, "Incorrect data was provided to drawPixel()! Pixel "
                    "coordinates are out of bound!");
     return;
   }
-  uint16_t finalX = x + offsetx_;
-  uint16_t finalY = y + offsety_;
-  ESP_LOGI(TAG_, "Drawing pixel at: %d:%d in colour: 0x%X", x, y, colour);
+  uint16_t finalX = point.x + offsetx_;
+  uint16_t finalY = point.y + offsety_;
+  ESP_LOGD(TAG_, "Drawing pixel at: %d:%d in colour: 0x%X", point.x, point.y,
+           colour);
   setDisplayAddress(finalX, finalX, finalY, finalY);
   writeCommand(commands::memoryWrite);
   writeColour(colour);
 }
 
-void ST7789VWDriver::drawPixelLine(uint16_t x, uint16_t y, uint16_t size,
+void ST7789VWDriver::drawPixelLine(const Point &point, uint16_t size,
                                    uint16_t colour) {
-  if (x + size > width_ || y >= height_) {
-    ESP_LOGE(TAG_, "Incorrect data were provided to drawPixelLine()! Pixel "
+  if (point.x + size > width_ || point.y >= height_) {
+    ESP_LOGE(TAG_, "Incorrect data was provided to drawPixelLine()! Pixel "
                    "coordinates are out of bound!");
     return;
   }
 
-  uint16_t beginX = x + offsetx_;
+  uint16_t beginX = point.x + offsetx_;
   uint16_t endX = beginX + size;
-  uint16_t beginY = y + offsety_;
-  ESP_LOGI(TAG_, "Drawing line of pixels: %d:%d  in %d line in colour: 0x%X",
+  uint16_t beginY = point.y + offsety_;
+  ESP_LOGD(TAG_, "Drawing line of pixels: %d:%d  in %d line in colour: 0x%X",
            beginX, endX, beginY, colour);
   setDisplayAddress(beginX, endX, beginY, beginY);
   writeCommand(commands::memoryWrite);
   writeColour(colour);
 }
 
-void ST7789VWDriver::drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2,
-                                         uint16_t y2, uint16_t colour) {
-  if (x1 >= width_ || y1 >= height_) {
-    ESP_LOGE(TAG_, "Incorrect data were provided to drawPixel()! Rectangle "
+void ST7789VWDriver::drawFilledRectangle(const Point &point1,
+                                         const Point &point2, uint16_t colour) {
+  if (point1.x >= width_ || point1.y >= height_) {
+    ESP_LOGE(TAG_, "Incorrect data was provided to drawPixel()! Rectangle "
                    "vertices are out of bound!");
     return;
   }
-  if (x2 >= width_)
-    x2 = width_ - 1;
-  if (y2 >= height_)
-    y2 = height_ - 1;
-
-  uint16_t beginX = x1 + offsetx_;
-  uint16_t endX = x2 + offsetx_;
-  uint16_t beginY = y1 + offsety_;
-  uint16_t endY = y2 + offsety_;
+  uint16_t beginX = point1.x + offsetx_;
+  uint16_t endX = point2.x + offsetx_;
+  uint16_t beginY = point1.y + offsety_;
+  uint16_t endY = point2.y + offsety_;
   uint16_t size = endX - beginX + 1;
-  ESP_LOGI(TAG_,
-           "Drawing rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) (%d,%d) in "
+  if (point2.x >= width_)
+    endX = width_ - 1 + offsetx_;
+  if (point2.y >= height_)
+    endY = height_ - 1 + offsety_;
+  ESP_LOGD(TAG_,
+           "Drawing filled rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) "
+           "(%d,%d) in "
            "colour: 0x%X",
            beginX, beginY, endX, beginY, endX, endY, beginX, endY, colour);
-  ESP_LOGI(TAG_, "Length of the side: %d ", size);
+  ESP_LOGD(TAG_, "Length of the side: %d ", size);
   setDisplayAddress(beginX, endX, beginY, endY);
   writeCommand(commands::memoryWrite);
   for (auto y = beginY; y <= endY; y++) {
@@ -239,25 +228,31 @@ void ST7789VWDriver::drawFilledRectangle(uint16_t x1, uint16_t y1, uint16_t x2,
   }
 }
 void ST7789VWDriver::fillScreen(uint16_t colour) {
-  drawFilledRectangle(0, 0, width_ - 1, height_ - 1, colour);
+  drawFilledRectangle(
+      {0, 0},
+      {static_cast<uint16_t>(width_ - 1), static_cast<uint16_t>(height_ - 1)},
+      colour);
 }
 
 // Implementation of Bresenham Algorithm
-void ST7789VWDriver::drawLine(uint16_t x1, uint16_t y1, uint16_t x2,
-                              uint16_t y2, uint16_t colour) {
-  ESP_LOGI(TAG_,
+void ST7789VWDriver::drawLine(const Point &point1, const Point &point2,
+                              uint16_t colour) {
+
+  ESP_LOGD(TAG_,
            "Drawing line: (%d,%d) -> (%d,%d) in "
            "colour: 0x%X",
-           x1, y1, x2, y2, colour);
-  uint16_t kx = x2 >= x1 ? 1 : -1;
-  uint16_t ky = y2 >= y1 ? 1 : -1;
-  uint16_t dx = abs(x1 - x2);
-  uint16_t dy = abs(y1 - y2);
-  drawPixel(x1, y1, colour);
+           point1.x, point1.y, point2.x, point2.y, colour);
+  int16_t kx = point2.x >= point1.x ? 1 : -1;
+  int16_t ky = point2.y >= point1.y ? 1 : -1;
+  int16_t dx = abs(point2.x - point1.x);
+  int16_t dy = abs(point2.y - point1.y);
+  drawPixel(point1, colour);
 
-  auto bresenhamLoop = [&](uint16_t &v1, uint16_t &v2, uint16_t &k1,
-                           uint16_t &k2, uint16_t &d1, uint16_t &d2) {
-    double err = d1 / 2;
+  int16_t currX = point1.x;
+  int16_t currY = point1.y;
+  auto bresenhamLoop = [&](int16_t &v1, int16_t &v2, int16_t &k1, int16_t &k2,
+                           int16_t &d1, int16_t &d2) {
+    double err = d1 / 2.0;
     for (auto i = 0; i < d1; ++i) {
       v1 = v1 + k1;
       err = err - d2;
@@ -265,15 +260,43 @@ void ST7789VWDriver::drawLine(uint16_t x1, uint16_t y1, uint16_t x2,
         v2 = v2 + k2;
         err = err + d1;
       }
-      drawPixel(v1, v2, colour);
+      drawPixel({currX, currY}, colour);
     }
   };
   if (dx >= dy) {
-    bresenhamLoop(x1, y1, kx, ky, dx, dy);
+    bresenhamLoop(currX, currY, kx, ky, dx, dy);
   } else {
-    bresenhamLoop(y1, x1, ky, kx, dy, dx);
+    bresenhamLoop(currY, currX, ky, kx, dy, dx);
   }
 }
+
+void ST7789VWDriver::drawRectangle(const Point &point1, const Point &point2,
+                                   uint16_t colour) {
+  ESP_LOGD(TAG_,
+           "Drawing rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) (%d,%d) in "
+           "colour: 0x%X",
+           point1.x, point1.y, point2.x, point1.y, point2.x, point2.y, point1.x,
+           point2.y, colour);
+  drawLine({point1.x, point1.y}, {point2.x, point1.y}, colour);
+  drawLine({point2.x, point1.y}, {point2.x, point2.y}, colour);
+  drawLine({point2.x, point2.y}, {point1.x, point2.y}, colour);
+  drawLine({point1.x, point2.y}, {point1.x, point1.y}, colour);
+}
+
+void ST7789VWDriver::drawTriangle(const Point &point1, const Point &point2,
+                                  const Point &point3, uint16_t colour) {
+  ESP_LOGD(TAG_,
+           "Drawing triangle of vertices: (%d,%d) (%d,%d) (%d,%d) in "
+           "colour: 0x%X",
+           point1.x, point1.y, point2.x, point2.y, point3.x, point3.y, colour);
+  drawLine(point1, point2, colour);
+  drawLine(point2, point3, colour);
+  drawLine(point3, point1, colour);
+}
+
+void ST7789VWDriver::drawFilledTriangle(const Point &point1,
+                                        const Point &point2,
+                                        const Point &point3, uint16_t colour) {}
 
 } // namespace ST7789
 } // namespace tamagotchi

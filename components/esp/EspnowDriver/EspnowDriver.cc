@@ -147,7 +147,7 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
   structs::espNowCommunicationType ret;
 
   vTaskDelay(5000 / portTICK_RATE_MS);
-  ESP_LOGI(consts::TAG, "Start sending broadcast data");
+  ESP_LOGD(consts::TAG, "Start sending broadcast data");
 
   /* Start sending broadcast ESPNOW data. */
   structs::espNowParams *sendParams = (structs::espNowParams *)pvParameter;
@@ -174,7 +174,7 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
       if (!is_broadcast) {
         sendParams->count--;
         if (sendParams->count == 0) {
-          ESP_LOGI(consts::TAG, "SEND DONE");
+          ESP_LOGD(consts::TAG, "SEND DONE");
           deinit(sendParams);
           vTaskDelete(NULL);
         }
@@ -185,7 +185,7 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
         vTaskDelay(sendParams->delay / portTICK_RATE_MS);
       }
 
-      ESP_LOGI(consts::TAG, "send data to " MACSTR "",
+      ESP_LOGD(consts::TAG, "send data to " MACSTR "",
                MAC2STR(sendCallback->macAddress));
 
       memcpy(sendParams->destinationMac, sendCallback->macAddress,
@@ -210,7 +210,7 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
           receiveCallback->dataLength, &recv_state, &recv_seq, &recv_magic);
       delete receiveCallback->data;
       if (ret == structs::espNowCommunicationType::ESPNOW_DATA_BROADCAST) {
-        ESP_LOGI(consts::TAG,
+        ESP_LOGD(consts::TAG,
                  "RECEIVE %dthBROADCAST DATA FROM: " MACSTR ", LEN: %d",
                  recv_seq, MAC2STR(receiveCallback->macAddress),
                  receiveCallback->dataLength);
@@ -236,8 +236,8 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
            * the other one receives ESPNOW data.
            */
           if (sendParams->unicast == false && sendParams->magic >= recv_magic) {
-            ESP_LOGI(consts::TAG, "START SENDING UNICAST DATA");
-            ESP_LOGI(consts::TAG, "SEND DATA TO " MACSTR "",
+            ESP_LOGD(consts::TAG, "START SENDING UNICAST DATA");
+            ESP_LOGD(consts::TAG, "SEND DATA TO " MACSTR "",
                      MAC2STR(receiveCallback->macAddress));
 
             /* Start sending unicast ESPNOW data. */
@@ -256,7 +256,7 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
           }
         }
       } else if (ret == structs::espNowCommunicationType::ESPNOW_DATA_UNICAST) {
-        ESP_LOGI(consts::TAG,
+        ESP_LOGD(consts::TAG,
                  "RECEIVE %dth UNICAST DATA FROM: " MACSTR ", LEN: %d",
                  recv_seq, MAC2STR(receiveCallback->macAddress),
                  receiveCallback->dataLength);
@@ -265,7 +265,7 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
          * data. */
         sendParams->broadcast = false;
       } else {
-        ESP_LOGI(consts::TAG, "RECEIVE ERROR DATA FROM: " MACSTR "",
+        ESP_LOGD(consts::TAG, "RECEIVE ERROR DATA FROM: " MACSTR "",
                  MAC2STR(receiveCallback->macAddress));
       }
       break;
