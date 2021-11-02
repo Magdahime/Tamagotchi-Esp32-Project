@@ -1,13 +1,13 @@
-#include "esp_spi_flash.h"
-#include "esp_system.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
 #include <cstdio>
 
 #include "EspnowDriver.hpp"
 #include "Joystick.hpp"
 #include "ST7789Driver.hpp"
+#include "esp_spi_flash.h"
+#include "esp_system.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 
 extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
@@ -37,10 +37,11 @@ extern "C" void app_main() {
 
   tamagotchi::ST7789::ST7789VWDriver st7789Driver(config);
   st7789Driver.fillScreen(tamagotchi::ST7789::colours::BLACK);
-  //st7789Driver.drawLine({50, 50}, {50, 150}, tamagotchi::ST7789::colours::RED);
+  // st7789Driver.drawLine({50, 50}, {50, 150},
+  // tamagotchi::ST7789::colours::RED);
   st7789Driver.drawLine({70, 170}, {70, 70}, tamagotchi::ST7789::colours::RED);
   st7789Driver.drawLine({100, 100}, {200, 300},
                         tamagotchi::ST7789::colours::PURPLE);
-  st7789Driver.drawRectangle({0, 100}, {100, 200},
-                             tamagotchi::ST7789::colours::BLUE);
+  st7789Driver.drawFilledTriangle({50, 50}, {20, 170}, {150, 120},
+                                  tamagotchi::ST7789::colours::BLUE);
 }

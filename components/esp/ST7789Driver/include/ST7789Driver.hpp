@@ -1,38 +1,34 @@
 #pragma once
+#include "ST7789Utils.hpp"
 #include "GpioDriver.hpp"
 #include "ST7789Conf.hpp"
 #include "SpiDriver.hpp"
+#include <algorithm>
 #include <cmath>
+#include <utility>
 
 namespace tamagotchi {
 namespace ST7789 {
 
-struct Point {
-  uint16_t x;
-  uint16_t y;
-};
 
 class ST7789VWDriver {
 public:
   ST7789VWDriver(structs::st7789_config_t config);
   ~ST7789VWDriver();
   void delay(uint32_t ms);
-  void drawPixel(const Point& point, uint16_t colour);
+  void drawPixel(const Point &point, uint16_t colour);
   void drawPixelLine(const Point &point, uint16_t size, uint16_t colour);
   void drawFilledRectangle(const Point &point1, const Point &point2,
                            uint16_t colour);
   void fillScreen(uint16_t colour);
-  void drawLine(const Point &point1, const Point &point2,
-                uint16_t colour);
-  void drawRectangle(const Point &point1, const Point &point2,
-                     uint16_t colour);
+  void drawLine(const Point &point1, const Point &point2, uint16_t colour);
+  void drawRectangle(const Point &point1, const Point &point2, uint16_t colour);
   void drawTriangle(const Point &point1, const Point &point2,
                     const Point &point3, uint16_t colour);
   void drawFilledTriangle(const Point &point1, const Point &point2,
                           const Point &point3, uint16_t colour);
   void drawCircle(const Point &center, uint16_t r, uint16_t colour);
-  void drawFilledCircle(uint16_t x0, uint16_t y0, uint16_t r,
-                        uint16_t colour);
+  void drawFilledCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t colour);
   void drawPolygon(const Point &center, uint16_t r, uint16_t colour,
                    double rotation);
   void drawFilledPolygon(const Point &center, uint16_t r, uint16_t colour,

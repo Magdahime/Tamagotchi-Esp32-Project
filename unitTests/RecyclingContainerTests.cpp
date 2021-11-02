@@ -1,4 +1,4 @@
-#include "../components/generic/RecyclingContainer/include/RecyclingContainer.hpp"
+#include "RecyclingContainer.hpp"
 #include "gtest/gtest.h"
 
 constexpr int CONTAINER_SIZE = 10;

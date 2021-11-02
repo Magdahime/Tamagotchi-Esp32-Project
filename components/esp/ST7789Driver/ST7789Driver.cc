@@ -1,5 +1,7 @@
 #include "ST7789Driver.hpp"
 
+#include "ST7789Utils.hpp"
+
 namespace tamagotchi {
 namespace ST7789 {
 
@@ -168,8 +170,9 @@ void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
 
 void ST7789VWDriver::drawPixel(const Point &point, uint16_t colour) {
   if (point.x >= width_ || point.y >= height_) {
-    ESP_LOGE(TAG_, "Incorrect data was provided to drawPixel()! Pixel "
-                   "coordinates are out of bound!");
+    ESP_LOGE(TAG_,
+             "Incorrect data was provided to drawPixel()! Pixel "
+             "coordinates are out of bound!");
     return;
   }
   uint16_t finalX = point.x + offsetx_;
@@ -184,8 +187,9 @@ void ST7789VWDriver::drawPixel(const Point &point, uint16_t colour) {
 void ST7789VWDriver::drawPixelLine(const Point &point, uint16_t size,
                                    uint16_t colour) {
   if (point.x + size > width_ || point.y >= height_) {
-    ESP_LOGE(TAG_, "Incorrect data was provided to drawPixelLine()! Pixel "
-                   "coordinates are out of bound!");
+    ESP_LOGE(TAG_,
+             "Incorrect data was provided to drawPixelLine()! Pixel "
+             "coordinates are out of bound!");
     return;
   }
 
@@ -202,8 +206,9 @@ void ST7789VWDriver::drawPixelLine(const Point &point, uint16_t size,
 void ST7789VWDriver::drawFilledRectangle(const Point &point1,
                                          const Point &point2, uint16_t colour) {
   if (point1.x >= width_ || point1.y >= height_) {
-    ESP_LOGE(TAG_, "Incorrect data was provided to drawPixel()! Rectangle "
-                   "vertices are out of bound!");
+    ESP_LOGE(TAG_,
+             "Incorrect data was provided to drawPixel()! Rectangle "
+             "vertices are out of bound!");
     return;
   }
   uint16_t beginX = point1.x + offsetx_;
@@ -211,10 +216,8 @@ void ST7789VWDriver::drawFilledRectangle(const Point &point1,
   uint16_t beginY = point1.y + offsety_;
   uint16_t endY = point2.y + offsety_;
   uint16_t size = endX - beginX + 1;
-  if (point2.x >= width_)
-    endX = width_ - 1 + offsetx_;
-  if (point2.y >= height_)
-    endY = height_ - 1 + offsety_;
+  if (point2.x >= width_) endX = width_ - 1 + offsetx_;
+  if (point2.y >= height_) endY = height_ - 1 + offsety_;
   ESP_LOGD(TAG_,
            "Drawing filled rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) "
            "(%d,%d) in "
@@ -230,14 +233,13 @@ void ST7789VWDriver::drawFilledRectangle(const Point &point1,
 void ST7789VWDriver::fillScreen(uint16_t colour) {
   drawFilledRectangle(
       {0, 0},
-      {static_cast<uint16_t>(width_ - 1), static_cast<uint16_t>(height_ - 1)},
+      {static_cast<int16_t>(width_ - 1), static_cast<int16_t>(height_ - 1)},
       colour);
 }
 
 // Implementation of Bresenham Algorithm
 void ST7789VWDriver::drawLine(const Point &point1, const Point &point2,
                               uint16_t colour) {
-
   ESP_LOGD(TAG_,
            "Drawing line: (%d,%d) -> (%d,%d) in "
            "colour: 0x%X",
@@ -296,7 +298,19 @@ void ST7789VWDriver::drawTriangle(const Point &point1, const Point &point2,
 
 void ST7789VWDriver::drawFilledTriangle(const Point &point1,
                                         const Point &point2,
-                                        const Point &point3, uint16_t colour) {}
+                                        const Point &point3, uint16_t colour) {
+  auto [max, mid, min] = sort3Points(point1, point2, point3, Coordinate::Y);
+  for (auto y = min.y; y <= mid.y; ++y) {
+    auto point1 = straightLineEquation(min, mid, {{}, y}, Coordinate::X);
+    auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
+    drawLine(point1, point2, colour);
+  }
+  for (auto y = mid.y; y <= max.y; ++y) {
+    auto point1 = straightLineEquation(mid, max, {{}, y}, Coordinate::X);
+    auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
+    drawLine(point1, point2, colour);
+  }
+}
 
-} // namespace ST7789
-} // namespace tamagotchi
+}  // namespace ST7789
+}  // namespace tamagotchi
