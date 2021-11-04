@@ -33,7 +33,10 @@ Point straightLineEquation(const Point &start, const Point &end,
     case Coordinate::Y:
       return Point{search.x,
                    static_cast<int16_t>(std::lround(search.x * m + c))};
+    default:
+      return Point{0, 0};
   }
+  return Point{0, 0};
 }
 
 }  // namespace ST7789

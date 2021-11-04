@@ -28,7 +28,7 @@ public:
   void drawFilledTriangle(const Point &point1, const Point &point2,
                           const Point &point3, uint16_t colour);
   void drawCircle(const Point &center, uint16_t r, uint16_t colour);
-  void drawFilledCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t colour);
+  void drawFilledCircle(const Point &center, uint16_t r, uint16_t colour);
   void drawPolygon(const Point &center, uint16_t r, uint16_t colour,
                    double rotation);
   void drawFilledPolygon(const Point &center, uint16_t r, uint16_t colour,

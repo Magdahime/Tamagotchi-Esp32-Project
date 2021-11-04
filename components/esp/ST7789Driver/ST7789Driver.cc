@@ -1,5 +1,7 @@
 #include "ST7789Driver.hpp"
 
+#include <stdint.h>
+
 #include "ST7789Utils.hpp"
 
 namespace tamagotchi {
@@ -309,6 +311,88 @@ void ST7789VWDriver::drawFilledTriangle(const Point &point1,
     auto point1 = straightLineEquation(mid, max, {{}, y}, Coordinate::X);
     auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
     drawLine(point1, point2, colour);
+  }
+}
+
+// Implementation of Mid-Point algorithm
+void ST7789VWDriver::drawCircle(const Point &center, uint16_t r,
+                                uint16_t colour) {
+  int16_t x = r;
+  int16_t y = 0;
+  int16_t err = 0;
+  while (x >= y) {
+    drawPixel({static_cast<int16_t>(center.x + x),
+               static_cast<int16_t>(center.y + y)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x + y),
+               static_cast<int16_t>(center.y + x)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x - y),
+               static_cast<int16_t>(center.y + x)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x - x),
+               static_cast<int16_t>(center.y + y)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x - x),
+               static_cast<int16_t>(center.y - y)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x - y),
+               static_cast<int16_t>(center.y - x)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x + y),
+               static_cast<int16_t>(center.y - x)},
+              colour);
+    drawPixel({static_cast<int16_t>(center.x + x),
+               static_cast<int16_t>(center.y - y)},
+              colour);
+
+    if (err <= 0) {
+      y += 1;
+      err += 2 * y + 1;
+    }
+
+    if (err > 0) {
+      x -= 1;
+      err -= 2 * x + 1;
+    }
+  }
+}
+void ST7789VWDriver::drawFilledCircle(const Point &center, uint16_t r,
+                                      uint16_t colour) {
+  int16_t x = r;
+  int16_t y = 0;
+  int16_t err = 0;
+  while (x >= y) {
+    drawLine({static_cast<int16_t>(center.x + x),
+              static_cast<int16_t>(center.y + y)},
+             {static_cast<int16_t>(center.x - x),
+              static_cast<int16_t>(center.y + y)},
+             colour);
+    drawLine({static_cast<int16_t>(center.x + y),
+              static_cast<int16_t>(center.y + x)},
+             {static_cast<int16_t>(center.x - y),
+              static_cast<int16_t>(center.y + x)},
+             colour);
+    drawLine({static_cast<int16_t>(center.x - x),
+              static_cast<int16_t>(center.y - y)},
+             {static_cast<int16_t>(center.x + x),
+              static_cast<int16_t>(center.y - y)},
+             colour);
+    drawLine({static_cast<int16_t>(center.x - y),
+              static_cast<int16_t>(center.y - x)},
+             {static_cast<int16_t>(center.x + y),
+              static_cast<int16_t>(center.y - x)},
+             colour);
+
+    if (err <= 0) {
+      y += 1;
+      err += 2 * y + 1;
+    }
+
+    if (err > 0) {
+      x -= 1;
+      err -= 2 * x + 1;
+    }
   }
 }
 
