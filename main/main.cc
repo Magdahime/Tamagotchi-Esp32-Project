@@ -47,6 +47,8 @@ extern "C" void app_main() {
   //                                 tamagotchi::ST7789::colours::BLUE);
   st7789Driver.drawFilledCircle({100, 50}, 20,
                                 tamagotchi::ST7789::colours::RED);
-  st7789Driver.drawFilledCircle({120, 120}, 100,
-                                tamagotchi::ST7789::colours::PURPLE);
+  st7789Driver.drawFilledPolygon({120, 120}, 100, 5,
+                                tamagotchi::ST7789::colours::PURPLE, 0.2);
+
+
 }

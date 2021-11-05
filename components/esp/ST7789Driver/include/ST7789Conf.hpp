@@ -1,7 +1,9 @@
 #pragma once
+#include <stdint.h>
+
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
-#include <stdint.h>
+
 
 namespace tamagotchi {
 namespace ST7789 {
@@ -16,7 +18,7 @@ constexpr uint16_t GRAY = 0x8c51;
 constexpr uint16_t YELLOW = 0xFFE0;
 constexpr uint16_t CYAN = 0x07FF;
 constexpr uint16_t PURPLE = 0xF81F;
-} // namespace colours
+}  // namespace colours
 
 namespace structs {
 
@@ -41,9 +43,10 @@ struct st7789_config_t {
   lcd_config_t lcd;
 };
 
-} // namespace structs
+}  // namespace structs
 
 namespace consts {
+constexpr double PI = 3.141592653589793238463;
 constexpr spi_host_device_t LCD_HOST = HSPI_HOST;
 constexpr int QUEUE_SIZE = 7;
 constexpr int SPI_FREQUENCY = SPI_MASTER_FREQ_20M;
@@ -55,7 +58,7 @@ constexpr uint8_t MEMORY_ACCESS_FORMAT = 0;
 constexpr uint32_t SHORT_PAUSE = 1000;
 constexpr uint32_t MEDIUM_PAUSE = 2000;
 constexpr uint32_t LONG_PAUSE = 3000;
-} // namespace consts
+}  // namespace consts
 
 namespace commands {
 constexpr uint8_t noOperation = 0x00;
@@ -105,7 +108,7 @@ constexpr uint8_t readABCSelfDiagnosticResult = 0x68;
 constexpr uint8_t readID1 = 0xDA;
 constexpr uint8_t readID2 = 0xDB;
 constexpr uint8_t readID3 = 0xDC;
-} // namespace commands
+}  // namespace commands
 
-} // namespace ST7789
-} // namespace tamagotchi
+}  // namespace ST7789
+}  // namespace tamagotchi

@@ -1,18 +1,19 @@
 #pragma once
-#include "ST7789Utils.hpp"
-#include "GpioDriver.hpp"
-#include "ST7789Conf.hpp"
-#include "SpiDriver.hpp"
 #include <algorithm>
 #include <cmath>
 #include <utility>
 
+#include "GpioDriver.hpp"
+#include "ST7789Conf.hpp"
+#include "ST7789Utils.hpp"
+#include "SpiDriver.hpp"
+
+
 namespace tamagotchi {
 namespace ST7789 {
 
-
 class ST7789VWDriver {
-public:
+ public:
   ST7789VWDriver(structs::st7789_config_t config);
   ~ST7789VWDriver();
   void delay(uint32_t ms);
@@ -29,13 +30,13 @@ public:
                           const Point &point3, uint16_t colour);
   void drawCircle(const Point &center, uint16_t r, uint16_t colour);
   void drawFilledCircle(const Point &center, uint16_t r, uint16_t colour);
-  void drawPolygon(const Point &center, uint16_t r, uint16_t colour,
-                   double rotation);
-  void drawFilledPolygon(const Point &center, uint16_t r, uint16_t colour,
-                         double rotation);
+  void drawPolygon(const Point &center, double r, uint16_t vertices,
+                   uint16_t colour, double rotation);
+  void drawFilledPolygon(const Point &center, double r, uint16_t vertices,
+                         uint16_t colour, double rotation);
   uint16_t convertColour(uint8_t r, uint8_t g, uint8_t b);
 
-private:
+ private:
   static const char *TAG_;
 
   inline void startCommand();
@@ -77,5 +78,5 @@ private:
 // private:
 // }
 
-} // namespace ST7789
-} // namespace tamagotchi
+}  // namespace ST7789
+}  // namespace tamagotchi

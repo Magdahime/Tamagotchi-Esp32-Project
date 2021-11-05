@@ -1,7 +1,9 @@
 #include "ST7789Driver.hpp"
 
-#include <stdint.h>
+#include <cmath>
+#include <cstdint>
 
+#include "ST7789Conf.hpp"
 #include "ST7789Utils.hpp"
 
 namespace tamagotchi {
@@ -393,6 +395,35 @@ void ST7789VWDriver::drawFilledCircle(const Point &center, uint16_t r,
       x -= 1;
       err -= 2 * x + 1;
     }
+  }
+}
+
+void ST7789VWDriver::drawPolygon(const Point &center, double r,
+                                 uint16_t vertices, uint16_t colour,
+                                 double rotation) {
+  double gamma = 2.0 * consts::PI / vertices;
+  Point lastPoint{static_cast<int16_t>(center.x + sin(rotation) * r),
+                  static_cast<int16_t>(center.y + cos(rotation) * r)};
+  for (auto i = 1; i <= vertices; ++i) {
+    Point currentPoint{
+        static_cast<int16_t>(center.x + sin(rotation + i * gamma) * r),
+        static_cast<int16_t>(center.y + cos(rotation + i * gamma) * r)};
+    drawLine(lastPoint, currentPoint, colour);
+    std::swap(lastPoint, currentPoint);
+  }
+}
+void ST7789VWDriver::drawFilledPolygon(const Point &center, double r,
+                                       uint16_t vertices, uint16_t colour,
+                                       double rotation) {
+  double gamma = 2.0 * consts::PI / vertices;
+  Point lastPoint{static_cast<int16_t>(center.x + sin(rotation) * r),
+                  static_cast<int16_t>(center.y + cos(rotation) * r)};
+  for (auto i = 1; i <= vertices; ++i) {
+    Point currentPoint{
+        static_cast<int16_t>(center.x + sin(rotation + i * gamma) * r),
+        static_cast<int16_t>(center.y + cos(rotation + i * gamma) * r)};
+    drawFilledTriangle(lastPoint, currentPoint, center, colour);
+    std::swap(lastPoint, currentPoint);
   }
 }
 
