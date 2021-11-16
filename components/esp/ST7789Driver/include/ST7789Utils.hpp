@@ -10,8 +10,10 @@ namespace tamagotchi {
 namespace ST7789 {
 
 struct Point {
-  int16_t x;
-  int16_t y;
+  int16_t x_;
+  int16_t y_;
+  template <typename T>
+  Point(T x, T y) : x_(std::round(x)), y_(std::round(y)) {}
 };
 
 enum class Coordinate { X, Y };

@@ -1,10 +1,13 @@
 #include "ST7789Driver.hpp"
 
+#include <stdint.h>
+
 #include <cmath>
 #include <cstdint>
 
 #include "ST7789Conf.hpp"
 #include "ST7789Utils.hpp"
+#include "SpiConf.hpp"
 
 namespace tamagotchi {
 namespace ST7789 {
@@ -150,11 +153,11 @@ void ST7789VWDriver::writeCommand(uint8_t command) {
   spiDriver_.writeCommand(spiHandle_, command);
 }
 
-void ST7789VWDriver::writeBytes(uint8_t *bytes, size_t size) {
+void ST7789VWDriver::writeBytes(const uint8_t *bytes, size_t size) {
   startDataTransfer();
   spiDriver_.writeBytes(spiHandle_, bytes, size);
 }
-void ST7789VWDriver::writeByte(uint8_t byte) { writeBytes(&byte, 1); }
+void ST7789VWDriver::writeByte(const uint8_t byte) { writeBytes(&byte, 1); }
 
 void ST7789VWDriver::writeColour(uint16_t colour) {
   colour = (colour << 8) + (colour >> 8);
@@ -173,15 +176,15 @@ void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
 }
 
 void ST7789VWDriver::drawPixel(const Point &point, uint16_t colour) {
-  if (point.x >= width_ || point.y >= height_) {
+  if (point.x_ >= width_ || point.y_ >= height_) {
     ESP_LOGE(TAG_,
              "Incorrect data was provided to drawPixel()! Pixel "
              "coordinates are out of bound!");
     return;
   }
-  uint16_t finalX = point.x + offsetx_;
-  uint16_t finalY = point.y + offsety_;
-  ESP_LOGD(TAG_, "Drawing pixel at: %d:%d in colour: 0x%X", point.x, point.y,
+  uint16_t finalX = point.x_ + offsetx_;
+  uint16_t finalY = point.y_ + offsety_;
+  ESP_LOGD(TAG_, "Drawing pixel at: %d:%d in colour: 0x%X", point.x_, point.y_,
            colour);
   setDisplayAddress(finalX, finalX, finalY, finalY);
   writeCommand(commands::memoryWrite);
@@ -190,38 +193,43 @@ void ST7789VWDriver::drawPixel(const Point &point, uint16_t colour) {
 
 void ST7789VWDriver::drawPixelLine(const Point &point, uint16_t size,
                                    uint16_t colour) {
-  if (point.x + size > width_ || point.y >= height_) {
+  if (point.x_ + size > width_ || point.y_ >= height_) {
     ESP_LOGE(TAG_,
              "Incorrect data was provided to drawPixelLine()! Pixel "
              "coordinates are out of bound!");
     return;
   }
 
-  uint16_t beginX = point.x + offsetx_;
+  uint16_t beginX = point.x_ + offsetx_;
   uint16_t endX = beginX + size;
-  uint16_t beginY = point.y + offsety_;
+  uint16_t beginY = point.y_ + offsety_;
   ESP_LOGD(TAG_, "Drawing line of pixels: %d:%d  in %d line in colour: 0x%X",
            beginX, endX, beginY, colour);
   setDisplayAddress(beginX, endX, beginY, beginY);
   writeCommand(commands::memoryWrite);
-  writeColour(colour);
+  writeColour(colour, size);
 }
 
 void ST7789VWDriver::drawFilledRectangle(const Point &point1,
                                          const Point &point2, uint16_t colour) {
-  if (point1.x >= width_ || point1.y >= height_) {
+  Point min_point = {std::min(point1.x_, point2.x_),
+                     std::min(point1.y_, point2.y_)};
+  Point max_point = {std::max(point1.x_, point2.x_),
+                     std::max(point1.y_, point2.y_)};
+  if (min_point.x_ >= width_ || min_point.y_ >= height_) {
     ESP_LOGE(TAG_,
              "Incorrect data was provided to drawPixel()! Rectangle "
              "vertices are out of bound!");
     return;
   }
-  uint16_t beginX = point1.x + offsetx_;
-  uint16_t endX = point2.x + offsetx_;
-  uint16_t beginY = point1.y + offsety_;
-  uint16_t endY = point2.y + offsety_;
+
+  uint16_t beginX = min_point.x_ + offsetx_;
+  uint16_t endX = max_point.x_ + offsetx_;
+  uint16_t beginY = min_point.y_ + offsety_;
+  uint16_t endY = max_point.y_ + offsety_;
   uint16_t size = endX - beginX + 1;
-  if (point2.x >= width_) endX = width_ - 1 + offsetx_;
-  if (point2.y >= height_) endY = height_ - 1 + offsety_;
+  if (max_point.x_ >= width_) endX = width_ - 1 + offsetx_;
+  if (max_point.y_ >= height_) endY = height_ - 1 + offsety_;
   ESP_LOGD(TAG_,
            "Drawing filled rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) "
            "(%d,%d) in "
@@ -235,10 +243,7 @@ void ST7789VWDriver::drawFilledRectangle(const Point &point1,
   }
 }
 void ST7789VWDriver::fillScreen(uint16_t colour) {
-  drawFilledRectangle(
-      {0, 0},
-      {static_cast<int16_t>(width_ - 1), static_cast<int16_t>(height_ - 1)},
-      colour);
+  drawFilledRectangle({0, 0}, {width_ - 1, height_ - 1}, colour);
 }
 
 // Implementation of Bresenham Algorithm
@@ -247,15 +252,15 @@ void ST7789VWDriver::drawLine(const Point &point1, const Point &point2,
   ESP_LOGD(TAG_,
            "Drawing line: (%d,%d) -> (%d,%d) in "
            "colour: 0x%X",
-           point1.x, point1.y, point2.x, point2.y, colour);
-  int16_t kx = point2.x >= point1.x ? 1 : -1;
-  int16_t ky = point2.y >= point1.y ? 1 : -1;
-  int16_t dx = abs(point2.x - point1.x);
-  int16_t dy = abs(point2.y - point1.y);
+           point1.x_, point1.y_, point2.x_, point2.y_, colour);
+  int16_t kx = point2.x_ >= point1.x_ ? 1 : -1;
+  int16_t ky = point2.y_ >= point1.y_ ? 1 : -1;
+  int16_t dx = abs(point2.x_ - point1.x_);
+  int16_t dy = abs(point2.y_ - point1.y_);
   drawPixel(point1, colour);
 
-  int16_t currX = point1.x;
-  int16_t currY = point1.y;
+  int16_t currX = point1.x_;
+  int16_t currY = point1.y_;
   auto bresenhamLoop = [&](int16_t &v1, int16_t &v2, int16_t &k1, int16_t &k2,
                            int16_t &d1, int16_t &d2) {
     double err = d1 / 2.0;
@@ -281,12 +286,12 @@ void ST7789VWDriver::drawRectangle(const Point &point1, const Point &point2,
   ESP_LOGD(TAG_,
            "Drawing rectangle of vertices: (%d,%d) (%d,%d) (%d,%d) (%d,%d) in "
            "colour: 0x%X",
-           point1.x, point1.y, point2.x, point1.y, point2.x, point2.y, point1.x,
-           point2.y, colour);
-  drawLine({point1.x, point1.y}, {point2.x, point1.y}, colour);
-  drawLine({point2.x, point1.y}, {point2.x, point2.y}, colour);
-  drawLine({point2.x, point2.y}, {point1.x, point2.y}, colour);
-  drawLine({point1.x, point2.y}, {point1.x, point1.y}, colour);
+           point1.x_, point1.y_, point2.x_, point1.y_, point2.x_, point2.y_,
+           point1.x_, point2.y_, colour);
+  drawLine({point1.x_, point1.y_}, {point2.x_, point1.y_}, colour);
+  drawLine({point2.x_, point1.y_}, {point2.x_, point2.y_}, colour);
+  drawLine({point2.x_, point2.y_}, {point1.x_, point2.y_}, colour);
+  drawLine({point1.x_, point2.y_}, {point1.x_, point1.y_}, colour);
 }
 
 void ST7789VWDriver::drawTriangle(const Point &point1, const Point &point2,
@@ -294,7 +299,8 @@ void ST7789VWDriver::drawTriangle(const Point &point1, const Point &point2,
   ESP_LOGD(TAG_,
            "Drawing triangle of vertices: (%d,%d) (%d,%d) (%d,%d) in "
            "colour: 0x%X",
-           point1.x, point1.y, point2.x, point2.y, point3.x, point3.y, colour);
+           point1.x_, point1.y_, point2.x_, point2.y_, point3.x_, point3.y_,
+           colour);
   drawLine(point1, point2, colour);
   drawLine(point2, point3, colour);
   drawLine(point3, point1, colour);
@@ -304,12 +310,12 @@ void ST7789VWDriver::drawFilledTriangle(const Point &point1,
                                         const Point &point2,
                                         const Point &point3, uint16_t colour) {
   auto [max, mid, min] = sort3Points(point1, point2, point3, Coordinate::Y);
-  for (auto y = min.y; y <= mid.y; ++y) {
+  for (auto y = min.y_; y <= mid.y_; ++y) {
     auto point1 = straightLineEquation(min, mid, {{}, y}, Coordinate::X);
     auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
     drawLine(point1, point2, colour);
   }
-  for (auto y = mid.y; y <= max.y; ++y) {
+  for (auto y = mid.y_; y <= max.y_; ++y) {
     auto point1 = straightLineEquation(mid, max, {{}, y}, Coordinate::X);
     auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
     drawLine(point1, point2, colour);
@@ -317,36 +323,24 @@ void ST7789VWDriver::drawFilledTriangle(const Point &point1,
 }
 
 // Implementation of Mid-Point algorithm
-void ST7789VWDriver::drawCircle(const Point &center, uint16_t r,
+void ST7789VWDriver::drawCircle(const Point &center, double r,
                                 uint16_t colour) {
+  ESP_LOGD(TAG_,
+           "Drawing circle of center (%d,%d) and radius %f in "
+           "colour: 0x%X",
+           center.x_, center.y_, r, colour);
   int16_t x = r;
   int16_t y = 0;
   int16_t err = 0;
   while (x >= y) {
-    drawPixel({static_cast<int16_t>(center.x + x),
-               static_cast<int16_t>(center.y + y)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x + y),
-               static_cast<int16_t>(center.y + x)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x - y),
-               static_cast<int16_t>(center.y + x)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x - x),
-               static_cast<int16_t>(center.y + y)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x - x),
-               static_cast<int16_t>(center.y - y)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x - y),
-               static_cast<int16_t>(center.y - x)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x + y),
-               static_cast<int16_t>(center.y - x)},
-              colour);
-    drawPixel({static_cast<int16_t>(center.x + x),
-               static_cast<int16_t>(center.y - y)},
-              colour);
+    drawPixel({center.x_ + x, center.y_ + y}, colour);
+    drawPixel({center.x_ + y, center.y_ + x}, colour);
+    drawPixel({center.x_ - y, center.y_ + x}, colour);
+    drawPixel({center.x_ - x, center.y_ + y}, colour);
+    drawPixel({center.x_ - x, center.y_ - y}, colour);
+    drawPixel({center.x_ - y, center.y_ - x}, colour);
+    drawPixel({center.x_ + y, center.y_ - x}, colour);
+    drawPixel({center.x_ + x, center.y_ - y}, colour);
 
     if (err <= 0) {
       y += 1;
@@ -359,31 +353,23 @@ void ST7789VWDriver::drawCircle(const Point &center, uint16_t r,
     }
   }
 }
-void ST7789VWDriver::drawFilledCircle(const Point &center, uint16_t r,
+void ST7789VWDriver::drawFilledCircle(const Point &center, double r,
                                       uint16_t colour) {
+  ESP_LOGD(TAG_,
+           "Drawing filled circle of center (%d,%d) and radius %f in "
+           "colour: 0x%X",
+           center.x_, center.y_, r, colour);
   int16_t x = r;
   int16_t y = 0;
   int16_t err = 0;
   while (x >= y) {
-    drawLine({static_cast<int16_t>(center.x + x),
-              static_cast<int16_t>(center.y + y)},
-             {static_cast<int16_t>(center.x - x),
-              static_cast<int16_t>(center.y + y)},
+    drawLine({center.x_ + x, center.y_ + y}, {center.x_ - x, center.y_ + y},
              colour);
-    drawLine({static_cast<int16_t>(center.x + y),
-              static_cast<int16_t>(center.y + x)},
-             {static_cast<int16_t>(center.x - y),
-              static_cast<int16_t>(center.y + x)},
+    drawLine({center.x_ + y, center.y_ + x}, {center.x_ - y, center.y_ + x},
              colour);
-    drawLine({static_cast<int16_t>(center.x - x),
-              static_cast<int16_t>(center.y - y)},
-             {static_cast<int16_t>(center.x + x),
-              static_cast<int16_t>(center.y - y)},
+    drawLine({center.x_ - x, center.y_ - y}, {center.x_ + x, center.y_ - y},
              colour);
-    drawLine({static_cast<int16_t>(center.x - y),
-              static_cast<int16_t>(center.y - x)},
-             {static_cast<int16_t>(center.x + y),
-              static_cast<int16_t>(center.y - x)},
+    drawLine({center.x_ - y, center.y_ - x}, {center.x_ + y, center.y_ - x},
              colour);
 
     if (err <= 0) {
@@ -401,13 +387,15 @@ void ST7789VWDriver::drawFilledCircle(const Point &center, uint16_t r,
 void ST7789VWDriver::drawPolygon(const Point &center, double r,
                                  uint16_t vertices, uint16_t colour,
                                  double rotation) {
+  ESP_LOGD(TAG_,
+           "Drawing polygon of center (%d,%d) and radius %f and %d vertices in "
+           "colour: 0x%X",
+           center.x_, center.y_, r, vertices, colour);
   double gamma = 2.0 * consts::PI / vertices;
-  Point lastPoint{static_cast<int16_t>(center.x + sin(rotation) * r),
-                  static_cast<int16_t>(center.y + cos(rotation) * r)};
+  Point lastPoint{center.x_ + sin(rotation) * r, center.y_ + cos(rotation) * r};
   for (auto i = 1; i <= vertices; ++i) {
-    Point currentPoint{
-        static_cast<int16_t>(center.x + sin(rotation + i * gamma) * r),
-        static_cast<int16_t>(center.y + cos(rotation + i * gamma) * r)};
+    Point currentPoint{center.x_ + sin(rotation + i * gamma) * r,
+                       center.y_ + cos(rotation + i * gamma) * r};
     drawLine(lastPoint, currentPoint, colour);
     std::swap(lastPoint, currentPoint);
   }
@@ -415,17 +403,60 @@ void ST7789VWDriver::drawPolygon(const Point &center, double r,
 void ST7789VWDriver::drawFilledPolygon(const Point &center, double r,
                                        uint16_t vertices, uint16_t colour,
                                        double rotation) {
+  ESP_LOGD(TAG_,
+           "Drawing filled polygon of center (%d,%d) and radius %f and %d "
+           "vertices in "
+           "colour: 0x%X",
+           center.x_, center.y_, r, vertices, colour);
   double gamma = 2.0 * consts::PI / vertices;
-  Point lastPoint{static_cast<int16_t>(center.x + sin(rotation) * r),
-                  static_cast<int16_t>(center.y + cos(rotation) * r)};
+  Point lastPoint{center.x_ + sin(rotation) * r, center.y_ + cos(rotation) * r};
   for (auto i = 1; i <= vertices; ++i) {
-    Point currentPoint{
-        static_cast<int16_t>(center.x + sin(rotation + i * gamma) * r),
-        static_cast<int16_t>(center.y + cos(rotation + i * gamma) * r)};
-    drawFilledTriangle(lastPoint, currentPoint, center, colour);
+    Point currentPoint{center.x_ + sin(rotation + i * gamma) * r,
+                       center.y_ + cos(rotation + i * gamma) * r};
+    ESP_LOGI(TAG_, "(%d, %d) (%d, %d) (%d, %d)", lastPoint.x_, lastPoint.y_,
+             currentPoint.x_, currentPoint.y_, center.x_, center.y_);
+    drawFilledTriangle(lastPoint, currentPoint, center, colour / i);
     std::swap(lastPoint, currentPoint);
   }
 }
 
+std::vector<uint16_t> ST7789VWDriver::readDisplayMemory(const Point &start,
+                                                        const Point &stop) {
+  writeCommand(commands::memoryRead);
+  setDisplayAddress(start.x_, stop.x_, start.y_, stop.y_);
+  size_t size = abs((stop.x_ - start.x_) * (stop.y_ - start.y_));
+  std::vector<uint16_t> vectorData(size);
+  spiDriver_.readDataWords(spiHandle_, vectorData.data(),
+                           size * tamagotchi::Spi::consts::DATA_WORD_BYTES);
+  return vectorData;
+}
+
+void ST7789VWDriver::drawBitmap(const Point &start, uint16_t sizeX,
+                                uint16_t sizeY, uint16_t colour,
+                                const std::vector<bool> &bitmap) {
+  if (sizeY * sizeX == bitmap.size()) {
+    ESP_LOGD(TAG_, "Drawing bitmap of size (%d, %d)in colour: 0x%X", sizeX,
+             sizeY, colour);
+    uint16_t countX = 0, countY = 0;
+    for (const auto &pixel : bitmap) {
+      if (pixel) {
+        drawPixel({start.x_ + countX, start.y_ + countY}, colour);
+      }
+      if (++countX == sizeX) {
+        countY++;
+        countX = 0;
+      }
+    }
+  } else {
+    ESP_LOGE(TAG_, "Incorrect data given to drawBitmap()! Incorrect size.");
+  }
+}
+void ST7789VWDriver::drawPicture(const Point &start, uint16_t sizeX,
+                                 uint16_t sizeY,
+                                 const std::vector<uint16_t> &picture) {
+  setDisplayAddress(start.x_, start.x_ + sizeX, start.y_, start.y_ + sizeY);
+  const uint8_t *bytes = reinterpret_cast<const uint8_t *>(picture.data());
+  writeBytes(bytes, picture.size() * tamagotchi::Spi::consts::DATA_WORD_BYTES);
+}
 }  // namespace ST7789
 }  // namespace tamagotchi

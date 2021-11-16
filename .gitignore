@@ -5,3 +5,6 @@ build/*
 unitTests/build/*
 unitTests/bin/*
 unitTests/.*
+
+test/build/*
+test/.*

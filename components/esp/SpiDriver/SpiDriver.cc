@@ -1,5 +1,9 @@
 #include "SpiDriver.hpp"
 
+#include <stdint.h>
+
+#include "SpiConf.hpp"
+
 namespace tamagotchi {
 namespace Spi {
 const char *SpiDriver::TAG_ = "ESP32 SpiDriver";
@@ -94,11 +98,38 @@ esp_err_t SpiDriver::writeDataWords(const uint64_t descriptor,
   return ESP_OK;
 }
 
-
 esp_err_t SpiDriver::writeCommand(const uint64_t descriptor,
                                   const uint8_t command) {
   return writeBytes(descriptor, &command, 1);
 }
 
-} // namespace Spi
-} // namespace tamagotchi
+esp_err_t SpiDriver::readBytes(const uint64_t descriptor, uint8_t *data,
+                               const size_t dataLength) {
+  if (dataLength == 0) {
+    ESP_LOGE(
+        TAG_,
+        "FAIL! Incorrect data provided to readBytes() Data length cannot be 0");
+    return ESP_FAIL;
+  }
+  spi_transaction_t spiTransaction;
+  memset(&spiTransaction, 0, sizeof(spi_transaction_t));
+  spiTransaction.rxlength = dataLength * consts::BYTE;
+  spiTransaction.rx_buffer = data;
+  esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
+  if (err == ESP_OK)
+    ESP_LOGD(TAG_, "Successfully read %d bits", spiTransaction.rxlength);
+  else
+    ESP_LOGE(TAG_, "FAIL! Cannot read %d bits", spiTransaction.rxlength);
+  return err;
+}
+esp_err_t SpiDriver::readByte(const uint64_t descriptor, uint8_t *data) {
+  return readBytes(descriptor, data, 1);
+}
+esp_err_t SpiDriver::readDataWords(const uint64_t descriptor, uint16_t *data,
+                                   const size_t dataLength) {
+  return readBytes(descriptor, reinterpret_cast<uint8_t *>(data),
+                   dataLength * consts::DATA_WORD_BYTES);
+}
+
+}  // namespace Spi
+}  // namespace tamagotchi
