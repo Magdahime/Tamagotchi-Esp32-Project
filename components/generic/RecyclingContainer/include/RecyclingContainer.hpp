@@ -118,7 +118,7 @@ public:
     return false;
   }
   void clear() {
-    items_.clear(items_.begin(), items_.end());
+    items_.clear();
     freeSlots_.clear();
   }
 

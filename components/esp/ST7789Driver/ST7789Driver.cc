@@ -413,9 +413,7 @@ void ST7789VWDriver::drawFilledPolygon(const Point &center, double r,
   for (auto i = 1; i <= vertices; ++i) {
     Point currentPoint{center.x_ + sin(rotation + i * gamma) * r,
                        center.y_ + cos(rotation + i * gamma) * r};
-    ESP_LOGI(TAG_, "(%d, %d) (%d, %d) (%d, %d)", lastPoint.x_, lastPoint.y_,
-             currentPoint.x_, currentPoint.y_, center.x_, center.y_);
-    drawFilledTriangle(lastPoint, currentPoint, center, colour / i);
+    drawFilledTriangle(lastPoint, currentPoint, center, colour);
     std::swap(lastPoint, currentPoint);
   }
 }
