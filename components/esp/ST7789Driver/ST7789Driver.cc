@@ -456,5 +456,59 @@ void ST7789VWDriver::drawPicture(const Point &start, uint16_t sizeX,
   const uint8_t *bytes = reinterpret_cast<const uint8_t *>(picture.data());
   writeBytes(bytes, picture.size() * tamagotchi::Spi::consts::DATA_WORD_BYTES);
 }
+
+void ST7789VWDriver::drawEllipse(const Point &center, double xRadius,
+                                 double yRadius, uint16_t colour) {
+  float dx, dy, d1, d2, x, y;
+  x = 0;
+  y = yRadius;
+  d1 = (yRadius * yRadius) - (xRadius * xRadius * yRadius) + (0.25 * xRadius * xRadius);
+  dx = 2 * yRadius * yRadius * x;
+  dy = 2 * xRadius * xRadius * y;
+
+  // For region 1
+  while (dx < dy) {
+    drawPixel({x + center.x_, y + center.y_}, colour);
+    drawPixel({-x + center.x_, y + center.y_}, colour);
+    drawPixel({x + center.x_, -y + center.y_}, colour);
+    drawPixel({-x + center.x_, -y + center.y_ }, colour);
+
+    if (d1 < 0) {
+      x++;
+      dx = dx + (2 * yRadius * yRadius);
+      d1 = d1 + dx + (yRadius * yRadius);
+    } else {
+      x++;
+      y--;
+      dx = dx + (2 * yRadius * yRadius);
+      dy = dy - (2 * xRadius * xRadius);
+      d1 = d1 + dx - dy + (yRadius * yRadius);
+    }
+  }
+
+  d2 = ((yRadius * yRadius) * ((x + 0.5) * (x + 0.5))) +
+       ((xRadius * xRadius) * ((y - 1) * (y - 1))) - (xRadius * xRadius * yRadius * yRadius);
+
+  // Plotting points of region 2
+  while (y >= 0) {
+    drawPixel({x + center.x_, y + center.y_}, colour);
+    drawPixel({-x + center.x_, y + center.y_}, colour);
+    drawPixel({x + center.x_, -y + center.y_}, colour);
+    drawPixel({-x + center.x_, -y + center.y_ }, colour);
+
+    if (d2 > 0) {
+      y--;
+      dy = dy - (2 * xRadius * xRadius);
+      d2 = d2 + (xRadius * xRadius) - dy;
+    } else {
+      y--;
+      x++;
+      dx = dx + (2 * yRadius * yRadius);
+      dy = dy - (2 * xRadius * xRadius);
+      d2 = d2 + dx - dy + (xRadius * xRadius);
+    }
+  }
+}
+
 }  // namespace ST7789
 }  // namespace tamagotchi

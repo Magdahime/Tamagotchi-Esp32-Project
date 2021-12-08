@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <array>
+#include <optional>
 
 #include "EspGLShapes.hpp"
 #include "EspGLUtils.hpp"
@@ -53,19 +54,23 @@ class TriangleBase : public Shape {
 
 class Triangle : public TriangleBase {
  public:
-  Triangle(Point point1, Point point2, Point point3, Colour fill)
-      : TriangleBase(point1, point2, point3), fill_(std::move(fill)) {}
+  Triangle(Point point1, Point point2, Point point3, Colour fill,
+           Colour outline = NULL)
+      : TriangleBase(point1, point2, point3),
+        fill_(std::move(fill)),
+        outline_(std::move(outline)) {}
 
   virtual void draw() override;
 
  private:
   Colour fill_;
+  std::optional<Colour> outline_;
 };
 
 class TriangleOutline : public TriangleBase {
  public:
   TriangleOutline(Point point1, Point point2, Point point3, Colour outline)
-      : TriangleBase(point1, point2, point3) : outline_(std::move(outline)) {}
+      : TriangleBase(point1, point2, point3), outline_(std::move(outline)) {}
 
   virtual void draw() override;
 
@@ -75,12 +80,14 @@ class TriangleOutline : public TriangleBase {
 
 class EquilateralTriangle : public Triangle {
  public:
-  EquilateralTriangle(Point point1, Point point2, Point point3, Colour fill);
-  EquilateralTriangle(Point center, Point sideLength, double angle = 0);
+  EquilateralTriangle(Point point1, Point point2, Point point3, Colour fill,
+                      Colour outline = NULL);
+  EquilateralTriangle(Point center, double sideLength, double angle = 0,
+                      Colour fill, Colour outline = NULL);
   virtual void draw() override;
 
  private:
-  Point sideLength_;
+  double sideLength_;
   Point center_;
   double angle_;
 };
@@ -89,47 +96,118 @@ class EquilateralTriangleOutline : public TriangleOutline {
  public:
   EquilateralTriangleOutline(Point point1, Point point2, Point point3,
                              Colour outline);
-  EquilateralTriangleOutline(Point center, Point sideLength, double angle = 0);
+  EquilateralTriangleOutline(Point center, double sideLength, double angle = 0);
   virtual void draw() override;
 
  private:
-  Point sideLength_;
+  double sideLength_;
   Point center_;
   float angle_;
 };
 
 class RectangleBase : public Shape {
  public:
-  RectangleBase(Point leftUpperPoint, uint16_t dimensionX, uint16_t dimensionY);
+  RectangleBase(Point leftUpperPoint, double dimensionX, double dimensionY)
+      : leftUpperPoint_(std::move(leftUpperPoint)),
+        dimensionX_(dimensionX),
+        dimensionY_(dimensionY) {}
+  virtual void draw() = 0;
 
  protected:
+  Point leftUpperPoint_;
+  double dimensionX_;
+  double dimensionY_;
 };
-class Rectangle : public RectangleBase {};
-class RectangleOutline : public RectangleBase {};
+class Rectangle : public RectangleBase {
+  Rectangle(Point leftUpperPoint, double dimensionX, double dimensionY,
+            Colour fill, Colour outline = NULL);
+  virtual void draw() override;
 
-class Square : public Rectangle {};
-class SquareOutline : public RectangleOutline {};
+ private:
+  Colour fill_;
+  std::optional<Colour> outline_;
+};
+class RectangleOutline : public RectangleBase {
+ public:
+  RectangleOutline(Point leftUpperPoint, double dimensionX, double dimensionY,
+                   Colour outline);
+  virtual void draw() override;
 
-class CircleBase : public Shape {};
-class Circle : public CircleBase {};
-class CircleOutline : public CircleBase {};
+ private:
+  Colour outline_;
+};
+
+class Square : public Rectangle {
+ public:
+  Square(Point leftUpperPoint, double dimensionX, double dimensionY,
+         Colour fill, Colour outline = NULL);
+  Square(Point center, double sideLength, Colour fill, Colour outline = NULL);
+  virtual void draw() override;
+
+ private:
+};
+
+class SquareOutline : public RectangleOutline {
+ public:
+  Square(Point leftUpperPoint, double dimensionX, double dimensionY,
+         Colour outline);
+  Square(Point center, double sideLength, Colour outline);
+  virtual void draw() override;
+
+ private:
+};
+
+class CircleBase : public Shape {
+ public:
+  CircleBase(Point center, double radius)
+      : center_(std::move(center)), radius_(radius) {}
+  virtual void draw() = 0;
+
+ protected:
+  Point center_;
+  double radius_;
+};
+class Circle : public CircleBase {
+ public:
+  Circle(Point center, double radius, Colour fill, Colour outline = NULL)
+      : CircleBase(center, radius),
+        fill_(std::move(fill)),
+        outline_(std::move(outline)) {}
+  virtual void draw() override;
+
+ private:
+  Colour fill;
+  std::optional<Colour> outline;
+};
+
+class CircleOutline : public CircleBase {
+ public:
+  CircleOutline(Point center, double radius, Colour outline)
+      : CircleBase(center, radius), outline_(std::move(outline)) {}
+
+  virtual void draw() override;
+
+ private:
+  Colour outline_;
+};
 
 template <unsigned Vertices>
 class Polygon : public Shape {
  public:
-  Polygon(std::array<Point, Vertices> vertices)
-      : vertices_(std::move(vertices)) {}
+  Polygon(std::array<Point, Vertices> vertices, Colour outline)
+      : vertices_(std::move(vertices)), outline_(outline) {}
   virtual void draw() override;
 
  protected:
   std::array<Point, Vertices> vertices_;
+  Colour outline_;
 };
 
 template <unsigned Vertices>
 class ConvexPolygon : public Polygon {
  public:
-  ConvexPolygon(std::array<Point, Vertices> vertices)
-      : Polygon(std::move(vertices)) {}
+  ConvexPolygon(std::array<Point, Vertices> vertices, Colour outline)
+      : Polygon(std::move(vertices), outline) {}
   virtual void draw() override;
 
  protected:
@@ -138,7 +216,7 @@ class ConvexPolygon : public Polygon {
 template <unsigned Vertices>
 class RegularPolygon : public Polygon {
  public:
-  RegularPolygon(Point center, uint16_t sideLength, double rotation = 0.0)
+  RegularPolygon(Point center, uint16_t sideLength, double rotation = 0.0, Colour outline)
       : center_(std::move(center)),
         sideLength_(std::move(sideLength_)),
         rotation_(std::move(rotation));
