@@ -39,6 +39,8 @@ class ST7789VWDriver {
                   uint16_t colour, const std::vector<bool> &bitmap);
   void drawEllipse(const Point &center, double xRadius, double yRadius,
                    uint16_t colour);
+  void drawFilledEllipse(const Point &center, double xRadius, double yRadius,
+                   uint16_t colour);
   void drawPicture(const Point &start, uint16_t sizeX, uint16_t sizeY,
                    const std::vector<uint16_t> &picture);
   uint16_t convertColour(uint8_t r, uint8_t g, uint8_t b);

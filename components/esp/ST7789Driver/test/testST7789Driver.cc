@@ -15,7 +15,7 @@ TEST_GROUP(ST7789VWDriverTests);
 TEST_SETUP(ST7789VWDriverTests) {}
 
 TEST_TEAR_DOWN(ST7789VWDriverTests) {
-  driver.delay(10000);
+  driver.delay(1000);
   driver.fillScreen(ST7789::colours::BLACK);
   driver.delay(1000);
 }
@@ -372,6 +372,11 @@ TEST(ST7789VWDriverTests, DrawingEllipse) {
   driver.drawEllipse({100, 100}, 15, 10, ST7789::colours::YELLOW);
 }
 
+
+TEST(ST7789VWDriverTests, DrawingFilledEllipse) {
+  driver.drawFilledEllipse({100, 100}, 15, 10, ST7789::colours::YELLOW);
+}
+
 TEST_GROUP_RUNNER(ST7789VWDriverTests) {
   // RUN_TEST_CASE(ST7789VWDriverTests, FillingDisplayTest)
   // RUN_TEST_CASE(ST7789VWDriverTests, DrawingPixelTest)
@@ -395,4 +400,5 @@ TEST_GROUP_RUNNER(ST7789VWDriverTests) {
   //               DrawingFilledRotatedPolygonWithManyVertices)
   // RUN_TEST_CASE(ST7789VWDriverTests, DrawingBitmap)
   RUN_TEST_CASE(ST7789VWDriverTests, DrawingEllipse)
+  RUN_TEST_CASE(ST7789VWDriverTests, DrawingFilledEllipse)
 }
