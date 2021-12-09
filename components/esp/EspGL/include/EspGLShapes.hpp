@@ -228,6 +228,8 @@ class RegularPolygon : public Polygon {
   double rotation_;
 };
 
+
+
 }  // namespace EspGL
 
 }  // namespace tamagotchi
