@@ -9,9 +9,9 @@ extern "C" {
 }
 
 static void run_all_tests(void) {
-  RUN_TEST_GROUP(ST7789VWDriverTests);
   RUN_TEST_GROUP(RecyclingContainerTests);
-  RUN_TEST_GROUP(ST7789VWUtilsTests);
+  RUN_TEST_GROUP(EspGLUtilsTests);
+  RUN_TEST_GROUP(EspGLShapesTests);
 }
 
 static void print_banner(const char* text) {

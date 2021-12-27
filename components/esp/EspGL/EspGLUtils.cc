@@ -1,11 +1,17 @@
-#include "ST7789Utils.hpp"
+#include "EspGLUtils.hpp"
 
 #include <stdint.h>
 
 #include <vector>
 
 namespace tamagotchi {
-namespace ST7789 {
+namespace EspGL {
+
+void delay(uint32_t ms) {
+  TickType_t delay = ms / portTICK_PERIOD_MS;
+  vTaskDelay(delay);
+}
+
 std::tuple<Point, Point, Point> sort3Points(const Point &a, const Point &b,
                                             const Point &c,
                                             Coordinate orderBy) {
@@ -63,5 +69,5 @@ Point straightLineEquation(const Point &start, const Point &end,
   return Point{0, 0};
 }
 
-}  // namespace ST7789
+}  // namespace EspGL
 }  // namespace tamagotchi

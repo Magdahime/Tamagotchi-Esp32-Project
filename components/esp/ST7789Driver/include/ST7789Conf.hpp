@@ -4,7 +4,6 @@
 #include "driver/spi_common.h"
 #include "driver/spi_master.h"
 
-
 namespace tamagotchi {
 namespace ST7789 {
 
@@ -19,6 +18,19 @@ constexpr uint16_t YELLOW = 0xFFE0;
 constexpr uint16_t CYAN = 0x07FF;
 constexpr uint16_t PURPLE = 0xF81F;
 }  // namespace colours
+
+namespace consts {
+constexpr int GPIOMOSI = 13;
+constexpr int GPIOSCLK = 14;
+constexpr int GPIOCS = 15;
+constexpr int GPIODC = 2;
+constexpr int GPIORESET = 4;
+constexpr int GPIOBL = -1;
+constexpr int WIDTH = 240;
+constexpr int HEIGHT = 320;
+constexpr int OFFSETX = 0;
+constexpr int OFFSETY = 0;
+}  // namespace consts
 
 namespace structs {
 

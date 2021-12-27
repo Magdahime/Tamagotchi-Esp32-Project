@@ -1,4 +1,4 @@
-idf_component_register(SRCS "ST7789Driver.cc" "ST7789Utils.cc"
+idf_component_register(SRCS "ST7789Driver.cc"
                     INCLUDE_DIRS "include"
-                    REQUIRES GpioDriver SpiDriver)
+                    REQUIRES GpioDriver SpiDriver EspGL ST7789Driver)
 component_compile_options(-std=gnu++17)

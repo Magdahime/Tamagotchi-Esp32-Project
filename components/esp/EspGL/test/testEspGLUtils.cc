@@ -1,21 +1,21 @@
-#include "ST7789Utils.hpp"
+#include "EspGLUtils.hpp"
 
 #include "unity.h"
 #include "unity_fixture.h"
 
-using namespace tamagotchi::ST7789;
+using namespace tamagotchi::EspGL;
 
 
 
-TEST_GROUP(ST7789VWUtilsTests);
+TEST_GROUP(EspGLUtilsTests);
 
-TEST_SETUP(ST7789VWUtilsTests) {}
+TEST_SETUP(EspGLUtilsTests) {}
 
-TEST_TEAR_DOWN(ST7789VWUtilsTests) {
+TEST_TEAR_DOWN(EspGLUtilsTests) {
 }
 
 
-TEST(ST7789VWUtilsTests, sort3PointsTest) {
+TEST(EspGLUtilsTests, sort3PointsTest) {
   Point point1{0, 2};
   Point point2{1, 1};
   Point point3{2, 0};
@@ -35,6 +35,6 @@ TEST(ST7789VWUtilsTests, sort3PointsTest) {
   TEST_ASSERT_EQUAL_INT(f.y_, point3.y_);
 }
 
-TEST_GROUP_RUNNER(ST7789VWUtilsTests) {
-  RUN_TEST_CASE(ST7789VWUtilsTests, sort3PointsTest)
+TEST_GROUP_RUNNER(EspGLUtilsTests) {
+  RUN_TEST_CASE(EspGLUtilsTests, sort3PointsTest)
 }
