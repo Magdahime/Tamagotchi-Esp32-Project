@@ -162,8 +162,9 @@ void ST7789VWDriver::writeColour(uint16_t colour) {
 void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
   colour = (colour << 8) + (colour >> 8);
   startDataTransfer();
+  const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&colour);
   for (auto counter = 0; counter < size; counter++) {
-    spiDriver_.writeBytes(spiHandle_, reinterpret_cast<const uint8_t *>(&colour),
+    spiDriver_.writeBytes(spiHandle_, bytes,
                           tamagotchi::Spi::consts::DATA_WORD_BYTES);
   }
 }
@@ -184,31 +185,12 @@ void ST7789VWDriver::drawPixel(const EspGL::Point &point, uint16_t colour) {
   writeColour(colour);
 }
 
-void ST7789VWDriver::drawPixelLine(const EspGL::Point &point, uint16_t size,
-                                   uint16_t colour) {
-  if (point.x_ + size > width_ || point.y_ >= height_) {
-    ESP_LOGE(TAG_,
-             "Incorrect data was provided to drawPixelLine()! Pixel "
-             "coordinates are out of bound!");
-    return;
-  }
-
-  uint16_t beginX = point.x_ + offsetx_;
-  uint16_t endX = beginX + size;
-  uint16_t beginY = point.y_ + offsety_;
-  ESP_LOGD(TAG_, "Drawing line of pixels: %d:%d  in %d line in colour: 0x%X",
-           beginX, endX, beginY, colour);
-  setDisplayAddress(beginX, endX, beginY, beginY);
-  writeCommand(commands::memoryWrite);
-  writeColour(colour, size);
-}
-
 void ST7789VWDriver::writePixelArea(int16_t startX, int16_t endX,
                                     int16_t startY, int16_t endY,
                                     uint16_t colour) {
   setDisplayAddress(startX, endX, startY, endY);
   writeCommand(commands::memoryWrite);
-  writeColour(colour, std::abs(endX - startX) * std::abs(endY - startY));
+  writeColour(colour, (endX - startX + 1) * (endY - startY + 1));
 }
 
 void ST7789VWDriver::writePixelArea(int16_t startX, int16_t endX,

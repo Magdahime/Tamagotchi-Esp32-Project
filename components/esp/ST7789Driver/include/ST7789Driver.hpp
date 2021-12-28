@@ -27,8 +27,6 @@ class ST7789VWDriver : public tamagotchi::EspGL::Driver<uint16_t> {
                               int16_t endY,
                               std::vector<uint16_t> &data) override;
 
-  void drawPixelLine(const EspGL::Point &point, uint16_t size, uint16_t colour);
-
  private:
   static const char *TAG_;
 

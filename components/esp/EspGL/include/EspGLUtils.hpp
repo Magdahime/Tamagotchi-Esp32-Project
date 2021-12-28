@@ -15,11 +15,12 @@
 namespace tamagotchi {
 namespace EspGL {
 
+
 struct Point {
-  int16_t x_;
-  int16_t y_;
-  template <typename T>
-  Point(T x, T y) : x_(std::round(x)), y_(std::round(y)) {}
+  int32_t x_;
+  int32_t y_;
+  template <typename T, typename Y>
+  Point(T x, Y y) : x_(std::round(x)), y_(std::round(y)) {}
 };
 
 enum class Coordinate { X, Y };
