@@ -58,7 +58,6 @@ struct st7789_config_t {
 }  // namespace structs
 
 namespace consts {
-constexpr double PI = 3.141592653589793238463;
 constexpr spi_host_device_t LCD_HOST = HSPI_HOST;
 constexpr int QUEUE_SIZE = 7;
 constexpr int SPI_FREQUENCY = SPI_MASTER_FREQ_20M;

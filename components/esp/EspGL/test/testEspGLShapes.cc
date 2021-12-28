@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <cmath>
 #include <memory>
 
 #include "EspGLScreen.hpp"
@@ -108,18 +109,33 @@ TEST(EspGLShapesTests, DrawingSquareOutlineMethod2) {
   square.draw(screen);
 }
 
+TEST(EspGLShapesTests, DrawingLines) {
+  Point center{100, 100};
+  int arms = 30;
+  int lengthOfArm = 50;
+  for (int i = 0; i < arms; i++) {
+    float angle = 2 * M_PI / arms * i;
+    Line<uint16_t> line(center,
+                        {center.x_ + sin(angle) * lengthOfArm,
+                         center.y_ + cos(angle) * lengthOfArm},
+                        colours::BLUE);
+    line.draw(screen);
+  }
+}
+
 TEST_GROUP_RUNNER(EspGLShapesTests) {
-  RUN_TEST_CASE(EspGLShapesTests, FillingDisplayTest)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingPixelTest)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingFilledRectangle)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingFilledRectangleWithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingFilledRectangles)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingRectangleOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingRectangleOutlines)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod1)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod2)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod1WithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod2WithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod1)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod2)
+  // RUN_TEST_CASE(EspGLShapesTests, FillingDisplayTest)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingPixelTest)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingFilledRectangle)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingFilledRectangleWithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingFilledRectangles)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingRectangleOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingRectangleOutlines)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod1)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod2)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod1WithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod2WithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod1)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod2)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingLines)
 }
