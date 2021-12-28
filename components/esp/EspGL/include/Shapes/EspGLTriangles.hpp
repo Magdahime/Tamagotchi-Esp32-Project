@@ -104,17 +104,29 @@ class EquilateralTriangleOutline
 template <typename ColourRepresentation>
 void Triangle<ColourRepresentation>::draw(
     Screen<ColourRepresentation>& target) {
+  ESP_LOGD(TAG_,
+           "Drawing filled triangle of vertices: (%d,%d) (%d,%d) (%d,%d) in "
+           "colour: 0x%X",
+           this->point1_.x_, this->point1_.y_, this->point2_.x_,
+           this->point2_.y_, this->point3_.x_, this->point3_.y_,
+           this->fill_.value());
   auto [max, mid, min] =
       sort3Points(this->point1_, this->point2_, this->point3_, Coordinate::Y);
   for (auto y = min.y_; y <= mid.y_; ++y) {
-    auto point1 = straightLineEquation(min, mid, {{}, y}, Coordinate::X);
-    auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
+    auto point1 = straightLineEquation(min, mid, {0, y}, Coordinate::X);
+    auto point2 = straightLineEquation(min, max, {0, y}, Coordinate::X);
     Line{point1, point2, fill_}.draw(target);
   }
   for (auto y = mid.y_; y <= max.y_; ++y) {
-    auto point1 = straightLineEquation(mid, max, {{}, y}, Coordinate::X);
-    auto point2 = straightLineEquation(min, max, {{}, y}, Coordinate::X);
+    auto point1 = straightLineEquation(mid, max, {0, y}, Coordinate::X);
+    auto point2 = straightLineEquation(min, max, {0, y}, Coordinate::X);
     Line{point1, point2, fill_}.draw(target);
+  }
+
+  if (outline_) {
+    TriangleOutline<ColourRepresentation>{this->point1_, this->point2_,
+                                          this->point3_, this->outline_.value()}
+        .draw(target);
   }
 }
 
@@ -128,8 +140,8 @@ void TriangleOutline<ColourRepresentation>::draw(
            this->point2_.y_, this->point3_.x_, this->point3_.y_,
            this->outline_.value());
   Line{this->point1_, this->point2_, this->outline_}.draw(target);
-  Line{this->point2_, this->point3_, this->outline_};
-  Line{this->point3_, this->point1_, this->outline_};
+  Line{this->point2_, this->point3_, this->outline_}.draw(target);
+  Line{this->point3_, this->point1_, this->outline_}.draw(target);
 }
 
 /////////////////////////////

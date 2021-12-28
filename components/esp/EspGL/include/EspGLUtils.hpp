@@ -28,8 +28,8 @@ enum class Coordinate { X, Y };
 std::tuple<Point, Point, Point> sort3Points(const Point &a, const Point &b,
                                             const Point &c, Coordinate orderBy);
 Point straightLineEquation(const Point &start, const Point &end,
-                           const Point &search, Coordinate coordinate);
-void delay(uint32_t ms);
+                           const Point &search, const Coordinate coordinate);
+void delay(const uint32_t ms);
 
 struct RGB888 {
   uint8_t r;

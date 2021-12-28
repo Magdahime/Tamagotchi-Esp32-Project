@@ -7,14 +7,14 @@
 namespace tamagotchi {
 namespace EspGL {
 
-void delay(uint32_t ms) {
+void delay(const uint32_t ms) {
   TickType_t delay = ms / portTICK_PERIOD_MS;
   vTaskDelay(delay);
 }
 
 std::tuple<Point, Point, Point> sort3Points(const Point &a, const Point &b,
                                             const Point &c,
-                                            Coordinate orderBy) {
+                                            const Coordinate orderBy) {
   std::vector<Point> points{a, b, c};
   std::sort(points.begin(), points.end(), [&](const Point &a, const Point &b) {
     switch (orderBy) {

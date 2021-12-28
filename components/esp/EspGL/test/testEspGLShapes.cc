@@ -118,9 +118,38 @@ TEST(EspGLShapesTests, DrawingLines) {
     Line<uint16_t> line(center,
                         {center.x_ + sin(angle) * lengthOfArm,
                          center.y_ + cos(angle) * lengthOfArm},
-                        colours::BLUE);
+                        Colour<uint16_t>(colours::BLUE));
     line.draw(screen);
   }
+}
+
+TEST(EspGLShapesTests, DrawingTriangle) {
+  Triangle<uint16_t> triangle{
+      {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+  triangle.draw(screen);
+}
+TEST(EspGLShapesTests, DrawingTriangleWithOutline) {
+  Triangle<uint16_t> triangle{{50, 50},
+                              {120, 120},
+                              {239, 40},
+                              Colour<uint16_t>(colours::RED),
+                              Colour<uint16_t>(colours::BLUE)};
+  triangle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingTriangles) {
+  TriangleOutline<uint16_t> triangle1{
+      {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+  TriangleOutline<uint16_t> triangle2{
+      {150, 150}, {120, 120}, {61, 290}, Colour<uint16_t>(colours::RED)};
+  triangle1.draw(screen);
+  triangle2.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingTriangleOutline) {
+  TriangleOutline<uint16_t> triangle{
+      {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+  triangle.draw(screen);
 }
 
 TEST_GROUP_RUNNER(EspGLShapesTests) {
@@ -138,4 +167,8 @@ TEST_GROUP_RUNNER(EspGLShapesTests) {
   // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod1)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod2)
   RUN_TEST_CASE(EspGLShapesTests, DrawingLines)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangle)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleWithOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangles)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleOutline)
 }

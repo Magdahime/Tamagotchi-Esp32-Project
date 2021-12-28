@@ -1,36 +1,3 @@
-// TEST(ST7789VWDriverTests, DrawingHorizontalLine) {
-//   driver.drawLine({50, 50}, {50, 120}, ST7789::colours::RED);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingVerticalLine) {
-//   driver.drawLine({50, 50}, {120, 50}, ST7789::colours::RED);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingLines) {
-//   ST7789::Point center{100, 100};
-//   int arms = 30;
-//   for (int i = 0; i < arms; i++) {
-//     float angle = 2 * tamagotchi::ST7789::consts::PI / arms * i;
-//     driver.drawLine(center,
-//                     {center.x_ + sin(angle) * 50, center.y_ + cos(angle) * 50},
-//                     ST7789::colours::BLUE);
-//   }
-// }
-
-// TEST(ST7789VWDriverTests, DrawingRectangleOutline) {
-//   driver.drawRectangle({50, 50}, {120, 120}, ST7789::colours::RED);
-//   driver.drawRectangle({239, 239}, {80, 80}, ST7789::colours::BLUE);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingTriangle) {
-//   driver.drawTriangle({50, 50}, {120, 120}, {239, 40}, ST7789::colours::BLUE);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingFilledTriangle) {
-//   driver.drawFilledTriangle({50, 50}, {120, 120}, {239, 40},
-//                             ST7789::colours::BLUE);
-// }
-
 // TEST(ST7789VWDriverTests, DrawingCircle) {
 //   driver.drawCircle({100, 100}, 50, ST7789::colours::YELLOW);
 // }
