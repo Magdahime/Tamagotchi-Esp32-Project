@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <vcruntime.h>
 
 #include <vector>
 
@@ -14,7 +13,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class Bitmap {
  public:
-  Bitmap(size_t sizeX, size_t sizeY, ColourRepresentation colour,
+  Bitmap(size_t sizeX, size_t sizeY, Colour<ColourRepresentation> colour,
          std::vector<bool> bitmap)
       : sizeX_(std::move(sizeX)),
         sizeY_(std::move(sizeY)),
@@ -25,7 +24,7 @@ class Bitmap {
  private:
   size_t sizeX_;
   size_t sizeY_;
-  ColourRepresentation colour_;
+  Colour<ColourRepresentation> colour_;
   std::vector<bool> bitmap_;
 };
 
@@ -38,7 +37,7 @@ void Bitmap<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
   for (const auto& pixel : bitmap_) {
     if (pixel) {
       target.screenDriver()->drawPixel({start.x_ + countX, start.y_ + countY},
-                                       colour_);
+                                       colour_.value());
     }
     if (++countX == sizeX_) {
       countY++;

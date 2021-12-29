@@ -1,31 +1,3 @@
-// TEST(ST7789VWDriverTests, DrawingPolygon) {
-//   driver.drawPolygon({100, 100}, 50, 4, ST7789::colours::YELLOW);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingRotatedPolygon) {
-//   driver.drawPolygon({100, 100}, 50, 4, ST7789::colours::YELLOW,
-//                      ST7789::consts::PI / 4.0);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingRotatedPolygonWithManyVertices) {
-//   driver.drawPolygon({100, 100}, 50, 16, ST7789::colours::YELLOW,
-//                      ST7789::consts::PI / 4.0);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingFilledPolygon) {
-//   driver.drawFilledPolygon({100, 100}, 50, 4, ST7789::colours::YELLOW);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingFilledRotatedPolygon) {
-//   driver.drawFilledPolygon({100, 100}, 50, 4, ST7789::colours::YELLOW,
-//                            ST7789::consts::PI / 4.0);
-// }
-
-// TEST(ST7789VWDriverTests, DrawingFilledRotatedPolygonWithManyVertices) {
-//   driver.drawFilledPolygon({100, 100}, 50, 16, ST7789::colours::YELLOW,
-//                            ST7789::consts::PI / 4.0);
-// }
-
 // TEST(ST7789VWDriverTests, DrawingBitmap) {
 //   std::vector<bool> test{
 //       false, false, false, false, false, false, false, false, false, false,
