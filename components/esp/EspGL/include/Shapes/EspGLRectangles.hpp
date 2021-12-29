@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+#include <optional>
 #include <stdexcept>
 
 #include "EspGL.hpp"
@@ -39,13 +40,8 @@ template <typename ColourRepresentation>
 class Rectangle : public RectangleBase<ColourRepresentation> {
  public:
   Rectangle(Point leftUpperPoint, int32_t dimensionX, int32_t dimensionY,
-            Colour<ColourRepresentation> fill)
-      : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
-                                            dimensionY),
-        fill_(fill) {}
-  Rectangle(Point leftUpperPoint, int32_t dimensionX, int32_t dimensionY,
             Colour<ColourRepresentation> fill,
-            Colour<ColourRepresentation> outline)
+            std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
                                             dimensionY),
         fill_(fill),
@@ -75,22 +71,13 @@ template <typename ColourRepresentation>
 class Square : public Rectangle<ColourRepresentation> {
  public:
   Square(Point leftUpperPoint, int32_t dimension,
-         Colour<ColourRepresentation> fill)
-      : Rectangle<ColourRepresentation>(leftUpperPoint, dimension, dimension,
-                                        fill) {}
-  Square(Point leftUpperPoint, int32_t dimension,
          Colour<ColourRepresentation> fill,
-         Colour<ColourRepresentation> outline)
+         std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : Rectangle<ColourRepresentation>(leftUpperPoint, dimension, dimension,
                                         fill, outline) {}
   Square(Point center, int32_t sideLength, Colour<ColourRepresentation> fill,
-         double angle)
-      : Rectangle<ColourRepresentation>(
-            Point(center.x_ - cos(angle) * (sideLength / 2.0),
-                  center.y_ - sin(angle) * (sideLength / 2.0)),
-            sideLength, sideLength, fill) {}
-  Square(Point center, int32_t sideLength, Colour<ColourRepresentation> fill,
-         Colour<ColourRepresentation> outline, double angle)
+         double angle,
+         std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : Rectangle<ColourRepresentation>(
             Point(center.x_ - cos(angle) * (sideLength / 2.0),
                   center.y_ - sin(angle) * (sideLength / 2.0)),

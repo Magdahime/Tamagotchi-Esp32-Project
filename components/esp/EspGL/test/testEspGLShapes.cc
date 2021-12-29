@@ -93,8 +93,8 @@ TEST(EspGLShapesTests, DrawingSquareMethod1WithOutline) {
 }
 
 TEST(EspGLShapesTests, DrawingSquareMethod2WithOutline) {
-  Square<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED),
-                          Colour<uint16_t>(colours::BLUE), 0.0);
+  Square<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED), 0.0,
+                          Colour<uint16_t>(colours::BLUE));
   square.draw(screen);
 }
 
@@ -141,7 +141,7 @@ TEST(EspGLShapesTests, DrawingTriangles) {
   TriangleOutline<uint16_t> triangle1{
       {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
   TriangleOutline<uint16_t> triangle2{
-      {150, 150}, {120, 120}, {61, 290}, Colour<uint16_t>(colours::RED)};
+      {150, 150}, {120, 120}, {61, 290}, Colour<uint16_t>(colours::BLUE)};
   triangle1.draw(screen);
   triangle2.draw(screen);
 }
@@ -149,6 +149,26 @@ TEST(EspGLShapesTests, DrawingTriangles) {
 TEST(EspGLShapesTests, DrawingTriangleOutline) {
   TriangleOutline<uint16_t> triangle{
       {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+  triangle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingEquilateralTriangle) {
+  EquilateralTriangle<uint16_t> triangle{
+      {100, 100}, 60, Colour<uint16_t>(colours::RED)};
+  triangle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingEquilateralTriangleWithOutline) {
+  EquilateralTriangle<uint16_t> triangle{{100, 100},
+                                         60,
+                                         Colour<uint16_t>(colours::RED),
+                                         Colour<uint16_t>(colours::BLUE)};
+  triangle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingEquilateralTriangleOutline) {
+  EquilateralTriangleOutline<uint16_t> triangle{
+      {100, 100}, 60, Colour<uint16_t>(colours::RED)};
   triangle.draw(screen);
 }
 
@@ -166,9 +186,14 @@ TEST_GROUP_RUNNER(EspGLShapesTests) {
   // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareMethod2WithOutline)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod1)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingSquareOutlineMethod2)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingLines)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangle)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleWithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangles)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingLines)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangle)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleWithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangles)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangle)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleWithOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleOutline)
+
+
 }

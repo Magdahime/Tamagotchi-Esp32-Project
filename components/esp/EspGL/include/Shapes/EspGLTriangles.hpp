@@ -2,10 +2,15 @@
 
 #include <stdint.h>
 
+#include <cmath>
+#include <optional>
+#include <stdexcept>
+
 #include "EspGL.hpp"
 #include "EspGLSimpleShapes.hpp"
 #include "EspGLUtils.hpp"
 #include "EspGlScreen.hpp"
+#include "Shapes/EspGLTriangles.hpp"
 
 namespace tamagotchi {
 namespace EspGL {
@@ -21,6 +26,7 @@ class TriangleBase : public Shape<ColourRepresentation> {
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
  protected:
+  explicit TriangleBase() = default;
   Point point1_;
   Point point2_;
   Point point3_;
@@ -30,18 +36,15 @@ template <typename ColourRepresentation>
 class Triangle : public TriangleBase<ColourRepresentation> {
  public:
   Triangle(Point point1, Point point2, Point point3,
-           Colour<ColourRepresentation> fill)
-      : TriangleBase<ColourRepresentation>(point1, point2, point3),
-        fill_(std::move(fill)) {}
-  Triangle(Point point1, Point point2, Point point3,
            Colour<ColourRepresentation> fill,
-           Colour<ColourRepresentation> outline)
+           std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : TriangleBase<ColourRepresentation>(point1, point2, point3),
         fill_(std::move(fill)),
-        outline_(std::move(outline)) {}
+        outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
- private:
+ protected:
+  explicit Triangle() = default;
   Colour<ColourRepresentation> fill_;
   std::optional<Colour<ColourRepresentation>> outline_;
 };
@@ -56,26 +59,36 @@ class TriangleOutline : public TriangleBase<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
- private:
+ protected:
+  explicit TriangleOutline() = default;
   Colour<ColourRepresentation> outline_;
 };
 
 template <typename ColourRepresentation>
 class EquilateralTriangle : public Triangle<ColourRepresentation> {
  public:
-  EquilateralTriangle(Point point1, Point point2, Point point3,
-                      Colour<ColourRepresentation> fill);
-  EquilateralTriangle(Point point1, Point point2, Point point3,
-                      Colour<ColourRepresentation> fill,
-                      Colour<ColourRepresentation> outline);
-  EquilateralTriangle(Point center, double sideLength,
-                      Colour<ColourRepresentation> fill, double angle = 0);
-  EquilateralTriangle(Point center, double sideLength,
-                      Colour<ColourRepresentation> fill,
-                      Colour<ColourRepresentation> outline, double angle = 0);
+  EquilateralTriangle(
+      Point center, double sideLength, Colour<ColourRepresentation> fill,
+      std::optional<Colour<ColourRepresentation>> outline = std::nullopt,
+      double angle = 0)
+      : Triangle<ColourRepresentation>() {
+    double radius = std::sqrt(3) * sideLength / 3;
+    double radians = M_PI * 2.0 / 3.0;
+    Point point1{center.x_ + cos(angle) * radius,
+                 center.y_ + sin(angle) * radius};
+    Point point2{center.x_ + cos(angle + radians) * radius,
+                 center.y_ + sin(angle + radians) * radius};
+    Point point3{center.x_ + cos(angle + 2 * radians) * radius,
+                 center.y_ + sin(angle + 2 * radians) * radius};
+    this->point1_ = point1;
+    this->point2_ = point2;
+    this->point3_ = point3;
+    this->fill_ = fill;
+    this->outline_ = outline;
+  }
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
- private:
+ protected:
   double sideLength_;
   Point center_;
   double angle_;
@@ -84,14 +97,26 @@ template <typename ColourRepresentation>
 class EquilateralTriangleOutline
     : public TriangleOutline<ColourRepresentation> {
  public:
-  EquilateralTriangleOutline(Point point1, Point point2, Point point3,
-                             Colour<ColourRepresentation> outline);
   EquilateralTriangleOutline(Point center, double sideLength,
                              Colour<ColourRepresentation> outline,
-                             double angle = 0);
+                             double angle = 0)
+      : TriangleOutline<ColourRepresentation>() {
+    double radius = std::sqrt(3) * sideLength / 3;
+    double radians = M_PI * 2.0 / 3.0;
+    Point point1{center.x_ + cos(angle) * radius,
+                 center.y_ + sin(angle) * radius};
+    Point point2{center.x_ + cos(angle + radians) * radius,
+                 center.y_ + sin(angle + radians) * radius};
+    Point point3{center.x_ + cos(angle + 2 * radians) * radius,
+                 center.y_ + sin(angle + 2 * radians) * radius};
+    this->point1_ = point1;
+    this->point2_ = point2;
+    this->point3_ = point3;
+    this->outline_ = outline;
+  }
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
- private:
+ protected:
   double sideLength_;
   Point center_;
   float angle_;

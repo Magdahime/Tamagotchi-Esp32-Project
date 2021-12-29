@@ -11,16 +11,15 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-
 namespace tamagotchi {
 namespace EspGL {
-
 
 struct Point {
   int32_t x_;
   int32_t y_;
   template <typename T, typename Y>
   Point(T x, Y y) : x_(std::round(x)), y_(std::round(y)) {}
+  Point() : x_(0), y_(0) {}
 };
 
 enum class Coordinate { X, Y };
@@ -40,6 +39,7 @@ struct RGB888 {
 template <typename ColourRepresentation>
 class Colour {
  public:
+  Colour() = default;
   Colour(ColourRepresentation colour) : value_(colour) {}
   Colour(uint8_t r, uint8_t g, uint8_t b) : value_(convertRGB(r, g, b)) {}
   RGB888 getRGB();
