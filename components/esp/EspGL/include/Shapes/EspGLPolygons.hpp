@@ -1,44 +1,48 @@
 #pragma once
 #include <array>
 #include <cmath>
+#include <optional>
 
 #include "EspGL.hpp"
+#include "EspGLScreen.hpp"
 #include "EspGLSimpleShapes.hpp"
 #include "EspGLUtils.hpp"
-#include "EspGLScreen.hpp"
+#include "Shapes/EspGLPolygons.hpp"
+#include "Shapes/EspGLTriangles.hpp"
 
 namespace tamagotchi {
 namespace EspGL {
 
 template <typename ColourRepresentation, unsigned Vertices>
-class Polygon : public Shape<ColourRepresentation> {
+class PolygonBase : public Shape<ColourRepresentation> {
  public:
-  Polygon(std::array<Point, Vertices> vertices,
-          Colour<ColourRepresentation> outline)
-      : vertices_(std::move(vertices)), outline_(outline) {}
-  virtual void draw(Screen<ColourRepresentation>& target) override;
+  PolygonBase(std::array<Point, Vertices> vertices)
+      : vertices_(std::move(vertices)) {}
+  virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
  protected:
+  void drawPolygon(Colour<ColourRepresentation> colour,
+                   Screen<ColourRepresentation>& target) {
+    ESP_LOGD(TAG_,
+             "Drawing polygon of %d "
+             "vertices in "
+             "colour: 0x%X",
+             Vertices, colour.value());
+    Point lastPoint = vertices_[0];
+    for (auto i = 1; i <= Vertices; i++) {
+      Point currentPoint = vertices_[i % Vertices];
+      Line<ColourRepresentation>{lastPoint, currentPoint, colour}.draw(target);
+      std::swap(lastPoint, currentPoint);
+    }
+  }
+  explicit PolygonBase() = default;
   std::array<Point, Vertices> vertices_;
-  Colour<ColourRepresentation> outline_;
 };
 
 template <typename ColourRepresentation, unsigned Vertices>
-class ConvexPolygon : public Polygon<ColourRepresentation, Vertices> {
+class RegularPolygonBase : public PolygonBase<ColourRepresentation, Vertices> {
  public:
-  ConvexPolygon(std::array<Point, Vertices> vertices,
-                Colour<ColourRepresentation> outline)
-      : Polygon<ColourRepresentation, Vertices>(std::move(vertices), outline) {}
-  virtual void draw(Screen<ColourRepresentation>& target) override;
-
- protected:
-};
-
-template <typename ColourRepresentation, unsigned Vertices>
-class RegularPolygon : public Polygon<ColourRepresentation, Vertices> {
- public:
-  RegularPolygon(Point center, uint16_t radius,
-                 Colour<ColourRepresentation> outline, double rotation = 0.0)
+  RegularPolygonBase(Point center, double radius, double rotation = 0.0)
       : center_(std::move(center)),
         radius_(std::move(radius)),
         rotation_(std::move(rotation)) {
@@ -48,55 +52,82 @@ class RegularPolygon : public Polygon<ColourRepresentation, Vertices> {
           radius_ * cos(2 * M_PI * i / Vertices + rotation_) + center_.x_,
           radius_ * sin(2 * M_PI * i / Vertices + rotation_) + center_.y_};
     }
-    Polygon<ColourRepresentation, Vertices>::Polygon(vertices, outline);
+    this->vertices_ = vertices;
   };
-  virtual void draw(Screen<ColourRepresentation>& target) override;
 
  protected:
   Point center_;
-  uint16_t radius_;
+  double radius_;
   double rotation_;
 };
 
-// /////////////////////////////
-// ///       POLYGON         ///
-// /////////////////////////////
+template <typename ColourRepresentation, unsigned Vertices>
+class RegularPolygonOutline
+    : public RegularPolygonBase<ColourRepresentation, Vertices> {
+ public:
+  RegularPolygonOutline(Point center, double radius,
+                        Colour<ColourRepresentation> outline,
+                        double rotation = 0.0)
+      : RegularPolygonBase<ColourRepresentation, Vertices>(center, radius,
+                                                           rotation),
+        outline_(outline) {}
 
-// template <typename ColourRepresentation, unsigned Vertices>
-// void Polygon<ColourRepresentation, Vertices>::draw(
-//     Screen<ColourRepresentation>& target) {
-//   ESP_LOGD(TAG_,
-//            "Drawing polygon of center (%d,%d) and radius %f and %d vertices
-//            in " "colour: 0x%X", center.x_, center.y_, r, vertices, colour);
-//   double gamma = 2.0 * consts::PI / vertices;
-//   EspGL::Point lastPoint{center.x_ + sin(rotation) * r,
-//                          center.y_ + cos(rotation) * r};
-//   for (auto i = 1; i <= vertices; ++i) {
-//     EspGL::Point currentPoint{center.x_ + sin(rotation + i * gamma) * r,
-//                               center.y_ + cos(rotation + i * gamma) * r};
-//     drawLine(lastPoint, currentPoint, colour);
-//     std::swap(lastPoint, currentPoint);
-//   }
-// }
+  virtual void draw(Screen<ColourRepresentation>& target) override {
+    PolygonBase<ColourRepresentation, Vertices>::drawPolygon(outline_, target);
+  }
 
-// void ST7789VWDriver::drawFilledPolygon(const EspGL::Point& center, double r,
-//                                        uint16_t vertices, uint16_t colour,
-//                                        double rotation) {
-//   ESP_LOGD(TAG_,
-//            "Drawing filled polygon of center (%d,%d) and radius %f and %d "
-//            "vertices in "
-//            "colour: 0x%X",
-//            center.x_, center.y_, r, vertices, colour);
-//   double gamma = 2.0 * consts::PI / vertices;
-//   EspGL::Point lastPoint{center.x_ + sin(rotation) * r,
-//                          center.y_ + cos(rotation) * r};
-//   for (auto i = 1; i <= vertices; ++i) {
-//     EspGL::Point currentPoint{center.x_ + sin(rotation + i * gamma) * r,
-//                               center.y_ + cos(rotation + i * gamma) * r};
-//     drawFilledTriangle(lastPoint, currentPoint, center, colour);
-//     std::swap(lastPoint, currentPoint);
-//   }
-// }
+ protected:
+  Colour<ColourRepresentation> outline_;
+};
+
+template <typename ColourRepresentation, unsigned Vertices>
+class RegularPolygon
+    : public RegularPolygonBase<ColourRepresentation, Vertices> {
+ public:
+  RegularPolygon(
+      Point center, uint16_t radius, Colour<ColourRepresentation> fill,
+      std::optional<Colour<ColourRepresentation>> outline = std::nullopt,
+      double rotation = 0.0)
+      : RegularPolygonBase<ColourRepresentation, Vertices>(center, radius,
+                                                           rotation),
+        fill_(std::move(fill)),
+        outline_(std::move(outline)) {}
+
+  virtual void draw(Screen<ColourRepresentation>& target) override;
+
+ protected:
+  Colour<ColourRepresentation> fill_;
+  std::optional<Colour<ColourRepresentation>> outline_;
+};
+
+/////////////////////////////
+///   REGULAR POLYGON     ///
+/////////////////////////////
+
+template <typename ColourRepresentation, unsigned Vertices>
+void RegularPolygon<ColourRepresentation, Vertices>::draw(
+    Screen<ColourRepresentation>& target) {
+  ESP_LOGD(TAG_,
+           "Drawing filled polygon of center (%d,%d) and radius %f and %d "
+           "vertices in "
+           "colour: 0x%X",
+           this->center_.x_, this->center_.y_, this->radius_, Vertices,
+           fill_.value());
+  Point lastPoint = this->vertices_[0];
+  for (auto i = 1; i <= Vertices; ++i) {
+    Point currentPoint = this->vertices_[i % Vertices];
+    Triangle<ColourRepresentation>{lastPoint, currentPoint, this->center_,
+                                   this->fill_}
+        .draw(target);
+    std::swap(lastPoint, currentPoint);
+  }
+
+  if (outline_) {
+    RegularPolygonOutline<ColourRepresentation, Vertices>(
+        this->center_, this->radius_, this->outline_.value(), this->rotation_)
+        .draw(target);
+  }
+}
 
 }  // namespace EspGL
 }  // namespace tamagotchi

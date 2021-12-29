@@ -4,6 +4,7 @@
 
 #include <array>
 #include <optional>
+#include <stdexcept>
 
 #include "EspGL.hpp"
 #include "EspGLUtils.hpp"

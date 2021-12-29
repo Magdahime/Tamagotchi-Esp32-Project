@@ -202,6 +202,38 @@ TEST(EspGLShapesTests, DrawingEllipseOutline) {
   ellipse.draw(screen);
 }
 
+TEST(EspGLShapesTests, DrawingRegularPolygon) {
+  RegularPolygon<uint16_t, 4> polygon(center, 50,
+                                      Colour<uint16_t>(colours::GREEN));
+  polygon.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingRegularPolygonWithOutline) {
+  RegularPolygon<uint16_t, 4> polygon(center, 50,
+                                      Colour<uint16_t>(colours::GREEN),
+                                      Colour<uint16_t>(colours::YELLOW));
+  polygon.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingRotatedRegularPolygonWithOutline) {
+  RegularPolygon<uint16_t, 4> polygon(center, 50,
+                                      Colour<uint16_t>(colours::GREEN),
+                                      Colour<uint16_t>(colours::YELLOW), 20);
+  polygon.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingRegularPolygonOutline) {
+  RegularPolygonOutline<uint16_t, 4> polygon(center, 50,
+                                             Colour<uint16_t>(colours::GREEN));
+  polygon.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingRotatedRegularPolygonOutline) {
+  RegularPolygonOutline<uint16_t, 4> polygon(
+      center, 50, Colour<uint16_t>(colours::GREEN), 20);
+  polygon.draw(screen);
+}
+
 TEST_GROUP_RUNNER(EspGLShapesTests) {
   // RUN_TEST_CASE(EspGLShapesTests, FillingDisplayTest)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingPixelTest)
@@ -224,10 +256,15 @@ TEST_GROUP_RUNNER(EspGLShapesTests) {
   // RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangle)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleWithOutline)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingCircle)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingCircleWithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingCircleOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingEllipse)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingEllipseWithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingEllipseOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingCircle)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingCircleWithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingCircleOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingEllipse)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingEllipseWithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingEllipseOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingRegularPolygon)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingRegularPolygonWithOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingRotatedRegularPolygonWithOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingRegularPolygonOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingRotatedRegularPolygonOutline)
 }
