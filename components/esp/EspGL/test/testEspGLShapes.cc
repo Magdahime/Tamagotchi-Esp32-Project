@@ -24,6 +24,7 @@ ST7789VWDriver st7789driver = initializeDisplay();
 std::unique_ptr<ST7789VWDriver> ptr(&st7789driver);
 tamagotchi::EspGL::Screen<uint16_t> screen(consts::WIDTH, consts::HEIGHT,
                                            std::move(ptr));
+Point center(screen.width() / 2, screen.height() / 2);
 
 TEST_GROUP(EspGLShapesTests);
 
@@ -40,35 +41,35 @@ TEST(EspGLShapesTests, FillingDisplayTest) {
 }
 
 TEST(EspGLShapesTests, DrawingPixelTest) {
-  screen.screenDriver()->drawPixel({150, 150}, colours::RED);
+  screen.screenDriver()->drawPixel(center, colours::RED);
 }
 
 TEST(EspGLShapesTests, DrawingFilledRectangle) {
-  Rectangle<uint16_t> rect({50, 50}, 60, 80, Colour<uint16_t>(colours::RED));
+  Rectangle<uint16_t> rect(center, 60, 80, Colour<uint16_t>(colours::RED));
   rect.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingFilledRectangleWithOutline) {
-  Rectangle<uint16_t> rect({50, 50}, 60, 80, Colour<uint16_t>(colours::RED),
+  Rectangle<uint16_t> rect(center, 60, 80, Colour<uint16_t>(colours::RED),
                            Colour<uint16_t>(colours::BLUE));
   rect.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingFilledRectangles) {
-  Rectangle<uint16_t> rect({50, 50}, 60, 80, Colour<uint16_t>(colours::RED));
+  Rectangle<uint16_t> rect(center, 60, 80, Colour<uint16_t>(colours::RED));
   Rectangle<uint16_t> rect2({150, 20}, 30, 80, Colour<uint16_t>(colours::BLUE));
   rect.draw(screen);
   rect2.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingRectangleOutline) {
-  RectangleOutline<uint16_t> rect({50, 50}, 60, 80,
+  RectangleOutline<uint16_t> rect(center, 60, 80,
                                   Colour<uint16_t>(colours::RED));
   rect.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingRectangleOutlines) {
-  RectangleOutline<uint16_t> rect({50, 50}, 60, 80,
+  RectangleOutline<uint16_t> rect(center, 60, 80,
                                   Colour<uint16_t>(colours::RED));
   RectangleOutline<uint16_t> rect2({150, 20}, 30, 80,
                                    Colour<uint16_t>(colours::BLUE));
@@ -77,40 +78,39 @@ TEST(EspGLShapesTests, DrawingRectangleOutlines) {
 }
 
 TEST(EspGLShapesTests, DrawingSquareMethod1) {
-  Square<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED));
+  Square<uint16_t> square(center, 60, Colour<uint16_t>(colours::RED));
   square.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingSquareMethod2) {
-  Square<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED), 0.0);
+  Square<uint16_t> square(center, 60, Colour<uint16_t>(colours::RED), 0.0);
   square.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingSquareMethod1WithOutline) {
-  Square<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED),
+  Square<uint16_t> square(center, 60, Colour<uint16_t>(colours::RED),
                           Colour<uint16_t>(colours::BLUE));
   square.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingSquareMethod2WithOutline) {
-  Square<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED), 0.0,
+  Square<uint16_t> square(center, 60, Colour<uint16_t>(colours::RED), 0.0,
                           Colour<uint16_t>(colours::BLUE));
   square.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingSquareOutlineMethod1) {
-  SquareOutline<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED));
+  SquareOutline<uint16_t> square(center, 60, Colour<uint16_t>(colours::RED));
   square.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingSquareOutlineMethod2) {
-  SquareOutline<uint16_t> square({50, 50}, 60, Colour<uint16_t>(colours::RED),
+  SquareOutline<uint16_t> square(center, 60, Colour<uint16_t>(colours::RED),
                                  0.0);
   square.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingLines) {
-  Point center{100, 100};
   int arms = 30;
   int lengthOfArm = 50;
   for (int i = 0; i < arms; i++) {
@@ -125,11 +125,11 @@ TEST(EspGLShapesTests, DrawingLines) {
 
 TEST(EspGLShapesTests, DrawingTriangle) {
   Triangle<uint16_t> triangle{
-      {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+      center, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
   triangle.draw(screen);
 }
 TEST(EspGLShapesTests, DrawingTriangleWithOutline) {
-  Triangle<uint16_t> triangle{{50, 50},
+  Triangle<uint16_t> triangle{center,
                               {120, 120},
                               {239, 40},
                               Colour<uint16_t>(colours::RED),
@@ -139,7 +139,7 @@ TEST(EspGLShapesTests, DrawingTriangleWithOutline) {
 
 TEST(EspGLShapesTests, DrawingTriangles) {
   TriangleOutline<uint16_t> triangle1{
-      {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+      center, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
   TriangleOutline<uint16_t> triangle2{
       {150, 150}, {120, 120}, {61, 290}, Colour<uint16_t>(colours::BLUE)};
   triangle1.draw(screen);
@@ -148,28 +148,58 @@ TEST(EspGLShapesTests, DrawingTriangles) {
 
 TEST(EspGLShapesTests, DrawingTriangleOutline) {
   TriangleOutline<uint16_t> triangle{
-      {50, 50}, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
+      center, {120, 120}, {239, 40}, Colour<uint16_t>(colours::RED)};
   triangle.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingEquilateralTriangle) {
-  EquilateralTriangle<uint16_t> triangle{
-      {100, 100}, 60, Colour<uint16_t>(colours::RED)};
+  EquilateralTriangle<uint16_t> triangle{center, 60,
+                                         Colour<uint16_t>(colours::RED)};
   triangle.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingEquilateralTriangleWithOutline) {
-  EquilateralTriangle<uint16_t> triangle{{100, 100},
-                                         60,
+  EquilateralTriangle<uint16_t> triangle{center, 60,
                                          Colour<uint16_t>(colours::RED),
                                          Colour<uint16_t>(colours::BLUE)};
   triangle.draw(screen);
 }
 
 TEST(EspGLShapesTests, DrawingEquilateralTriangleOutline) {
-  EquilateralTriangleOutline<uint16_t> triangle{
-      {100, 100}, 60, Colour<uint16_t>(colours::RED)};
+  EquilateralTriangleOutline<uint16_t> triangle{center, 60,
+                                                Colour<uint16_t>(colours::RED)};
   triangle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingCircle) {
+  Circle<uint16_t> circle(center, 60, Colour<uint16_t>(colours::GREEN));
+  circle.draw(screen);
+}
+TEST(EspGLShapesTests, DrawingCircleWithOutline) {
+  Circle<uint16_t> circle(center, 60, Colour<uint16_t>(colours::GREEN),
+                          Colour<uint16_t>(colours::RED));
+  circle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingCircleOutline) {
+  CircleOutline<uint16_t> circle(center, 60, Colour<uint16_t>(colours::GREEN));
+  circle.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingEllipse) {
+  Ellipse<uint16_t> ellipse(center, 60, 80, Colour<uint16_t>(colours::GREEN));
+  ellipse.draw(screen);
+}
+TEST(EspGLShapesTests, DrawingEllipseWithOutline) {
+  Ellipse<uint16_t> ellipse(center, 60, 80, Colour<uint16_t>(colours::GREEN),
+                            Colour<uint16_t>(colours::RED));
+  ellipse.draw(screen);
+}
+
+TEST(EspGLShapesTests, DrawingEllipseOutline) {
+  EllipseOutline<uint16_t> ellipse(center, 60, 80,
+                                   Colour<uint16_t>(colours::GREEN));
+  ellipse.draw(screen);
 }
 
 TEST_GROUP_RUNNER(EspGLShapesTests) {
@@ -191,9 +221,13 @@ TEST_GROUP_RUNNER(EspGLShapesTests) {
   // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleWithOutline)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangles)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingTriangleOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangle)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleWithOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleOutline)
-
-
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangle)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleWithOutline)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingEquilateralTriangleOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingCircle)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingCircleWithOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingCircleOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingEllipse)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingEllipseWithOutline)
+  RUN_TEST_CASE(EspGLShapesTests, DrawingEllipseOutline)
 }

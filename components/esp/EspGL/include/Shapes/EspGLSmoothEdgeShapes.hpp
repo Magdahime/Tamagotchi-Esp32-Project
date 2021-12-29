@@ -1,8 +1,10 @@
 #pragma once
+#include <optional>
+
 #include "EspGL.hpp"
+#include "EspGLScreen.hpp"
 #include "EspGLSimpleShapes.hpp"
 #include "EspGLUtils.hpp"
-#include "EspGLScreen.hpp"
 
 namespace tamagotchi {
 namespace EspGL {
@@ -22,11 +24,8 @@ class CircleBase : public Shape<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Circle : public CircleBase<ColourRepresentation> {
  public:
-  Circle(Point center, double radius, Colour<ColourRepresentation> fill)
-      : CircleBase<ColourRepresentation>(center, radius),
-        fill_(std::move(fill)) {}
   Circle(Point center, double radius, Colour<ColourRepresentation> fill,
-         Colour<ColourRepresentation> outline)
+         std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : CircleBase<ColourRepresentation>(center, radius),
         fill_(std::move(fill)),
         outline_(std::move(outline)) {}
@@ -70,12 +69,8 @@ template <typename ColourRepresentation>
 class Ellipse : public EllipseBase<ColourRepresentation> {
  public:
   Ellipse(Point center, double xRadius, double yRadius,
-          Colour<ColourRepresentation> fill)
-      : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
-        fill_(std::move(fill)) {}
-  Ellipse(Point center, double xRadius, double yRadius,
           Colour<ColourRepresentation> fill,
-          Colour<ColourRepresentation> outline)
+          std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
         fill_(std::move(fill)),
         outline_(std::move(outline)) {}
@@ -116,19 +111,19 @@ void Circle<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
   int16_t y = 0;
   int16_t err = 0;
   while (x >= y) {
-    Line{{this->center_.x_ + x, this->center_.y_ + y},
+    Line<ColourRepresentation>{{this->center_.x_ + x, this->center_.y_ + y},
          {this->center_.x_ - x, this->center_.y_ + y},
          fill_.value()}
         .draw(target);
-    Line{{this->center_.x_ + y, this->center_.y_ + x},
+    Line<ColourRepresentation>{{this->center_.x_ + y, this->center_.y_ + x},
          {this->center_.x_ - y, this->center_.y_ + x},
          fill_.value()}
         .draw(target);
-    Line{{this->center_.x_ - x, this->center_.y_ - y},
+    Line<ColourRepresentation>{{this->center_.x_ - x, this->center_.y_ - y},
          {this->center_.x_ + x, this->center_.y_ - y},
          fill_.value()}
         .draw(target);
-    Line{{this->center_.x_ - y, this->center_.y_ - x},
+    Line<ColourRepresentation>{{this->center_.x_ - y, this->center_.y_ - x},
          {this->center_.x_ + y, this->center_.y_ - x},
          fill_.value()}
         .draw(target);
@@ -142,6 +137,11 @@ void Circle<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
       x -= 1;
       err -= 2 * x + 1;
     }
+  }
+  if (outline_) {
+    CircleOutline<ColourRepresentation>{this->center_, this->radius_,
+                                        this->outline_.value()}
+        .draw(target);
   }
 }
 
@@ -157,21 +157,21 @@ void CircleOutline<ColourRepresentation>::draw(
   int16_t err = 0;
   while (x >= y) {
     target.screenDriver()->drawPixel(
-        {this->center_.x_ + x, this->center_.y_ + y}, outline_);
+        {this->center_.x_ + x, this->center_.y_ + y}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ + y, this->center_.y_ + x}, outline_);
+        {this->center_.x_ + y, this->center_.y_ + x}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ - y, this->center_.y_ + x}, outline_);
+        {this->center_.x_ - y, this->center_.y_ + x}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ - x, this->center_.y_ + y}, outline_);
+        {this->center_.x_ - x, this->center_.y_ + y}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ - x, this->center_.y_ - y}, outline_);
+        {this->center_.x_ - x, this->center_.y_ - y}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ - y, this->center_.y_ - x}, outline_);
+        {this->center_.x_ - y, this->center_.y_ - x}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ + y, this->center_.y_ - x}, outline_);
+        {this->center_.x_ + y, this->center_.y_ - x}, outline_.value());
     target.screenDriver()->drawPixel(
-        {this->center_.x_ + x, this->center_.y_ - y}, outline_);
+        {this->center_.x_ + x, this->center_.y_ - y}, outline_.value());
 
     if (err <= 0) {
       y += 1;
@@ -207,11 +207,11 @@ void Ellipse<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 
   // For region 1
   while (dx < dy) {
-    Line{{this->center_.x_ + x, this->center_.y_ + y},
+    Line<ColourRepresentation>{{this->center_.x_ + x, this->center_.y_ + y},
          {this->center_.x_ - x, this->center_.y_ + y},
          fill_}
         .draw(target);
-    Line{{x + this->center_.x_, -y + this->center_.y_},
+    Line<ColourRepresentation>{{x + this->center_.x_, -y + this->center_.y_},
          {-x + this->center_.x_, -y + this->center_.y_},
          fill_}
         .draw(target);
@@ -235,11 +235,11 @@ void Ellipse<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 
   // Plotting points of region 2
   while (y >= 0) {
-    Line{{this->center_.x_ + x, this->center_.y_ + y},
+    Line<ColourRepresentation>{{this->center_.x_ + x, this->center_.y_ + y},
          {this->center_.x_ - x, this->center_.y_ + y},
          fill_}
         .draw(target);
-    Line{{x + this->center_.x_, -y + this->center_.y_},
+    Line<ColourRepresentation>{{x + this->center_.x_, -y + this->center_.y_},
          {-x + this->center_.x_, -y + this->center_.y_},
          fill_}
         .draw(target);
@@ -255,6 +255,11 @@ void Ellipse<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
       dy = dy - (2 * this->xRadius_ * this->xRadius_);
       d2 = d2 + dx - dy + (this->xRadius_ * this->xRadius_);
     }
+  }
+  if (outline_) {
+    EllipseOutline<ColourRepresentation>{this->center_, this->xRadius_,
+                                         this->yRadius_, this->outline_.value()}
+        .draw(target);
   }
 }
 
@@ -278,13 +283,13 @@ void EllipseOutline<ColourRepresentation>::draw(
   // For region 1
   while (dx < dy) {
     target.screenDriver()->drawPixel(
-        {x + this->center_.x_, y + this->center_.y_}, outline_);
+        {x + this->center_.x_, y + this->center_.y_}, outline_.value());
     target.screenDriver()->drawPixel(
-        {-x + this->center_.x_, y + this->center_.y_}, outline_);
+        {-x + this->center_.x_, y + this->center_.y_}, outline_.value());
     target.screenDriver()->drawPixel(
-        {x + this->center_.x_, -y + this->center_.y_}, outline_);
+        {x + this->center_.x_, -y + this->center_.y_}, outline_.value());
     target.screenDriver()->drawPixel(
-        {-x + this->center_.x_, -y + this->center_.y_}, outline_);
+        {-x + this->center_.x_, -y + this->center_.y_}, outline_.value());
 
     if (d1 < 0) {
       x++;
@@ -306,13 +311,13 @@ void EllipseOutline<ColourRepresentation>::draw(
   // Plotting points of region 2
   while (y >= 0) {
     target.screenDriver()->drawPixel(
-        {x + this->center_.x_, y + this->center_.y_}, outline_);
+        {x + this->center_.x_, y + this->center_.y_}, outline_.value());
     target.screenDriver()->drawPixel(
-        {-x + this->center_.x_, y + this->center_.y_}, outline_);
+        {-x + this->center_.x_, y + this->center_.y_}, outline_.value());
     target.screenDriver()->drawPixel(
-        {x + this->center_.x_, -y + this->center_.y_}, outline_);
+        {x + this->center_.x_, -y + this->center_.y_}, outline_.value());
     target.screenDriver()->drawPixel(
-        {-x + this->center_.x_, -y + this->center_.y_}, outline_);
+        {-x + this->center_.x_, -y + this->center_.y_}, outline_.value());
 
     if (d2 > 0) {
       y--;
