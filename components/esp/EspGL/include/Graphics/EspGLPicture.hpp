@@ -18,6 +18,9 @@ class Picture {
         sizeY_(std::move(sizeY)),
         picture_(std::move(picture)) {}
   void draw(Screen<ColourRepresentation>& target, const Point& start);
+  inline size_t sizeX() { return sizeX_; }
+  inline size_t sizeY() { return sizeY_; }
+  inline const std::vector<ColourRepresentation>& picture() { return picture_; }
 
  private:
   size_t sizeX_;
@@ -26,7 +29,8 @@ class Picture {
 };
 
 template <typename ColourRepresentation>
-void Picture<ColourRepresentation>::draw(Screen<ColourRepresentation>& target, const Point& start) {
+void Picture<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
+                                         const Point& start) {
   target.screenDriver()->writePixelArea(picture_);
 }
 

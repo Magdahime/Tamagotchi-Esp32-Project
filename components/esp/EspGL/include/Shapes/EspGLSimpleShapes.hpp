@@ -7,8 +7,8 @@
 #include <stdexcept>
 
 #include "EspGL.hpp"
-#include "EspGLUtils.hpp"
 #include "EspGLScreen.hpp"
+#include "EspGLUtils.hpp"
 
 namespace tamagotchi {
 
@@ -19,6 +19,7 @@ class Shape {
  public:
   virtual void draw(Screen<ColourRepresentation> &target) = 0;
   virtual ~Shape() = default;
+
  protected:
 };
 
@@ -31,6 +32,16 @@ class Line : public Shape<ColourRepresentation> {
         colour_(std::move(colour)) {}
 
   virtual void draw(Screen<ColourRepresentation> &target) override;
+
+  inline Point start() { return start_; }
+  inline Point end() { return end_; }
+  inline Colour<ColourRepresentation> colour() { return colour_; }
+
+  inline void setStart(Point newStart) { start_ = newStart; }
+  inline void setEnd(Point newEnd) { end_ = newEnd; }
+  inline void setColour(Colour<ColourRepresentation> newColour) {
+    colour_ = newColour;
+  }
 
  private:
   Point start_;

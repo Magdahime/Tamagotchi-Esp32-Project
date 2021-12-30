@@ -16,6 +16,12 @@ class CircleBase : public Shape<ColourRepresentation> {
       : center_(std::move(center)), radius_(std::move(radius)) {}
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
+  inline Point center() { return center_; }
+  inline double radius() { return radius_; }
+
+  inline void setCenter(Point newCenter) { center_ = newCenter; }
+  inline void setRadius(double newRadius) { radius_ = newRadius; }
+
  protected:
   Point center_;
   double radius_;
@@ -30,6 +36,14 @@ class Circle : public CircleBase<ColourRepresentation> {
         fill_(std::move(fill)),
         outline_(std::move(outline)) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
+
+  inline Colour<ColourRepresentation> fill() { return fill_; }
+  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+
+  inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
 
  private:
   Colour<ColourRepresentation> fill_;
@@ -46,6 +60,11 @@ class CircleOutline : public CircleBase<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
+  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
+
  private:
   Colour<ColourRepresentation> outline_;
 };
@@ -58,6 +77,14 @@ class EllipseBase : public Shape<ColourRepresentation> {
         xRadius_(std::move(xRadius)),
         yRadius_(std::move(yRadius)) {}
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
+
+  inline Point center() { return center_; }
+  inline double xRadius() { return xRadius_; }
+  inline double yRadius() { return yRadius_; }
+
+  inline void setCenter(Point newCenter) { center_ = newCenter; }
+  inline void setXRadius(double newRadius) { xRadius_ = newRadius; }
+  inline void setYRadius(double newRadius) { yRadius_ = newRadius; }
 
  protected:
   Point center_;
@@ -76,6 +103,14 @@ class Ellipse : public EllipseBase<ColourRepresentation> {
         outline_(std::move(outline)) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
+  inline Colour<ColourRepresentation> fill() { return fill_; }
+  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+
+  inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
+
  protected:
   Colour<ColourRepresentation> fill_;
   std::optional<Colour<ColourRepresentation>> outline_;
@@ -89,6 +124,11 @@ class EllipseOutline : public EllipseBase<ColourRepresentation> {
       : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
         outline_(std::move(outline)) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
+
+  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
 
  protected:
   Colour<ColourRepresentation> outline_;
@@ -112,20 +152,20 @@ void Circle<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
   int16_t err = 0;
   while (x >= y) {
     Line<ColourRepresentation>{{this->center_.x_ + x, this->center_.y_ + y},
-         {this->center_.x_ - x, this->center_.y_ + y},
-         fill_.value()}
+                               {this->center_.x_ - x, this->center_.y_ + y},
+                               fill_.value()}
         .draw(target);
     Line<ColourRepresentation>{{this->center_.x_ + y, this->center_.y_ + x},
-         {this->center_.x_ - y, this->center_.y_ + x},
-         fill_.value()}
+                               {this->center_.x_ - y, this->center_.y_ + x},
+                               fill_.value()}
         .draw(target);
     Line<ColourRepresentation>{{this->center_.x_ - x, this->center_.y_ - y},
-         {this->center_.x_ + x, this->center_.y_ - y},
-         fill_.value()}
+                               {this->center_.x_ + x, this->center_.y_ - y},
+                               fill_.value()}
         .draw(target);
     Line<ColourRepresentation>{{this->center_.x_ - y, this->center_.y_ - x},
-         {this->center_.x_ + y, this->center_.y_ - x},
-         fill_.value()}
+                               {this->center_.x_ + y, this->center_.y_ - x},
+                               fill_.value()}
         .draw(target);
 
     if (err <= 0) {
@@ -208,12 +248,12 @@ void Ellipse<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
   // For region 1
   while (dx < dy) {
     Line<ColourRepresentation>{{this->center_.x_ + x, this->center_.y_ + y},
-         {this->center_.x_ - x, this->center_.y_ + y},
-         fill_}
+                               {this->center_.x_ - x, this->center_.y_ + y},
+                               fill_}
         .draw(target);
     Line<ColourRepresentation>{{x + this->center_.x_, -y + this->center_.y_},
-         {-x + this->center_.x_, -y + this->center_.y_},
-         fill_}
+                               {-x + this->center_.x_, -y + this->center_.y_},
+                               fill_}
         .draw(target);
 
     if (d1 < 0) {
@@ -236,12 +276,12 @@ void Ellipse<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
   // Plotting points of region 2
   while (y >= 0) {
     Line<ColourRepresentation>{{this->center_.x_ + x, this->center_.y_ + y},
-         {this->center_.x_ - x, this->center_.y_ + y},
-         fill_}
+                               {this->center_.x_ - x, this->center_.y_ + y},
+                               fill_}
         .draw(target);
     Line<ColourRepresentation>{{x + this->center_.x_, -y + this->center_.y_},
-         {-x + this->center_.x_, -y + this->center_.y_},
-         fill_}
+                               {-x + this->center_.x_, -y + this->center_.y_},
+                               fill_}
         .draw(target);
 
     if (d2 > 0) {
@@ -266,11 +306,11 @@ void Ellipse<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 template <typename ColourRepresentation>
 void EllipseOutline<ColourRepresentation>::draw(
     Screen<ColourRepresentation>& target) {
-  ESP_LOGD(
-      TAG_,
-      "Drawing ellipse of center (%d, %d) of radiuses (%f, %f) in colour: 0x%X",
-      this->center_.x_, this->center_.y_, this->xRadius_, this->yRadius_,
-      outline_.value());
+  ESP_LOGD(TAG_,
+           "Drawing ellipse of center (%d, %d) of radiuses (%f, %f) in "
+           "colour: 0x%X",
+           this->center_.x_, this->center_.y_, this->xRadius_, this->yRadius_,
+           outline_.value());
   float dx, dy, d1, d2, x, y;
   x = 0;
   y = this->yRadius_;

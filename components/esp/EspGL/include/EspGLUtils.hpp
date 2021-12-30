@@ -44,6 +44,7 @@ class Colour {
   Colour(uint8_t r, uint8_t g, uint8_t b) : value_(convertRGB(r, g, b)) {}
   RGB888 getRGB();
   inline ColourRepresentation value() { return value_; }
+  inline void setValue(ColourRepresentation newValue) { value_ = newValue; }
 
  private:
   ColourRepresentation value_;

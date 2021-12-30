@@ -25,6 +25,14 @@ class TriangleBase : public Shape<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
+  inline Point point1() { return point1_; }
+  inline Point point2() { return point2_; }
+  inline Point point3() { return point3_; }
+
+  inline void setPoint1(Point newPoint) { point1_ = newPoint; }
+  inline void setPoint2(Point newPoint) { point2_ = newPoint; }
+  inline void setPoint3(Point newPoint) { point3_ = newPoint; }
+
  protected:
   explicit TriangleBase() = default;
   Point point1_;
@@ -43,6 +51,15 @@ class Triangle : public TriangleBase<ColourRepresentation> {
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
+  inline Colour<ColourRepresentation> fill() { return fill_; }
+  inline std::optional<Colour<ColourRepresentation>> outline() {
+    return outline_.value();
+  }
+
+  inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
+
+  inline void setOutline(Colour<ColourRepresentation> newOutline) { outline_ = newOutline; }
+
  protected:
   explicit Triangle() = default;
   Colour<ColourRepresentation> fill_;
@@ -58,6 +75,11 @@ class TriangleOutline : public TriangleBase<ColourRepresentation> {
         outline_(std::move(outline)) {}
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
+
+  inline std::optional<Colour<ColourRepresentation>> outline() {
+    return outline_.value();
+  }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) { outline_ = newOutline; }
 
  protected:
   explicit TriangleOutline() = default;

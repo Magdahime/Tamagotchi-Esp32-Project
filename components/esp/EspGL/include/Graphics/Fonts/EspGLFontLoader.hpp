@@ -1,9 +1,16 @@
 #pragma once
 
+#include "EspGLFont.hpp"
+
 namespace tamagotchi {
 namespace EspGL {
 
-class Font {};
+class FontLoader {
+ public:
+ 
+ private:
+  
+};
 
 }  // namespace EspGL
 }  // namespace tamagotchi

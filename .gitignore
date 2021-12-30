@@ -2,9 +2,7 @@ build/*
 .cache/*
 .vscode/*
 
-unitTests/build/*
-unitTests/bin/*
-unitTests/.*
+fonts/*
 
 test/build/*
 test/.*

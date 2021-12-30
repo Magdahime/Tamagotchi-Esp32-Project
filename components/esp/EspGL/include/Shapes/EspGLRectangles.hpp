@@ -16,7 +16,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class RectangleBase : public Shape<ColourRepresentation> {
  public:
-  RectangleBase(Point leftUpperPoint, int32_t dimensionX, int32_t dimensionY)
+  RectangleBase(Point leftUpperPoint, int16_t dimensionX, int16_t dimensionY)
       : leftUpperPoint_(std::move(leftUpperPoint)),
         rightLowerPoint_(
             {leftUpperPoint.x_ + dimensionX, leftUpperPoint.y_ + dimensionY}),
@@ -29,6 +29,11 @@ class RectangleBase : public Shape<ColourRepresentation> {
   }
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
+  inline Point leftUpperPoint() { return leftUpperPoint_; }
+  inline Point rightLowerPoint() { return rightLowerPoint_; }
+  inline int16_t dimensionX() { return dimensionX_; }
+  inline int16_t dimensionY() { return dimensionY_; }
+
  protected:
   Point leftUpperPoint_;
   Point rightLowerPoint_;
@@ -39,7 +44,7 @@ class RectangleBase : public Shape<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Rectangle : public RectangleBase<ColourRepresentation> {
  public:
-  Rectangle(Point leftUpperPoint, int32_t dimensionX, int32_t dimensionY,
+  Rectangle(Point leftUpperPoint, int16_t dimensionX, int16_t dimensionY,
             Colour<ColourRepresentation> fill,
             std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
@@ -47,6 +52,14 @@ class Rectangle : public RectangleBase<ColourRepresentation> {
         fill_(fill),
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
+
+  inline Colour<ColourRepresentation> fill() { return fill_; }
+  inline Colour<ColourRepresentation> outline() { return outline_; }
+
+  inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
 
  protected:
   Colour<ColourRepresentation> fill_;
@@ -56,12 +69,17 @@ class Rectangle : public RectangleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class RectangleOutline : public RectangleBase<ColourRepresentation> {
  public:
-  RectangleOutline(Point leftUpperPoint, int32_t dimensionX, int32_t dimensionY,
+  RectangleOutline(Point leftUpperPoint, int16_t dimensionX, int16_t dimensionY,
                    Colour<ColourRepresentation> outline)
       : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
                                             dimensionY),
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
+
+  inline Colour<ColourRepresentation> outline() { return outline_; }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
 
  protected:
   Colour<ColourRepresentation> outline_;
@@ -70,12 +88,12 @@ class RectangleOutline : public RectangleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Square : public Rectangle<ColourRepresentation> {
  public:
-  Square(Point leftUpperPoint, int32_t dimension,
+  Square(Point leftUpperPoint, int16_t dimension,
          Colour<ColourRepresentation> fill,
          std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : Rectangle<ColourRepresentation>(leftUpperPoint, dimension, dimension,
                                         fill, outline) {}
-  Square(Point center, int32_t sideLength, Colour<ColourRepresentation> fill,
+  Square(Point center, int16_t sideLength, Colour<ColourRepresentation> fill,
          double angle,
          std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : Rectangle<ColourRepresentation>(
@@ -90,11 +108,11 @@ class Square : public Rectangle<ColourRepresentation> {
 template <typename ColourRepresentation>
 class SquareOutline : public RectangleOutline<ColourRepresentation> {
  public:
-  SquareOutline(Point leftUpperPoint, int32_t dimension,
+  SquareOutline(Point leftUpperPoint, int16_t dimension,
                 Colour<ColourRepresentation> outline)
       : RectangleOutline<ColourRepresentation>(leftUpperPoint, dimension,
                                                dimension, outline) {}
-  SquareOutline(Point center, int32_t sideLength,
+  SquareOutline(Point center, int16_t sideLength,
                 Colour<ColourRepresentation> outline, double angle)
       : RectangleOutline<ColourRepresentation>(
             Point(center.x_ - cos(angle) * (sideLength / 2.0),

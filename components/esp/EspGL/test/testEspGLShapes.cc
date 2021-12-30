@@ -489,8 +489,8 @@ TEST(EspGLShapesTests, DrawingBitmap) {
       false, false, false, false, false, false, false, false, false, false,
 
   };
-  Bitmap<uint16_t> bitmap(50, 50, Colour<uint16_t>(colours::GREEN), test);
-  bitmap.draw(screen, center);
+  Bitmap<uint16_t> bitmap(50, 50, test);
+  bitmap.draw(screen, center, Colour<uint16_t>(colours::GREEN));
 }
 
 TEST_GROUP_RUNNER(EspGLShapesTests) {
