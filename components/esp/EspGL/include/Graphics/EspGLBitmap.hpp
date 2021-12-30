@@ -1,7 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <vcruntime.h>
-
 #include <vector>
 
 #include "EspGL.hpp"

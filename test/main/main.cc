@@ -12,6 +12,7 @@ static void run_all_tests(void) {
   RUN_TEST_GROUP(RecyclingContainerTests);
   RUN_TEST_GROUP(EspGLUtilsTests);
   RUN_TEST_GROUP(EspGLShapesTests);
+  RUN_TEST_GROUP(SPIFFSDriverTests);
 }
 
 static void print_banner(const char* text) {
