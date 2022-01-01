@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <sys/unistd.h>
 
+#include <fstream>
 #include <string>
 
 #include "esp_err.h"
@@ -13,7 +14,7 @@
 
 namespace tamagotchi {
 namespace SPIFFS {
-static const char* TAG_ = "SPIFFSDriver";
+constexpr auto TAG_ = "SPIFFSDriver";
 
 class SPIFFSDriver {
  public:
@@ -21,7 +22,7 @@ class SPIFFSDriver {
                std::string partitionLabel = "storage", uint16_t maxFiles = 5,
                bool formatIfMountFailed = false);
   ~SPIFFSDriver();
-  FILE* getFileDescriptor(std::string filename, std::string mode);
+  std::fstream getFileDescriptor(std::string filename);
 
  private:
   std::string basePath_;

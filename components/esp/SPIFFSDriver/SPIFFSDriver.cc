@@ -1,15 +1,15 @@
 #include "SPIFFSDriver.hpp"
 
+#include <fstream>
+
 namespace tamagotchi {
 namespace SPIFFS {
 
-FILE* SPIFFSDriver::getFileDescriptor(std::string filename, std::string mode) {
+std::fstream SPIFFSDriver::getFileDescriptor(std::string filename) {
   std::string fullPath = basePath_ + "/" + filename;
-  FILE* fileHandle = fopen(fullPath.c_str(), mode.c_str());
-  if (fileHandle == NULL) {
-    ESP_LOGE(TAG_, "Failed to open file %s for mode %s", filename.c_str(),
-             mode.c_str());
-    return nullptr;
+  std::fstream fileHandle(fullPath);
+  if (!fileHandle.is_open()) {
+    ESP_LOGE(TAG_, "Failed to open file %s", filename.c_str());
   }
   return fileHandle;
 }

@@ -1,4 +1,4 @@
-idf_component_register(SRCS "EspGLUtils.cc"
+idf_component_register(SRCS "EspGLUtils.cc" "Graphics/Font/EspGLFontLoader.cc" 
                     INCLUDE_DIRS "include"
-                    REQUIRES SPIFFSDriver)
+                    REQUIRES )
 component_compile_options(-std=gnu++17)

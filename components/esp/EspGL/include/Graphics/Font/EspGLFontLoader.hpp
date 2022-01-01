@@ -1,4 +1,8 @@
 #pragma once
+#include <stdint.h>
+
+#include <cstdint>
+#include <fstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -11,15 +15,25 @@ namespace EspGL {
 
 class FontLoader {
  public:
+  FontLoader(std::fstream fileHandle)
+      : fileHandle_(std::move(fileHandle)),
+        currentCharacter_(),
+        characterCounter_(0) {
+    nextCharacter();
+  }
   Font load(std::string filename);
-
- private:
- 
-  void parseMagicNumber();
-  Bitmap parseBitmap();
-  std::pair<uint16_t, uint16_t> parseDimensions();
+  std::string parseMagicNumber();
+  Bitmap parseBitmap(size_t dim1, size_t dim2);
+  std::pair<size_t, size_t> parseDimensions();
   std::vector<char> parseLetters();
   void parseComment();
+
+ private:
+  std::fstream fileHandle_;
+  char currentCharacter_;
+  std::uint64_t characterCounter_;
+  inline void nextCharacter() { fileHandle_.get(currentCharacter_); }
+  void ignoreWhitespaces();
 };
 
 }  // namespace EspGL

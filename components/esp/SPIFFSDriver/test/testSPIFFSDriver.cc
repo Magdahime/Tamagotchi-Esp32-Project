@@ -1,5 +1,7 @@
-#include "SPIFFSDriver.hpp"
 #include <cstring>
+#include <string>
+
+#include "SPIFFSDriver.hpp"
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -15,12 +17,11 @@ TEST(SPIFFSDriverTests, MountingSPIFFSTest) { SPIFFSDriver(); }
 
 TEST(SPIFFSDriverTests, ReadingFromFileTest) {
   SPIFFSDriver spiffsDriver = SPIFFSDriver();
-  auto fileHandler = spiffsDriver.getFileDescriptor("hello_world.txt", "r");
-  char buf[64];
-  memset(buf, 0, sizeof(buf));
-  fread(buf, 1, sizeof(buf), fileHandler);
-  fclose(fileHandler);
-  ESP_LOGI(TAG_, "Read from hello.txt: %s", buf);
+  auto fileHandler = spiffsDriver.getFileDescriptor("hello_world.txt");
+  std::string line;
+  std::getline(fileHandler, line);
+  TEST_ASSERT_EQUAL_STRING("Hello World!", line.c_str());
+  ESP_LOGI(TAG_, "Read from hello.txt: %s", line.c_str());
 }
 
 TEST_GROUP_RUNNER(SPIFFSDriverTests) {

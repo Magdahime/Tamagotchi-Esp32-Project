@@ -526,5 +526,5 @@ TEST_GROUP_RUNNER(EspGLShapesTests) {
   // RUN_TEST_CASE(EspGLShapesTests, DrawingRotatedRegularPolygonWithOutline)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingRegularPolygonOutline)
   // RUN_TEST_CASE(EspGLShapesTests, DrawingRotatedRegularPolygonOutline)
-  RUN_TEST_CASE(EspGLShapesTests, DrawingBitmap)
+  // RUN_TEST_CASE(EspGLShapesTests, DrawingBitmap)
 }
