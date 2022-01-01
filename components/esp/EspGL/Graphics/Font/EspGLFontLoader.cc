@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 #include <iterator>
 #include <string>
 #include <utility>
@@ -15,13 +16,14 @@ namespace tamagotchi {
 namespace EspGL {
 
 Font FontLoader::load(std::string filename) {
-  std::map<char, Bitmap> fontMap;
+  std::map<std::string, Bitmap> fontMap;
   parseMagicNumber();
   auto dimensions = parseDimensions();
-  std::vector<char> letters = parseLetters();
+  std::vector<std::string> letters = parseLetters();
   for (auto& letter : letters) {
     fontMap.insert(std::make_pair(
         letter, parseBitmap(dimensions.first, dimensions.second)));
+    nextCharacter();
   }
 
   return Font(fontMap);
@@ -30,13 +32,11 @@ Font FontLoader::load(std::string filename) {
 std::string FontLoader::parseMagicNumber() {
   ignoreWhitespaces();
   parseComment();
-  std::string line;
-  if (currentCharacter_ == 'P') {
-    std::getline(fileHandle_, line);
-    return currentCharacter_ + line;
+  auto magicNumber = currentCharacter_;
+  if (currentCharacter_ == "P1") {
+    nextCharacter();
   }
-
-  return "";
+  return magicNumber;
 }
 
 Bitmap FontLoader::parseBitmap(size_t dim1, size_t dim2) {
@@ -44,8 +44,7 @@ Bitmap FontLoader::parseBitmap(size_t dim1, size_t dim2) {
   parseComment();
   std::vector<bool> bitmap;
   std::string stringBitmap;
-  std::getline(fileHandle_, stringBitmap);
-  stringBitmap = currentCharacter_ + stringBitmap;
+  stringBitmap = currentCharacter_;
   std::transform(stringBitmap.begin(), stringBitmap.end(),
                  std::back_inserter(bitmap), [](char& c) {
                    if (c == '0') return false;
@@ -57,25 +56,22 @@ Bitmap FontLoader::parseBitmap(size_t dim1, size_t dim2) {
 std::pair<size_t, size_t> FontLoader::parseDimensions() {
   ignoreWhitespaces();
   parseComment();
-  std::string dimension;
-  std::getline(fileHandle_, dimension, ' ');
-  size_t dim1 = std::stoi(dimension);
-  std::getline(fileHandle_, dimension);
-  size_t dim2 = std::stoi(dimension);
+  size_t dim1 = std::stoi(currentCharacter_);
+  nextCharacter();
+  size_t dim2 = std::stoi(currentCharacter_);
+  nextCharacter();
   return std::make_pair(dim1, dim2);
 }
-std::vector<char> FontLoader::parseLetters() {
+std::vector<std::string> FontLoader::parseLetters() {
   ignoreWhitespaces();
   parseComment();
-  std::vector<char> letters;
-  std::string line;
-  std::getline(fileHandle_, line);
-  size_t lettersNum = std::stoi(currentCharacter_ + line);
-
+  std::vector<std::string> letters;
+  size_t lettersNum = std::stoi(currentCharacter_);
+  nextCharacter();
   while (lettersNum != 0) {
     ignoreWhitespaces();
     parseComment();
-    if (std::isalnum(currentCharacter_)) {
+    if (std::isalnum(currentCharacter_.front())) {
       letters.push_back(currentCharacter_);
       nextCharacter();
       lettersNum--;
@@ -86,13 +82,14 @@ std::vector<char> FontLoader::parseLetters() {
 
 void FontLoader::parseComment() {
   std::string comment;
-  if (currentCharacter_ == '#') {
+  if (currentCharacter_.front() == '#') {
     getline(fileHandle_, comment);
+    nextCharacter();
   }
 }
 
 void FontLoader::ignoreWhitespaces() {
-  while (isspace(currentCharacter_)) {
+  while (isspace(currentCharacter_.front())) {
     nextCharacter();
   }
 }

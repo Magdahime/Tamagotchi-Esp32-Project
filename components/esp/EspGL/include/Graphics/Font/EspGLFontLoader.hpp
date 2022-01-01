@@ -25,14 +25,14 @@ class FontLoader {
   std::string parseMagicNumber();
   Bitmap parseBitmap(size_t dim1, size_t dim2);
   std::pair<size_t, size_t> parseDimensions();
-  std::vector<char> parseLetters();
+  std::vector<std::string> parseLetters();
   void parseComment();
 
  private:
   std::fstream fileHandle_;
-  char currentCharacter_;
+  std::string currentCharacter_;
   std::uint64_t characterCounter_;
-  inline void nextCharacter() { fileHandle_.get(currentCharacter_); }
+  inline void nextCharacter() { fileHandle_ >> currentCharacter_; }
   void ignoreWhitespaces();
 };
 

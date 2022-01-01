@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <string>
 
 #include "../EspGLBitmap.hpp"
 
@@ -8,10 +9,10 @@ namespace EspGL {
 
 class Font {
  public:
-  Font(std::map<char, Bitmap>& letters) : letters_(std::move(letters)) {}
+  Font(std::map<std::string, Bitmap>& letters) : letters_(std::move(letters)) {}
 
  private:
-  std::map<char, Bitmap> letters_;
+  std::map<std::string, Bitmap> letters_;
 };
 
 }  // namespace EspGL
