@@ -20,7 +20,9 @@ class PolygonBase : public Shape<ColourRepresentation> {
       : vertices_(std::move(vertices)) {}
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline const std::array<Point, Vertices>& vertices() { return vertices_; }
+  inline const std::array<Point, Vertices>& vertices() const {
+    return vertices_;
+  }
   inline void setVertices(std::array<Point, Vertices>& newVertices) {
     vertices_ = newVertices;
   }
@@ -61,9 +63,9 @@ class RegularPolygonBase : public PolygonBase<ColourRepresentation, Vertices> {
     this->vertices_ = vertices;
   };
 
-  inline Point center() { return center_; }
-  inline double radius() { return radius_; }
-  inline double rotation() { return rotation_; }
+  inline const Point& center() const { return center_; }
+  inline double radius() const { return radius_; }
+  inline double rotation() const { return rotation_; }
 
   inline void setCenter(Point newCenter) { center_ = newCenter; }
   inline void setRadius(double newRadius) { radius_ = newRadius; }
@@ -90,7 +92,7 @@ class RegularPolygonOutline
     PolygonBase<ColourRepresentation, Vertices>::drawPolygon(outline_, target);
   }
 
-  inline Colour<ColourRepresentation> outline() { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const  { return outline_; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }
@@ -114,16 +116,13 @@ class RegularPolygon
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> outline() { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const { return outline_; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }
 
-  inline Colour<ColourRepresentation> fill() { return fill_; }
-  inline void setFill(Colour<ColourRepresentation> newFill) {
-    fill_ = newFill;
-  }
-
+  inline const Colour<ColourRepresentation>& fill() const { return fill_; }
+  inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
 
  protected:
   Colour<ColourRepresentation> fill_;

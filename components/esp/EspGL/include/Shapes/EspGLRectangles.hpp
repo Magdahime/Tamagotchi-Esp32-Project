@@ -29,10 +29,19 @@ class RectangleBase : public Shape<ColourRepresentation> {
   }
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline Point leftUpperPoint() { return leftUpperPoint_; }
-  inline Point rightLowerPoint() { return rightLowerPoint_; }
-  inline int16_t dimensionX() { return dimensionX_; }
-  inline int16_t dimensionY() { return dimensionY_; }
+  inline const Point& leftUpperPoint() const { return leftUpperPoint_; }
+  inline const Point& rightLowerPoint() const { return rightLowerPoint_; }
+  inline int16_t dimensionX() const { return dimensionX_; }
+  inline int16_t dimensionY() const { return dimensionY_; }
+
+  inline void setLeftUpperPoint(Point leftUpperPoint) {
+    leftUpperPoint_ = leftUpperPoint;
+  }
+  inline void setRightLowerPoint(Point rightLowerPoint) {
+    rightLowerPoint_ = rightLowerPoint;
+  }
+  inline void setDimensionX(int16_t dimensionX) { dimensionX_ = dimensionX; }
+  inline void setDimensionY(int16_t dimensionY) { dimensionY_ = dimensionY; }
 
  protected:
   Point leftUpperPoint_;
@@ -53,8 +62,10 @@ class Rectangle : public RectangleBase<ColourRepresentation> {
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> fill() { return fill_; }
-  inline Colour<ColourRepresentation> outline() { return outline_; }
+  inline const Colour<ColourRepresentation>& fill() const { return fill_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_;
+  }
 
   inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
@@ -76,7 +87,9 @@ class RectangleOutline : public RectangleBase<ColourRepresentation> {
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> outline() { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_;
+  }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }

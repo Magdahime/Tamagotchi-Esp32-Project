@@ -12,7 +12,7 @@
 #include "Shapes/EspGLSimpleShapes.hpp"
 #include "Shapes/EspGLSmoothEdgeShapes.hpp"
 #include "Shapes/EspGLTriangles.hpp"
-#include "testEspGLUtils.hpp"
+#include "initializeDisplay.hpp"
 #include "unity.h"
 #include "unity_fixture.h"
 

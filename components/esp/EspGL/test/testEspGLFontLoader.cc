@@ -1,20 +1,21 @@
 #include <iostream>
 
 #include "EspGL.hpp"
+#include "Graphics/Font/EspGLFont.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
 #include "SPIFFSDriver.hpp"
 #include "unity.h"
 #include "unity_fixture.h"
 
-
 TEST_GROUP(EspGLFontLoaderTests);
 
 TEST_SETUP(EspGLFontLoaderTests) {}
 
-TEST_TEAR_DOWN(EspGLFontLoaderTests) {}
+TEST_TEAR_DOWN(EspGLFontLoaderTests) { tamagotchi::EspGL::delay(1000); }
 
 TEST(EspGLFontLoaderTests, ParseMagicNumberTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver;
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
+      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::EspGL::FontLoader fLoader(
       spiffsDriver.getFileDescriptor("fullFont.pbm"));
   std::string magicNumber = fLoader.parseMagicNumber();
@@ -24,7 +25,8 @@ TEST(EspGLFontLoaderTests, ParseMagicNumberTest) {
 }
 
 TEST(EspGLFontLoaderTests, ParseDimensionsTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver;
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
+      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::EspGL::FontLoader fLoader(
       spiffsDriver.getFileDescriptor("fullFont.pbm"));
   fLoader.parseMagicNumber();
@@ -34,7 +36,8 @@ TEST(EspGLFontLoaderTests, ParseDimensionsTest) {
 }
 
 TEST(EspGLFontLoaderTests, ParseLettersTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver;
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
+      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::EspGL::FontLoader fLoader(
       spiffsDriver.getFileDescriptor("fullFont.pbm"));
   fLoader.parseMagicNumber();
@@ -46,7 +49,8 @@ TEST(EspGLFontLoaderTests, ParseLettersTest) {
 }
 
 TEST(EspGLFontLoaderTests, ParseBitmapTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver;
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
+      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::EspGL::FontLoader fLoader(
       spiffsDriver.getFileDescriptor("fullFont.pbm"));
   std::map<std::string, tamagotchi::EspGL::Bitmap> fontMap;
@@ -63,9 +67,21 @@ TEST(EspGLFontLoaderTests, ParseBitmapTest) {
   }
 }
 
+TEST(EspGLFontLoaderTests, LoadBitmapTest) {
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
+      tamagotchi::SPIFFS::SPIFFSDriver();
+  tamagotchi::EspGL::FontLoader fLoader(
+      spiffsDriver.getFileDescriptor("fullFont.pbm"));
+  tamagotchi::EspGL::Font font = fLoader.load();
+
+  TEST_ASSERT_EQUAL_INT(0, font.null().empty());
+  TEST_ASSERT_EQUAL_INT(37, font.size());
+}
+
 TEST_GROUP_RUNNER(EspGLFontLoaderTests) {
   RUN_TEST_CASE(EspGLFontLoaderTests, ParseMagicNumberTest)
   RUN_TEST_CASE(EspGLFontLoaderTests, ParseDimensionsTest)
   RUN_TEST_CASE(EspGLFontLoaderTests, ParseLettersTest)
   RUN_TEST_CASE(EspGLFontLoaderTests, ParseBitmapTest)
+  RUN_TEST_CASE(EspGLFontLoaderTests, LoadBitmapTest)
 }

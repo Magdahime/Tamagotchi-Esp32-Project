@@ -25,9 +25,9 @@ class TriangleBase : public Shape<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline Point point1() { return point1_; }
-  inline Point point2() { return point2_; }
-  inline Point point3() { return point3_; }
+  inline const Point& point1() const { return point1_; }
+  inline const Point& point2() const { return point2_; }
+  inline const Point& point3() const { return point3_; }
 
   inline void setPoint1(Point newPoint) { point1_ = newPoint; }
   inline void setPoint2(Point newPoint) { point2_ = newPoint; }
@@ -51,8 +51,8 @@ class Triangle : public TriangleBase<ColourRepresentation> {
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> fill() { return fill_; }
-  inline std::optional<Colour<ColourRepresentation>> outline() {
+  inline const Colour<ColourRepresentation>& fill() const { return fill_; }
+  inline const std::optional<Colour<ColourRepresentation>>& outline() const  {
     return outline_.value();
   }
 
@@ -76,7 +76,7 @@ class TriangleOutline : public TriangleBase<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline std::optional<Colour<ColourRepresentation>> outline() {
+  inline const std::optional<Colour<ColourRepresentation>>& outline() const  {
     return outline_.value();
   }
   inline void setOutline(Colour<ColourRepresentation> newOutline) { outline_ = newOutline; }

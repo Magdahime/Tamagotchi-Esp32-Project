@@ -42,8 +42,8 @@ class Colour {
   Colour() = default;
   Colour(ColourRepresentation colour) : value_(colour) {}
   Colour(uint8_t r, uint8_t g, uint8_t b) : value_(convertRGB(r, g, b)) {}
-  RGB888 getRGB();
-  inline ColourRepresentation value() { return value_; }
+  const RGB888&  getRGB();
+  inline const ColourRepresentation& value() const { return value_; }
   inline void setValue(ColourRepresentation newValue) { value_ = newValue; }
 
  private:

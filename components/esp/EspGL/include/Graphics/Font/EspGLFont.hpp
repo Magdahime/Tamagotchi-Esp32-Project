@@ -9,10 +9,18 @@ namespace EspGL {
 
 class Font {
  public:
-  Font(std::map<std::string, Bitmap>& letters) : letters_(std::move(letters)) {}
+  Font(std::map<char, Bitmap>& letters, Bitmap null)
+      : letters_(std::move(letters)), null_(std::move(null)) {}
+  Font(std::map<char, Bitmap>& letters) : letters_(std::move(letters)) {}
+  inline const std::map<char, Bitmap>& letters() const { return letters_; }
+  Bitmap at(char letter) const;
+  inline Bitmap null() const { return null_; };
+  inline void setNull(Bitmap null) { null_ = null; }
+  inline size_t size() { return letters_.size() + (int)!null_.empty(); }
 
  private:
-  std::map<std::string, Bitmap> letters_;
+  std::map<char, Bitmap> letters_;
+  Bitmap null_;
 };
 
 }  // namespace EspGL

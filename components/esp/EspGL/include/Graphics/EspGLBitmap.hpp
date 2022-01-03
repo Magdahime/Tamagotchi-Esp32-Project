@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+
 #include <vector>
 
 #include "EspGL.hpp"
@@ -15,12 +16,14 @@ class Bitmap {
       : sizeX_(std::move(sizeX)),
         sizeY_(std::move(sizeY)),
         bitmap_(std::move(bitmap)) {}
+  Bitmap() = default;
   template <typename ColourRepresentation>
   void draw(Screen<ColourRepresentation>& target, const Point& start,
             Colour<ColourRepresentation> colour);
-  inline size_t sizeX() { return sizeX_; }
-  inline size_t sizeY() { return sizeY_; }
-  inline const std::vector<bool>& bitmap() { return bitmap_; };
+  inline size_t sizeX() const { return sizeX_; }
+  inline size_t sizeY() const { return sizeY_; }
+  inline const std::vector<bool>& bitmap() const { return bitmap_; };
+  inline bool empty() { return bitmap_.empty(); }
 
  private:
   size_t sizeX_;

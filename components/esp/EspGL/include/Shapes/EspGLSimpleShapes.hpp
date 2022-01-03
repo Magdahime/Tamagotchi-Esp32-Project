@@ -33,9 +33,9 @@ class Line : public Shape<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation> &target) override;
 
-  inline Point start() { return start_; }
-  inline Point end() { return end_; }
-  inline Colour<ColourRepresentation> colour() { return colour_; }
+  inline const Point &start() const { return start_; }
+  inline const Point &end() const { return end_; }
+  inline const Colour<ColourRepresentation> &colour() const { return colour_; }
 
   inline void setStart(Point newStart) { start_ = newStart; }
   inline void setEnd(Point newEnd) { end_ = newEnd; }

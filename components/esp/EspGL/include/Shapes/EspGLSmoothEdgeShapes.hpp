@@ -16,8 +16,8 @@ class CircleBase : public Shape<ColourRepresentation> {
       : center_(std::move(center)), radius_(std::move(radius)) {}
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline Point center() { return center_; }
-  inline double radius() { return radius_; }
+  inline const Point& center() const { return center_; }
+  inline double radius() const { return radius_; }
 
   inline void setCenter(Point newCenter) { center_ = newCenter; }
   inline void setRadius(double newRadius) { radius_ = newRadius; }
@@ -37,8 +37,10 @@ class Circle : public CircleBase<ColourRepresentation> {
         outline_(std::move(outline)) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> fill() { return fill_; }
-  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+  inline const Colour<ColourRepresentation>& fill() const { return fill_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_.value();
+  }
 
   inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
@@ -60,7 +62,7 @@ class CircleOutline : public CircleBase<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+  inline const Colour<ColourRepresentation>&  outline() const { return outline_.value(); }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }
@@ -78,9 +80,9 @@ class EllipseBase : public Shape<ColourRepresentation> {
         yRadius_(std::move(yRadius)) {}
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline Point center() { return center_; }
-  inline double xRadius() { return xRadius_; }
-  inline double yRadius() { return yRadius_; }
+  inline const Point& center() const  { return center_; }
+  inline double xRadius() const { return xRadius_; }
+  inline double yRadius() const { return yRadius_; }
 
   inline void setCenter(Point newCenter) { center_ = newCenter; }
   inline void setXRadius(double newRadius) { xRadius_ = newRadius; }
@@ -103,8 +105,8 @@ class Ellipse : public EllipseBase<ColourRepresentation> {
         outline_(std::move(outline)) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> fill() { return fill_; }
-  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+  inline const Colour<ColourRepresentation>& fill() { return fill_; }
+  inline const Colour<ColourRepresentation>& outline() { return outline_.value(); }
 
   inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
@@ -125,7 +127,7 @@ class EllipseOutline : public EllipseBase<ColourRepresentation> {
         outline_(std::move(outline)) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline Colour<ColourRepresentation> outline() { return outline_.value(); }
+  inline const Colour<ColourRepresentation>& outline() { return outline_.value(); }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }

@@ -6,6 +6,7 @@
 #include <cctype>
 #include <iostream>
 #include <iterator>
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -15,17 +16,24 @@
 namespace tamagotchi {
 namespace EspGL {
 
-Font FontLoader::load(std::string filename) {
-  std::map<std::string, Bitmap> fontMap;
+Font FontLoader::load() {
+  std::map<char, Bitmap> fontMap;
+  Bitmap null;
   parseMagicNumber();
   auto dimensions = parseDimensions();
   std::vector<std::string> letters = parseLetters();
   for (auto& letter : letters) {
-    fontMap.insert(std::make_pair(
-        letter, parseBitmap(dimensions.first, dimensions.second)));
+    if (letter == "null") {
+      null = parseBitmap(dimensions.first, dimensions.second);
+    } else {
+      fontMap.insert(std::make_pair(
+          letter.front(), parseBitmap(dimensions.first, dimensions.second)));
+    }
     nextCharacter();
   }
-
+  if (!null.empty()) {
+    return Font(fontMap, null);
+  }
   return Font(fontMap);
 }
 
@@ -33,9 +41,12 @@ std::string FontLoader::parseMagicNumber() {
   ignoreWhitespaces();
   parseComment();
   auto magicNumber = currentCharacter_;
-  if (currentCharacter_ == "P1") {
-    nextCharacter();
+  if (currentCharacter_ != "P1") {
+    throw std::runtime_error("Unindentified token at " +
+                             std::to_string(characterCounter_) +
+                             " - expected magic number!");
   }
+  nextCharacter();
   return magicNumber;
 }
 
@@ -45,6 +56,11 @@ Bitmap FontLoader::parseBitmap(size_t dim1, size_t dim2) {
   std::vector<bool> bitmap;
   std::string stringBitmap;
   stringBitmap = currentCharacter_;
+  if (stringBitmap.front() != '0' && stringBitmap.front() != '1') {
+    throw std::runtime_error("Unindentified token at " +
+                             std::to_string(characterCounter_) +
+                             " - expected bitmap string!");
+  }
   std::transform(stringBitmap.begin(), stringBitmap.end(),
                  std::back_inserter(bitmap), [](char& c) {
                    if (c == '0') return false;
@@ -75,6 +91,10 @@ std::vector<std::string> FontLoader::parseLetters() {
       letters.push_back(currentCharacter_);
       nextCharacter();
       lettersNum--;
+    } else {
+      throw std::runtime_error("Unindentified token at " +
+                               std::to_string(characterCounter_) +
+                               " - expected character!");
     }
   }
   return letters;
@@ -84,6 +104,7 @@ void FontLoader::parseComment() {
   std::string comment;
   if (currentCharacter_.front() == '#') {
     getline(fileHandle_, comment);
+    characterCounter_ += comment.size();
     nextCharacter();
   }
 }
