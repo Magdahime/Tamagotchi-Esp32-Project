@@ -1,4 +1,5 @@
 #include "EspGLScreen.hpp"
+#include "EspGLUtils.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
 #include "Graphics/Text/EspGLText.hpp"
 #include "SPIFFSDriver.hpp"
@@ -17,7 +18,11 @@ extern Point center;
 
 TEST_GROUP(EspGLTextTests);
 
-TEST_SETUP(EspGLTextTests) {}
+TEST_SETUP(EspGLTextTests) {
+  tamagotchi::EspGL::delay(SHORT_PAUSE);
+  screen.fill(Colour<uint16_t>(colours::BLACK));
+  tamagotchi::EspGL::delay(SHORT_PAUSE);
+}
 
 TEST_TEAR_DOWN(EspGLTextTests) {}
 
@@ -27,8 +32,10 @@ TEST(EspGLTextTests, PrintingTextTest) {
   tamagotchi::EspGL::FontLoader fLoader(
       spiffsDriver.getFileDescriptor("fullFont.pbm"));
   Font font = fLoader.load();
-  Text<uint16_t> text("mama", font, Colour<uint16_t>(colours::GREEN));
+  Text<uint16_t> text("siurek", font, Colour<uint16_t>(colours::GREEN));
   text.draw(screen, {0, 0});
 }
 
-TEST_GROUP_RUNNER(EspGLTextTests) {}
+TEST_GROUP_RUNNER(EspGLTextTests) {
+  RUN_TEST_CASE(EspGLTextTests, PrintingTextTest)
+}
