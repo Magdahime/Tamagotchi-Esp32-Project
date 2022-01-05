@@ -1,6 +1,7 @@
 #include "Graphics/Font/EspGLFontLoader.hpp"
 
 #include <ctype.h>
+#include <stdint.h>
 
 #include <algorithm>
 #include <cctype>
@@ -21,6 +22,7 @@ Font FontLoader::load() {
   Bitmap null;
   parseMagicNumber();
   auto dimensions = parseDimensions();
+  uint32_t fontHeight = dimensions.second;
   std::vector<std::string> letters = parseLetters();
   for (auto& letter : letters) {
     if (letter == "null") {
@@ -32,9 +34,9 @@ Font FontLoader::load() {
     nextCharacter();
   }
   if (!null.empty()) {
-    return Font(fontMap, null);
+    return Font(fontHeight, fontMap, null);
   }
-  return Font(fontMap);
+  return Font(fontHeight, fontMap);
 }
 
 std::string FontLoader::parseMagicNumber() {
@@ -87,7 +89,8 @@ std::vector<std::string> FontLoader::parseLetters() {
   while (lettersNum != 0) {
     ignoreWhitespaces();
     parseComment();
-    if (std::isalnum(currentCharacter_.front())) {
+    if (std::isalnum(currentCharacter_.front()) ||
+        ispunct(currentCharacter_.front())) {
       letters.push_back(currentCharacter_);
       nextCharacter();
       lettersNum--;

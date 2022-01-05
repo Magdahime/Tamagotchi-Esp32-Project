@@ -43,7 +43,7 @@ TEST(EspGLFontLoaderTests, ParseLettersTest) {
   fLoader.parseMagicNumber();
   fLoader.parseDimensions();
   auto letters = fLoader.parseLetters();
-  TEST_ASSERT_EQUAL_INT(37, letters.size());
+  TEST_ASSERT_EQUAL_INT(69, letters.size());
   TEST_ASSERT_EQUAL_STRING(letters.front().c_str(), "0");
   TEST_ASSERT_EQUAL_STRING(letters.back().c_str(), "null");
 }
@@ -61,7 +61,7 @@ TEST(EspGLFontLoaderTests, ParseBitmapTest) {
     fontMap.insert(std::make_pair(
         letter, fLoader.parseBitmap(dimensions.first, dimensions.second)));
   }
-  TEST_ASSERT_EQUAL_INT(37, fontMap.size());
+  TEST_ASSERT_EQUAL_INT(69, fontMap.size());
   for (auto& [key, value] : fontMap) {
     TEST_ASSERT_EQUAL_INT(value.bitmap().size(), 48);
   }
@@ -75,7 +75,7 @@ TEST(EspGLFontLoaderTests, LoadBitmapTest) {
   tamagotchi::EspGL::Font font = fLoader.load();
 
   TEST_ASSERT_EQUAL_INT(0, font.null().empty());
-  TEST_ASSERT_EQUAL_INT(37, font.size());
+  TEST_ASSERT_EQUAL_INT(69, font.size());
 }
 
 TEST_GROUP_RUNNER(EspGLFontLoaderTests) {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ctype.h>
 #include <stdint.h>
 
 #include <optional>
@@ -53,6 +54,7 @@ class Text {
  private:
   void drawLetter(Screen<ColourRepresentation>& target, Bitmap& bitmap,
                   Point cursor);
+  Point drawWhitespace(char whitespace, Point cursor);
   uint16_t letterSpacing_;
   uint16_t lineSpacing_;
   uint32_t characterScale_;
@@ -63,13 +65,43 @@ class Text {
 };
 
 template <typename ColourRepresentation>
+Point Text<ColourRepresentation>::drawWhitespace(char whitespace,
+                                                 Point cursor) {
+  switch (whitespace) {
+    case '\n':
+      cursor.y_ += lineSpacing_ * characterScale_;
+      break;
+    case ' ':
+      cursor.x_ += letterSpacing_ * characterScale_;
+      break;
+    default:
+      break;
+  }
+  return cursor;
+}
+
+template <typename ColourRepresentation>
 void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
                                       Point start) {
-  size_t offset = 0;
+  uint32_t offsetX = start.x_;
+  uint32_t offsetY = start.y_;
   for (const auto& letter : text_) {
-    auto bitmap = font_.at(letter);
-    drawLetter(target, bitmap, {offset, start.y_});
-    offset += bitmap.sizeX() + letterSpacing_ * characterScale_;
+    if (isspace(letter)) {
+      auto cursor = drawWhitespace(letter, {offsetX, offsetY});
+      offsetX = cursor.x_;
+      offsetY = cursor.y_;
+    } else {
+      auto bitmap = font_.at(letter);
+      if (offsetX + bitmap.sizeX() >= target.width()) {
+        offsetY += (bitmap.sizeY() + lineSpacing_) * characterScale_;
+        offsetX = start.x_;
+      }
+      if (offsetY + bitmap.sizeY() >= target.height()) {
+        break;
+      }
+      drawLetter(target, bitmap, {offsetX, offsetY});
+      offsetX += bitmap.sizeX() + letterSpacing_ * characterScale_;
+    }
   }
 }
 

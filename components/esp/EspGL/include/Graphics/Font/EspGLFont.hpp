@@ -1,4 +1,6 @@
 #pragma once
+#include <stdint.h>
+
 #include <map>
 #include <string>
 
@@ -9,16 +11,21 @@ namespace EspGL {
 
 class Font {
  public:
-  Font(std::map<char, Bitmap>& letters, Bitmap null)
-      : letters_(std::move(letters)), null_(std::move(null)) {}
-  Font(std::map<char, Bitmap>& letters) : letters_(std::move(letters)) {}
+  Font(uint32_t height, std::map<char, Bitmap>& letters, Bitmap null)
+      : fontHeight_(height),
+        letters_(std::move(letters)),
+        null_(std::move(null)) {}
+  Font(uint32_t height, std::map<char, Bitmap>& letters)
+      : fontHeight_(height), letters_(std::move(letters)) {}
   inline const std::map<char, Bitmap>& letters() const { return letters_; }
   Bitmap at(char letter) const;
   inline Bitmap null() const { return null_; };
   inline void setNull(Bitmap null) { null_ = null; }
   inline size_t size() { return letters_.size() + (int)!null_.empty(); }
+  inline uint32_t height() { return fontHeight_; }
 
  private:
+  uint32_t fontHeight_;
   std::map<char, Bitmap> letters_;
   Bitmap null_;
 };
