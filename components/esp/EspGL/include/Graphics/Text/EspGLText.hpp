@@ -92,11 +92,12 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
       offsetY = cursor.y_;
     } else {
       auto bitmap = font_.at(letter);
-      if (offsetX + bitmap.sizeX() >= target.width()) {
+      if (offsetX + bitmap.sizeX() * characterScale_ >= target.width()) {
         offsetY += (bitmap.sizeY() + lineSpacing_) * characterScale_;
         offsetX = start.x_;
       }
-      if (offsetY + bitmap.sizeY() >= target.height()) {
+      if (offsetY + (bitmap.sizeY() + lineSpacing_) * characterScale_ >=
+          target.height()) {
         break;
       }
       drawLetter(target, bitmap, {offsetX, offsetY});
