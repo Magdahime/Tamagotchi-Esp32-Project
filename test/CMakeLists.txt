@@ -4,7 +4,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS "-g -Wall -Wextra  -O3  -Werror ")
 set(EXTRA_COMPONENT_DIRS ../components/esp ../components/generic $ENV{IDF_PATH}/tools/unit-test-app/components)
-set(TEST_COMPONENTS RecyclingContainer EspGL SPIFFSDriver CACHE STRING "List of components to test")
-
+set(TEST_COMPONENTS RecyclingContainer EspGL SPIFFSDriver BitmapLoader CACHE STRING "List of components to test")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(Tamagotchi_unit_tests)
