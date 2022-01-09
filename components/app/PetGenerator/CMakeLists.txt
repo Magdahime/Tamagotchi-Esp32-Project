@@ -1,4 +1,3 @@
-idf_component_register(SRCS "PetGenerator.cc"
+idf_component_register(SRCS "ColourProvider.cc"
                     INCLUDE_DIRS "include"
-                    REQUIRES Pet EspGL)
-component_compile_options(-std=gnu++17)
+                    REQUIRES  BitmapLoader EspGL SPIFFSDriver Pet)

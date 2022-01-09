@@ -1,6 +1,5 @@
 #pragma once
 #include <stdint.h>
-#include <vcruntime.h>
 
 #include <vector>
 
@@ -18,11 +17,9 @@ class Picture {
         sizeY_(std::move(sizeY)),
         picture_(std::move(picture)) {}
   void draw(Screen<ColourRepresentation>& target, const Point& start);
-  inline size_t sizeX() const { return sizeX_; }
-  inline size_t sizeY() const { return sizeY_; }
-  inline const std::vector<ColourRepresentation>& picture() const {
-    return picture_;
-  }
+  inline size_t sizeX() { return sizeX_; }
+  inline size_t sizeY() { return sizeY_; }
+  inline std::vector<ColourRepresentation>& picture() { return picture_; }
 
  private:
   size_t sizeX_;

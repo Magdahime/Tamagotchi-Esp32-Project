@@ -30,5 +30,7 @@ class SPIFFSDriver {
   uint16_t maxFiles_;
   bool formatIfMountFailed_;
 };
+
+
 }  // namespace SPIFFS
 }  // namespace tamagotchi

@@ -41,14 +41,11 @@ class Colour {
  public:
   Colour() = default;
   Colour(ColourRepresentation colour) : value_(colour) {}
-  Colour(uint8_t r, uint8_t g, uint8_t b) : value_(convertRGB(r, g, b)) {}
-  const RGB888&  getRGB();
-  inline const ColourRepresentation& value() const { return value_; }
+  inline const ColourRepresentation &value() const { return value_; }
   inline void setValue(ColourRepresentation newValue) { value_ = newValue; }
 
  private:
   ColourRepresentation value_;
-  ColourRepresentation convertRGB(uint8_t r, uint8_t g, uint8_t b);
 };
 
 using Colour16 = Colour<uint16_t>;
