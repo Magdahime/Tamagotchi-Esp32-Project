@@ -16,13 +16,12 @@
 #include "unity.h"
 #include "unity_fixture.h"
 
-using namespace tamagotchi::ST7789;
 using namespace tamagotchi::EspGL;
 
 constexpr int SHORT_PAUSE = 1000;
 
-ST7789VWDriver st7789driver = initializeDisplay();
-std::unique_ptr<ST7789VWDriver> ptr(&st7789driver);
+tamagotchi::ST7789::ST7789VWDriver st7789driver = initializeDisplay();
+std::unique_ptr<tamagotchi::ST7789::ST7789VWDriver> ptr(&st7789driver);
 tamagotchi::EspGL::Screen<uint16_t> screen(consts::WIDTH, consts::HEIGHT,
                                            std::move(ptr));
 Point center(screen.width() / 2, screen.height() / 2);

@@ -7,18 +7,6 @@
 namespace tamagotchi {
 namespace ST7789 {
 
-namespace colours {
-constexpr uint16_t RED = 0xf800;
-constexpr uint16_t GREEN = 0x07e0;
-constexpr uint16_t BLUE = 0x001f;
-constexpr uint16_t BLACK = 0x0000;
-constexpr uint16_t WHITE = 0xffff;
-constexpr uint16_t GRAY = 0x8c51;
-constexpr uint16_t YELLOW = 0xFFE0;
-constexpr uint16_t CYAN = 0x07FF;
-constexpr uint16_t PURPLE = 0xF81F;
-}  // namespace colours
-
 namespace consts {
 constexpr int GPIOMOSI = 13;
 constexpr int GPIOSCLK = 14;

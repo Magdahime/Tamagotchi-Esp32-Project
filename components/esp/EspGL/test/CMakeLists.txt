@@ -1,3 +1,4 @@
 idf_component_register(SRCS "testEspGLUtils.cc" "testEspGLShapes.cc" "testEspGLFontLoader.cc" "testEspGLText.cc" "initializeDisplay.cc" "testEspGLBitmap.cc"
                        INCLUDE_DIRS "include"
                        REQUIRES unity test_utils ST7789Driver EspGL SPIFFSDriver BitmapLoader)
+component_compile_options(-std=gnu++17)

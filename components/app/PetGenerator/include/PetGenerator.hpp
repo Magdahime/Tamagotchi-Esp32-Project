@@ -13,11 +13,6 @@ namespace tamagotchi {
 namespace App {
 namespace Pet {
 
-constexpr int EYES_COLUMN = 5;
-constexpr int EYES_ROW = 10;
-constexpr int FACE_COLUMN = 5;
-constexpr int FACE_ROW = 13;
-
 template <typename ColourRepresentation>
 class PetGenerator {
  public:
@@ -95,11 +90,7 @@ Pet<ColourRepresentation> PetGenerator<ColourRepresentation>::generate() {
   EspGL::Bitmap petBitmap = chooseBody();
   EspGL::Bitmap eyes = chooseEyes();
   EspGL::Bitmap face = chooseFace();
-  EspGL::Point eyesPoint(EYES_COLUMN, EYES_ROW);
-  EspGL::Point facePoint(FACE_COLUMN, FACE_ROW);
-  petBitmap.overlay(eyes, eyesPoint);
-  petBitmap.overlay(eyes, facePoint);
-  return Pet<ColourRepresentation>(petBitmap, chooseColour());
+  return Pet<ColourRepresentation>(petBitmap, eyes, face, chooseColour());
 }
 
 }  // namespace Pet
