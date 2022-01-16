@@ -15,10 +15,11 @@ static void run_all_tests(void) {
   // RUN_TEST_GROUP(SPIFFSDriverTests);
   // RUN_TEST_GROUP(EspGLFontLoaderTests);
   // RUN_TEST_GROUP(BitmapLoaderTests);
-  //RUN_TEST_GROUP(EspGLTextTests);
+  // RUN_TEST_GROUP(EspGLTextTests);
   RUN_TEST_GROUP(EspGLBitmapTests);
   RUN_TEST_GROUP(PetGeneratorTests);
-  RUN_TEST_GROUP(PetTests);
+  // RUN_TEST_GROUP(PetTests);
+  RUN_TEST_GROUP(GomokuTests);
 }
 
 static void print_banner(const char* text) {
