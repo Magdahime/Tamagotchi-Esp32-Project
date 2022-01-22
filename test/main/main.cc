@@ -20,6 +20,7 @@ static void run_all_tests(void) {
   RUN_TEST_GROUP(PetGeneratorTests);
   // RUN_TEST_GROUP(PetTests);
   RUN_TEST_GROUP(GomokuTests);
+  RUN_TEST_GROUP(GameTests);
 }
 
 static void print_banner(const char* text) {

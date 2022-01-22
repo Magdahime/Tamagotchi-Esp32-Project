@@ -20,6 +20,7 @@ constexpr int ESPNOW_SEND_DELAY = 1000;
 constexpr int ESPNOW_SEND_LEN = 200;
 constexpr int ESPNOW_QUEUE_SIZE = 6;
 constexpr int ESPNOW_MAXDELAY = 512;
+constexpr int ESPNOW_MAXMSGLENGTH = 256;
 constexpr int ESPNOW_DATA_MAX = 2;
 constexpr int ESPNOW_COMMUNICATION_METHODS = 2;
 constexpr char TAG[] = "ESP32 EspnowDriver";

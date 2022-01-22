@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "EspGLDrivers.hpp"
+#include "EspGLDriver.hpp"
 #include "esp_log.h"
 
 namespace tamagotchi {

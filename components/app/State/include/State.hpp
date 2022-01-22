@@ -1,12 +1,23 @@
 #pragma once
+#include "Event.hpp"
 
+namespace tamagotchi {
 
-class State{
+namespace App {
 
-public:
+namespace State {
 
+class State {
+ public:
+  virtual void handleEvent(Event::Event Event) = 0;
 
-private:
+ private:
+};
 
+enum class StateType { Start, MainMenu, MiniGame, End };
 
-};   
+}  // namespace State
+
+}  // namespace App
+
+}  // namespace tamagotchi
