@@ -29,7 +29,7 @@ TEST(SPIFFSDriverTests, ReadingFromFileTest) {
 
 TEST(SPIFFSDriverTests, CreatingNewFile) {
   SPIFFSDriver spiffsDriver = SPIFFSDriver();
-  auto fileHandler = spiffsDriver.getFileDescriptor("test.txt");
+  auto fileHandler = spiffsDriver.createNewFile("test.txt");
   fileHandler << "test\n";
   fileHandler.close();
 }

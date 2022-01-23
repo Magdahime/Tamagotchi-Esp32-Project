@@ -21,6 +21,7 @@ static void run_all_tests(void) {
   // RUN_TEST_GROUP(PetTests);
   RUN_TEST_GROUP(GomokuTests);
   RUN_TEST_GROUP(GameTests);
+  RUN_TEST_GROUP(SerializerTests);
 }
 
 static void print_banner(const char* text) {

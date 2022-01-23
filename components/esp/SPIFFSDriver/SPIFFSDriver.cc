@@ -58,12 +58,23 @@ SPIFFSDriver::~SPIFFSDriver() {
 }
 
 bool SPIFFSDriver::deleteFile(std::string filename) {
+  std::string fullPath = basePath_ + "/" + filename;
   struct stat st;
-  if (stat(filename.c_str(), &st) == 0) {
-    unlink(filename.c_str());
+  if (stat(fullPath.c_str(), &st) == 0) {
+    unlink(fullPath.c_str());
     return true;
   }
   return false;
+}
+
+std::fstream SPIFFSDriver::createNewFile(std::string filename) {
+  std::string fullPath = basePath_ + "/" + filename;
+  FILE* f = fopen(fullPath.c_str(), "w+");
+  if (f == NULL) {
+    ESP_LOGE(TAG_, "Failed to create new file: %s", filename.c_str());
+  }
+  fclose(f);
+  return std::fstream(fullPath);
 }
 
 }  // namespace SPIFFS

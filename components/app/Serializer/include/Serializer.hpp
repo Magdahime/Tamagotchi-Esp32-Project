@@ -15,6 +15,7 @@ namespace Serializer {
 
 class Serializer {
  public:
+  Serializer(std::string filename);
   virtual void serialize(Pet::Pet<uint16_t>* pet);
 
  private:
