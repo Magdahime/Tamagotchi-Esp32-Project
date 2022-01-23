@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <cstring>
 #include <string>
 
@@ -22,9 +24,34 @@ TEST(SPIFFSDriverTests, ReadingFromFileTest) {
   std::getline(fileHandler, line);
   TEST_ASSERT_EQUAL_STRING("Hello World!", line.c_str());
   ESP_LOGI(TAG_, "Read from hello.txt: %s", line.c_str());
+  fileHandler.close();
+}
+
+TEST(SPIFFSDriverTests, CreatingNewFile) {
+  SPIFFSDriver spiffsDriver = SPIFFSDriver();
+  auto fileHandler = spiffsDriver.getFileDescriptor("test.txt");
+  fileHandler << "test\n";
+  fileHandler.close();
+}
+
+TEST(SPIFFSDriverTests, ReadingFromNewFile) {
+  SPIFFSDriver spiffsDriver = SPIFFSDriver();
+  auto fileHandler = spiffsDriver.getFileDescriptor("test.txt");
+  std::string line;
+  std::getline(fileHandler, line);
+  TEST_ASSERT_EQUAL_STRING("test", line.c_str());
+  fileHandler.close();
+}
+
+TEST(SPIFFSDriverTests, DeletingFile) {
+  SPIFFSDriver spiffsDriver = SPIFFSDriver();
+  TEST_ASSERT_TRUE(spiffsDriver.deleteFile("test.txt"));
 }
 
 TEST_GROUP_RUNNER(SPIFFSDriverTests) {
   RUN_TEST_CASE(SPIFFSDriverTests, MountingSPIFFSTest)
   RUN_TEST_CASE(SPIFFSDriverTests, ReadingFromFileTest)
+  RUN_TEST_CASE(SPIFFSDriverTests, CreatingNewFile)
+  RUN_TEST_CASE(SPIFFSDriverTests, ReadingFromNewFile);
+  RUN_TEST_CASE(SPIFFSDriverTests, DeletingFile);
 }

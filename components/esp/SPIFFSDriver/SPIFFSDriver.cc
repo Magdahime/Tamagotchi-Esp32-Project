@@ -1,5 +1,7 @@
 #include "SPIFFSDriver.hpp"
 
+#include <stdio.h>
+
 #include <fstream>
 
 namespace tamagotchi {
@@ -53,6 +55,15 @@ SPIFFSDriver::SPIFFSDriver(std::string basePath, std::string partitionLabel,
 SPIFFSDriver::~SPIFFSDriver() {
   esp_vfs_spiffs_unregister(partitionLabel_.c_str());
   ESP_LOGI(TAG_, "SPIFFS unmounted");
+}
+
+bool SPIFFSDriver::deleteFile(std::string filename) {
+  struct stat st;
+  if (stat(filename.c_str(), &st) == 0) {
+    unlink(filename.c_str());
+    return true;
+  }
+  return false;
 }
 
 }  // namespace SPIFFS

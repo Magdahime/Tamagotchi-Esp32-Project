@@ -23,6 +23,7 @@ class SPIFFSDriver {
                bool formatIfMountFailed = false);
   ~SPIFFSDriver();
   std::fstream getFileDescriptor(std::string filename);
+  bool deleteFile(std::string filename);
 
  private:
   std::string basePath_;
@@ -30,7 +31,6 @@ class SPIFFSDriver {
   uint16_t maxFiles_;
   bool formatIfMountFailed_;
 };
-
 
 }  // namespace SPIFFS
 }  // namespace tamagotchi

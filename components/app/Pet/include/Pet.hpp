@@ -8,9 +8,11 @@
 #include "EspGLUtils.hpp"
 #include "Graphics/EspGLBitmap.hpp"
 #include "Graphics/EspGLPicture.hpp"
+#include "Serializer.hpp"
 
 namespace tamagotchi {
 namespace App {
+
 namespace Pet {
 
 constexpr int32_t PET_NEEDS = 2;
@@ -21,7 +23,9 @@ constexpr int FACE_OFFSETY = 13;
 template <typename ColourRepresentation>
 class Pet {
  public:
-  Pet(std::pair<std::string, EspGL::Bitmap> body, std::pair<std::string, EspGL::Bitmap> eyes, std::pair<std::string, EspGL::Bitmap> face,
+  Pet(std::pair<std::string, EspGL::Bitmap> body,
+      std::pair<std::string, EspGL::Bitmap> eyes,
+      std::pair<std::string, EspGL::Bitmap> face,
       EspGL::Colour<ColourRepresentation> colour)
       : needs_({100}),
         colour_(std::move(colour)),
@@ -34,6 +38,10 @@ class Pet {
 
   void draw(EspGL::Screen<ColourRepresentation>& target, EspGL::Point start,
             uint32_t scale = 5);
+
+  virtual void accept(Serializer::Serializer& serializer) {
+    serializer.serialize(this);
+  }
 
   inline EspGL::Bitmap& body() { return body_.second; }
   inline EspGL::Bitmap& eyes() { return eyes_.second; }
