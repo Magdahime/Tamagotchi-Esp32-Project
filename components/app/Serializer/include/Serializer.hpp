@@ -28,11 +28,24 @@ class Serializer {
       typename = typename std::enable_if<
           std::is_arithmetic<ArithmeticType>::value, ArithmeticType>::type>
   void serialize(std::fstream& fileHandle, ArithmeticType data) {
-    fileHandle.write(reinterpret_cast<char*>(data), sizeof(data));
+    size_t size = sizeof(data);
+    fileHandle.write(reinterpret_cast<char*>(&size), sizeof(size));
+    fileHandle.write(reinterpret_cast<char*>(&data), size);
+  }
+
+  template <
+      typename ArithmeticType,
+      typename = typename std::enable_if<
+          std::is_arithmetic<ArithmeticType>::value, ArithmeticType>::type>
+  void deserialize(std::fstream& fileHandle, ArithmeticType& data) {
+    size_t size;
+    fileHandle.read(reinterpret_cast<char*>(&size), sizeof(size));
+    fileHandle.read(reinterpret_cast<char*>(&data), size);
   }
 
   template <typename T>
   void serialize(std::fstream& fileHandle, std::vector<T> data) {
+    serialize(fileHandle, data.size());
     for (auto& elem : data) {
       serialize(fileHandle, elem);
     }
