@@ -5,18 +5,35 @@ namespace tamagotchi {
 namespace App {
 namespace Serializer {
 
-template <>
 void Serializer::serialize(std::fstream& fileHandle, std::vector<bool> data) {
   std::vector<uint8_t> boolData((data.size() + 7) / 8, 0);
   for (auto i = 0; i < data.size(); i += 8) {
     auto operationsNum = i + 8 < data.size() ? 8 : data.size() - i;
     uint8_t packedBools{0u};
-    for (auto j = 0; j < operationsNum; i++) {
+    for (auto j = 0; j < operationsNum; ++j) {
       packedBools += data[i + j] << j;
     }
     boolData[i / 8] = packedBools;
   }
+  serialize(fileHandle, data.size());
   serialize(fileHandle, boolData);
+}
+
+void Serializer::deserialize(std::fstream& fileHandle,
+                             std::vector<bool>& data) {
+  data.clear();
+  size_t bitsNum;
+  deserialize(fileHandle, bitsNum);
+  data.resize(bitsNum);
+  std::vector<uint8_t> charBitset;
+  deserialize(fileHandle, charBitset);
+  for (auto i = 0; i < charBitset.size(); ++i) {
+    auto operationsNum = bitsNum > 8 ? 8 : bitsNum;
+    for (auto j = 0; j < operationsNum; j++) {
+      data[i * 8 + j] = charBitset[i] & (1 << j);
+    }
+    operationsNum -= 8;
+  }
 }
 
 void Serializer::serialize(std::fstream& fileHandle, std::string string) {

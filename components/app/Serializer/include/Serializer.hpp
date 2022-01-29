@@ -51,6 +51,22 @@ class Serializer {
     }
   }
 
+  void serialize(std::fstream& fileHandle, std::vector<bool> data);
+  void deserialize(std::fstream& fileHandle, std::vector<bool>& data);
+
+  template <typename T>
+  void deserialize(std::fstream& fileHandle, std::vector<T>& data) {
+    data.clear();
+    size_t size = 0;
+    deserialize(fileHandle, size);
+    data.resize(size);
+    for (auto i = 0; i < size; i++) {
+      T elem;
+      deserialize(fileHandle, elem);
+      data[i] = elem;
+    }
+  }
+
  private:
   SPIFFS::SPIFFSDriver spiffsDriver_;
 };

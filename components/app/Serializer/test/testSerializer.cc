@@ -35,12 +35,42 @@ TEST(SerializerTests, SerializeArithmeticType) {
   TEST_ASSERT_EQUAL_INT(test, deserializedTest);
 }
 
+TEST(SerializerTests, SerializeVectorOfArithmeticType) {
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver;
+  std::vector<int> test{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  auto serializeFileHandle = spiffsDriver.createNewFile("test.txt");
+  tamagotchi::App::Serializer::Serializer serializer;
+  serializer.serialize(serializeFileHandle, test);
+  serializeFileHandle.close();
+  auto deserializeFileHandle = spiffsDriver.getFileDescriptor("test.txt");
+  std::vector<int> deserializedTest;
+  serializer.deserialize(deserializeFileHandle, deserializedTest);
+  TEST_ASSERT_EQUAL_INT(test.size(), deserializedTest.size());
+  for (int i = 0; i < deserializedTest.size(); i++) {
+    TEST_ASSERT_EQUAL_INT(test[i], deserializedTest[i]);
+  }
+}
 
-
+TEST(SerializerTests, SerializeVectorOfBool) {
+  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver;
+  std::vector<bool> test{true,  false, true,  false, true,
+                         false, true,  false, false};
+  auto serializeFileHandle = spiffsDriver.createNewFile("test.txt");
+  tamagotchi::App::Serializer::Serializer serializer;
+  serializer.serialize(serializeFileHandle, test);
+  serializeFileHandle.close();
+  auto deserializeFileHandle = spiffsDriver.getFileDescriptor("test.txt");
+  std::vector<bool> deserializedTest;
+  serializer.deserialize(deserializeFileHandle, deserializedTest);
+  TEST_ASSERT_EQUAL_INT(test.size(), deserializedTest.size());
+  for (int i = 0; i < deserializedTest.size(); i++) {
+    TEST_ASSERT_EQUAL_INT(test[i], deserializedTest[i]);
+  }
+}
 
 TEST_GROUP_RUNNER(SerializerTests) {
   RUN_TEST_CASE(SerializerTests, SerializeString)
   RUN_TEST_CASE(SerializerTests, SerializeArithmeticType)
-  // RUN_TEST_CASE(SerializerTests, SerializeVectorOfArithmeticType)
-  // RUN_TEST_CASE(SerializerTests, SerializeVectorOfBool)
+  RUN_TEST_CASE(SerializerTests, SerializeVectorOfArithmeticType)
+  RUN_TEST_CASE(SerializerTests, SerializeVectorOfBool)
 }
