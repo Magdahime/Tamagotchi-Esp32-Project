@@ -67,9 +67,10 @@ bool SPIFFSDriver::deleteFile(std::string filename) {
   return false;
 }
 
-std::fstream SPIFFSDriver::createNewFile(std::string filename) {
+std::fstream SPIFFSDriver::createNewFile(std::string filename,
+                                         std::string mode) {
   std::string fullPath = basePath_ + "/" + filename;
-  FILE* f = fopen(fullPath.c_str(), "w+");
+  FILE* f = fopen(fullPath.c_str(), mode.c_str());
   if (f == NULL) {
     ESP_LOGE(TAG_, "Failed to create new file: %s", filename.c_str());
   }

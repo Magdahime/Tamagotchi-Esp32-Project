@@ -17,8 +17,8 @@ class Font {
         null_(std::move(null)) {}
   Font(uint32_t height, std::map<char, Bitmap>& letters)
       : fontHeight_(height), letters_(std::move(letters)) {}
-  inline const std::map<char, Bitmap>& letters() const { return letters_; }
-  Bitmap at(char letter) const;
+  inline std::map<char, Bitmap>& letters() { return letters_; }
+  Bitmap at(char letter) const ;
   inline Bitmap null() const { return null_; };
   inline void setNull(Bitmap null) { null_ = null; }
   inline size_t size() { return letters_.size() + (int)!null_.empty(); }

@@ -41,7 +41,7 @@ class Colour {
  public:
   Colour() = default;
   Colour(ColourRepresentation colour) : value_(colour) {}
-  inline const ColourRepresentation &value() const { return value_; }
+  inline ColourRepresentation value() const { return value_; }
   inline void setValue(ColourRepresentation newValue) { value_ = newValue; }
 
  private:

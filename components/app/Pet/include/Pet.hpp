@@ -43,18 +43,20 @@ class Pet {
     serializer.serialize(this);
   }
 
-  inline EspGL::Bitmap& body() { return body_.second; }
-  inline EspGL::Bitmap& eyes() { return eyes_.second; }
-  inline EspGL::Bitmap& face() { return face_.second; }
+  inline std::pair<std::string, EspGL::Bitmap>& body() { return body_; }
+  inline std::pair<std::string, EspGL::Bitmap>& eyes() { return eyes_; }
+  inline std::pair<std::string, EspGL::Bitmap>& face() { return face_; }
   inline std::string& name() { return name_; }
+  inline std::array<int16_t, PET_NEEDS> needs() { return needs_; }
+  inline EspGL::Colour<ColourRepresentation> colour() { return colour_; }
 
  private:
-  std::array<uint16_t, PET_NEEDS> needs_;
+  std::string name_;
+  std::array<int16_t, PET_NEEDS> needs_;
   EspGL::Colour<ColourRepresentation> colour_;
   std::pair<std::string, EspGL::Bitmap> body_;
   std::pair<std::string, EspGL::Bitmap> eyes_;
   std::pair<std::string, EspGL::Bitmap> face_;
-  std::string name_;
 };
 
 template <typename ColourRepresentation>

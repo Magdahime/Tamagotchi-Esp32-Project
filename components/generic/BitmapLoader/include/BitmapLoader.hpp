@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
+#include <algorithm>
 #include <fstream>
 #include <string>
-#include <algorithm>
 #include <vector>
 
 namespace tamagotchi {
@@ -27,10 +27,8 @@ class BitmapLoader {
   int64_t parseBitmapNumber();
   void parseComment();
 
-  inline const std::fstream& fileHandle() const { return fileHandle_; }
-  inline const std::string& currentCharacter() const {
-    return currentCharacter_;
-  }
+  inline std::fstream& fileHandle() { return fileHandle_; }
+  inline std::string& currentCharacter() { return currentCharacter_; }
   inline std::uint64_t characterCounter() const { return characterCounter_; }
 
  private:

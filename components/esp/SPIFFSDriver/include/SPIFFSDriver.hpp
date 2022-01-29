@@ -24,7 +24,8 @@ class SPIFFSDriver {
   ~SPIFFSDriver();
   std::fstream getFileDescriptor(std::string filename);
   bool deleteFile(std::string filename);
-  std::fstream createNewFile(std::string filename);
+  std::fstream createNewFile(std::string filename, std::string mode = "w+");
+
  private:
   std::string basePath_;
   std::string partitionLabel_;

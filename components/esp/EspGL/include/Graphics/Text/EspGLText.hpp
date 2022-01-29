@@ -29,9 +29,9 @@ class Text {
   Text(Font& font) : font_(font) {}
   void draw(Screen<ColourRepresentation>& target, Point start);
 
-  inline uint16_t letterSpacing() const { return letterSpacing_; }
-  inline uint16_t lineSpacing() const { return lineSpacing_; }
-  inline uint32_t characterScale() const { return characterScale_; }
+  inline uint16_t letterSpacing() { return letterSpacing_; }
+  inline uint16_t lineSpacing() { return lineSpacing_; }
+  inline uint32_t characterScale() { return characterScale_; }
   inline const Colour<ColourRepresentation>& colour() const { return colour_; }
   inline const std::string& text() const { return text_; }
   inline const Font& font() const { return font_; }

@@ -64,8 +64,8 @@ class RegularPolygonBase : public PolygonBase<ColourRepresentation, Vertices> {
   };
 
   inline const Point& center() const { return center_; }
-  inline double radius() const { return radius_; }
-  inline double rotation() const { return rotation_; }
+  inline double radius() { return radius_; }
+  inline double rotation() { return rotation_; }
 
   inline void setCenter(Point newCenter) { center_ = newCenter; }
   inline void setRadius(double newRadius) { radius_ = newRadius; }
@@ -92,7 +92,7 @@ class RegularPolygonOutline
     PolygonBase<ColourRepresentation, Vertices>::drawPolygon(outline_, target);
   }
 
-  inline const Colour<ColourRepresentation>& outline() const  { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const { return outline_; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }

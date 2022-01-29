@@ -24,14 +24,12 @@ TEST(SPIFFSDriverTests, ReadingFromFileTest) {
   std::getline(fileHandler, line);
   TEST_ASSERT_EQUAL_STRING("Hello World!", line.c_str());
   ESP_LOGI(TAG_, "Read from hello.txt: %s", line.c_str());
-  fileHandler.close();
 }
 
 TEST(SPIFFSDriverTests, CreatingNewFile) {
   SPIFFSDriver spiffsDriver = SPIFFSDriver();
   auto fileHandler = spiffsDriver.createNewFile("test.txt");
   fileHandler << "test\n";
-  fileHandler.close();
 }
 
 TEST(SPIFFSDriverTests, ReadingFromNewFile) {
@@ -40,7 +38,6 @@ TEST(SPIFFSDriverTests, ReadingFromNewFile) {
   std::string line;
   std::getline(fileHandler, line);
   TEST_ASSERT_EQUAL_STRING("test", line.c_str());
-  fileHandler.close();
 }
 
 TEST(SPIFFSDriverTests, DeletingFile) {
