@@ -4,6 +4,8 @@
 
 #include <memory>
 
+#include "SPIFFSDriver.hpp"
+
 namespace tamagotchi {
 namespace App {
 namespace Game {

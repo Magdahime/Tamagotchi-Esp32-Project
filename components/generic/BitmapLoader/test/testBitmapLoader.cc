@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include "EspGL.hpp"
+#include "Globals.hpp"
 #include "Graphics/Font/EspGLFont.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
-#include "SPIFFSDriver.hpp"
 #include "unity.h"
 #include "unity_fixture.h"
 
@@ -14,10 +14,8 @@ TEST_SETUP(BitmapLoaderTests) {}
 TEST_TEAR_DOWN(BitmapLoaderTests) { tamagotchi::EspGL::delay(1000); }
 
 TEST(BitmapLoaderTests, ParseMagicNumberTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
-      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::BitmapLoader::BitmapLoader bitmapLoader(
-      spiffsDriver.getFileDescriptor("fullFont.pbm"));
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   std::string magicNumber = bitmapLoader.parseMagicNumber();
   TEST_ASSERT_EQUAL_STRING("P1", magicNumber.c_str());
   ESP_LOGI(tamagotchi::EspGL::TAG_, "Read from fullFont.pbm: %s",
@@ -25,10 +23,8 @@ TEST(BitmapLoaderTests, ParseMagicNumberTest) {
 }
 
 TEST(BitmapLoaderTests, ParseDimensionsTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
-      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::BitmapLoader::BitmapLoader bitmapLoader(
-      spiffsDriver.getFileDescriptor("fullFont.pbm"));
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   bitmapLoader.parseMagicNumber();
   auto dimensions = bitmapLoader.parseDimensions();
   TEST_ASSERT_EQUAL_INT(dimensions.first, 6);
@@ -36,10 +32,8 @@ TEST(BitmapLoaderTests, ParseDimensionsTest) {
 }
 
 TEST(BitmapLoaderTests, ParseLettersTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
-      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::BitmapLoader::BitmapLoader bitmapLoader(
-      spiffsDriver.getFileDescriptor("fullFont.pbm"));
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   bitmapLoader.parseMagicNumber();
   bitmapLoader.parseDimensions();
   auto bitmapNumber = bitmapLoader.parseBitmapNumber();
@@ -50,10 +44,8 @@ TEST(BitmapLoaderTests, ParseLettersTest) {
 }
 
 TEST(BitmapLoaderTests, ParseBitmapTest) {
-  tamagotchi::SPIFFS::SPIFFSDriver spiffsDriver =
-      tamagotchi::SPIFFS::SPIFFSDriver();
   tamagotchi::BitmapLoader::BitmapLoader bitmapLoader(
-      spiffsDriver.getFileDescriptor("fullFont.pbm"));
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   std::map<std::string, std::vector<bool>> fontMap;
   bitmapLoader.parseMagicNumber();
   auto dimensions = bitmapLoader.parseDimensions();

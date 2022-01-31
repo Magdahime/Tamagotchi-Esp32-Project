@@ -7,6 +7,7 @@
 
 #include "EspGLDriver.hpp"
 #include "EspGLScreen.hpp"
+#include "SPIFFSDriver.hpp"
 #include "ST7789Driver.hpp"
 #include "StartState.hpp"
 #include "State.hpp"

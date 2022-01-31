@@ -22,7 +22,7 @@ SPIFFSDriver::SPIFFSDriver(std::string basePath, std::string partitionLabel,
       partitionLabel_(partitionLabel),
       maxFiles_(maxFiles),
       formatIfMountFailed_(formatIfMountFailed) {
-  ESP_LOGI(TAG_, "Initializing SPIFFS");
+  ESP_LOGI(TAG_, "Initializing SPIFFS %p", this);
 
   esp_vfs_spiffs_conf_t conf = {.base_path = basePath_.c_str(),
                                 .partition_label = partitionLabel_.c_str(),
@@ -54,7 +54,7 @@ SPIFFSDriver::SPIFFSDriver(std::string basePath, std::string partitionLabel,
 
 SPIFFSDriver::~SPIFFSDriver() {
   esp_vfs_spiffs_unregister(partitionLabel_.c_str());
-  ESP_LOGI(TAG_, "SPIFFS unmounted");
+  ESP_LOGI(TAG_, "SPIFFS unmounted %p", this);
 }
 
 bool SPIFFSDriver::deleteFile(std::string filename) {

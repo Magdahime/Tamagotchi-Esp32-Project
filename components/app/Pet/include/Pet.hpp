@@ -15,7 +15,8 @@ namespace App {
 
 namespace Pet {
 
-constexpr int32_t PET_NEEDS = 2;
+constexpr size_t PET_NEEDS = 2;
+constexpr int MAX_NEED_VALUE = 100;
 constexpr int EYES_OFFSETX = 5;
 constexpr int EYES_OFFSETY = 10;
 constexpr int FACE_OFFSETY = 13;
@@ -27,11 +28,15 @@ class Pet {
       std::pair<std::string, EspGL::Bitmap> eyes,
       std::pair<std::string, EspGL::Bitmap> face,
       EspGL::Colour<ColourRepresentation> colour)
-      : needs_({100}),
-        colour_(std::move(colour)),
+      : colour_(std::move(colour)),
         body_(std::move(body)),
         eyes_(std::move(eyes)),
-        face_(std::move(face)) {}
+        face_(std::move(face)) {
+    needs_.resize(PET_NEEDS);
+    std::fill(needs_.begin(), needs_.end(), MAX_NEED_VALUE);
+  }
+  Pet() = default;
+
   void giveFood();
   void giveSnack();
   void play();
@@ -47,12 +52,12 @@ class Pet {
   inline std::pair<std::string, EspGL::Bitmap>& eyes() { return eyes_; }
   inline std::pair<std::string, EspGL::Bitmap>& face() { return face_; }
   inline std::string& name() { return name_; }
-  inline std::array<int16_t, PET_NEEDS> needs() { return needs_; }
-  inline EspGL::Colour<ColourRepresentation> colour() { return colour_; }
+  inline std::vector<int16_t>& needs() { return needs_; }
+  inline EspGL::Colour<ColourRepresentation>& colour() { return colour_; }
 
  private:
   std::string name_;
-  std::array<int16_t, PET_NEEDS> needs_;
+  std::vector<int16_t> needs_;
   EspGL::Colour<ColourRepresentation> colour_;
   std::pair<std::string, EspGL::Bitmap> body_;
   std::pair<std::string, EspGL::Bitmap> eyes_;

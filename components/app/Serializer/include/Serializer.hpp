@@ -20,6 +20,8 @@ class Serializer {
   Serializer() = default;
   virtual void serialize(Pet::Pet<uint16_t>* pet,
                          std::string filename = "pet.ser");
+  void deserialize(std::fstream& fileHandle, Pet::Pet<uint16_t>& pet);
+
   void serialize(std::fstream& fileHandle, std::string string);
   void deserialize(std::fstream& fileHandle, std::string& deserializedString);
 
@@ -68,7 +70,6 @@ class Serializer {
   }
 
  private:
-  SPIFFS::SPIFFSDriver spiffsDriver_;
 };
 
 }  // namespace Serializer

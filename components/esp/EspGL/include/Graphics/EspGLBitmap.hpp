@@ -1,9 +1,9 @@
 #pragma once
 #include <stdint.h>
 
+#include <optional>
 #include <stdexcept>
 #include <vector>
-#include <optional>
 
 #include "EspGL.hpp"
 #include "EspGLUtils.hpp"
@@ -39,8 +39,8 @@ class Bitmap {
 
   void overlay(Bitmap& bitmap, Point& start);
 
-  inline size_t sizeX() { return sizeX_; }
-  inline size_t sizeY() { return sizeY_; }
+  inline size_t& sizeX() { return sizeX_; }
+  inline size_t& sizeY() { return sizeY_; }
   inline std::vector<bool>& bitmap() { return bitmap_; };
   inline bool empty() const { return bitmap_.empty(); }
   inline bool at(int64_t index) const { return bitmap_[index]; }

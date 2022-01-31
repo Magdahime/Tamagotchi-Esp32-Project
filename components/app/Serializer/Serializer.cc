@@ -1,5 +1,6 @@
 #include "Serializer.hpp"
 
+#include "Globals.hpp"
 #include "Pet.hpp"
 namespace tamagotchi {
 namespace App {
@@ -52,7 +53,7 @@ void Serializer::deserialize(std::fstream& fileHandle,
 }
 
 void Serializer::serialize(Pet::Pet<uint16_t>* pet, std::string filename) {
-  auto fileHandle = spiffsDriver_.createNewFile(filename);
+  auto fileHandle = Globals::spiffsDriver.createNewFile(filename);
   if (fileHandle.is_open()) {
     // NAME
     serialize(fileHandle, pet->name());
@@ -75,12 +76,40 @@ void Serializer::serialize(Pet::Pet<uint16_t>* pet, std::string filename) {
     serialize(fileHandle, eyes.first);
     serialize(fileHandle, eyes.second.sizeX());
     serialize(fileHandle, eyes.second.sizeY());
+    serialize(fileHandle, eyes.second.bitmap());
     // FACE
     auto face = pet->face();
     serialize(fileHandle, face.first);
     serialize(fileHandle, face.second.sizeX());
     serialize(fileHandle, face.second.sizeY());
+    serialize(fileHandle, face.second.bitmap());
   }
+}
+
+void Serializer::deserialize(std::fstream& fileHandle,
+                             Pet::Pet<uint16_t>& pet) {
+  deserialize(fileHandle, pet.name());
+
+  deserialize(fileHandle, pet.needs());
+
+  uint16_t colourValue;
+  deserialize(fileHandle, colourValue);
+  pet.colour().setValue(colourValue);
+
+  deserialize(fileHandle, pet.body().first);
+  deserialize(fileHandle, pet.body().second.sizeX());
+  deserialize(fileHandle, pet.body().second.sizeY());
+  deserialize(fileHandle, pet.body().second.bitmap());
+
+  deserialize(fileHandle, pet.eyes().first);
+  deserialize(fileHandle, pet.eyes().second.sizeX());
+  deserialize(fileHandle, pet.eyes().second.sizeY());
+  deserialize(fileHandle, pet.eyes().second.bitmap());
+
+  deserialize(fileHandle, pet.face().first);
+  deserialize(fileHandle, pet.face().second.sizeX());
+  deserialize(fileHandle, pet.face().second.sizeY());
+  deserialize(fileHandle, pet.face().second.bitmap());
 }
 
 }  // namespace Serializer

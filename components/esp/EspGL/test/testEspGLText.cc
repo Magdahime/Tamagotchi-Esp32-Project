@@ -1,8 +1,8 @@
 #include "EspGLScreen.hpp"
 #include "EspGLUtils.hpp"
+#include "Globals.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
 #include "Graphics/Text/EspGLText.hpp"
-#include "SPIFFSDriver.hpp"
 #include "ST7789Driver.hpp"
 #include "unity.h"
 #include "unity_fixture.h"
@@ -26,14 +26,16 @@ TEST_SETUP(EspGLTextTests) {
 TEST_TEAR_DOWN(EspGLTextTests) {}
 
 TEST(EspGLTextTests, PrintingTextTest) {
-  tamagotchi::EspGL::FontLoader fLoader("fullFont.pbm");
+  tamagotchi::EspGL::FontLoader fLoader(
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   Font font = fLoader.load();
   Text<uint16_t> text("Hello World", font, Colour<uint16_t>(colours::GREEN));
   text.draw(screen, {0, 0});
 }
 
 TEST(EspGLTextTests, PrintingAlphabetTest) {
-  tamagotchi::EspGL::FontLoader fLoader("fullFont.pbm");
+  tamagotchi::EspGL::FontLoader fLoader(
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   Font font = fLoader.load();
   Text<uint16_t> text(
       "0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z "
@@ -43,7 +45,8 @@ TEST(EspGLTextTests, PrintingAlphabetTest) {
 }
 
 TEST(EspGLTextTests, PrintingLongTextTest) {
-  tamagotchi::EspGL::FontLoader fLoader("fullFont.pbm");
+  tamagotchi::EspGL::FontLoader fLoader(
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   Font font = fLoader.load();
   Text<uint16_t> text(
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer quis "

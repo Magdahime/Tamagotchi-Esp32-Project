@@ -11,20 +11,16 @@
 #include "BitmapLoader.hpp"
 #include "EspGLFont.hpp"
 #include "EspGLUtils.hpp"
-#include "SPIFFSDriver.hpp"
 
 namespace tamagotchi {
 namespace EspGL {
 
 class FontLoader {
  public:
-  FontLoader(std::string filename)
-      : spiffsDriver_(),
-        bitmapLoader_(spiffsDriver_.getFileDescriptor(filename)) {}
+  FontLoader(std::fstream fileHandle) : bitmapLoader_(std::move(fileHandle)) {}
   Font load();
 
  private:
-  SPIFFS::SPIFFSDriver spiffsDriver_;
   BitmapLoader::BitmapLoader bitmapLoader_;
 };
 

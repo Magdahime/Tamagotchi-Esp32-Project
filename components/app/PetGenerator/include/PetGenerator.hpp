@@ -7,6 +7,7 @@
 #include "BitmapLoader.hpp"
 #include "ColourProvider.hpp"
 #include "EspGLUtils.hpp"
+#include "Globals.hpp"
 #include "Graphics/EspGLBitmap.hpp"
 #include "Pet.hpp"
 #include "SPIFFSDriver.hpp"
@@ -20,8 +21,8 @@ template <typename ColourRepresentation>
 class PetGenerator {
  public:
   PetGenerator(std::string filename)
-      : spiffsDriver_(),
-        bitmapLoader_(spiffsDriver_.getFileDescriptor(filename)) {
+      : bitmapLoader_(tamagotchi::App::Globals::spiffsDriver.getFileDescriptor(
+            filename)) {
     loadData();
   }
   Pet<ColourRepresentation> generate();
@@ -34,7 +35,6 @@ class PetGenerator {
   inline EspGL::Bitmap& petBitmap() { return petBitmap_; }
 
  private:
-  SPIFFS::SPIFFSDriver spiffsDriver_;
   BitmapLoader::BitmapLoader bitmapLoader_;
   EspGL::Bitmap petBitmap_;
   std::map<std::string, EspGL::Bitmap> eyes_;
