@@ -76,8 +76,9 @@ TEST(SerializerTests, SerializeVectorOfBool) {
 }
 
 TEST(SerializerTests, SerializePet) {
+  tamagotchi::App::Pet::Pet<uint16_t> pet;
   tamagotchi::App::Pet::PetGenerator<uint16_t> petGen("petComponents.pbm");
-  auto pet = petGen.generate();
+  pet = petGen.generate();
   tamagotchi::App::Serializer::Serializer serializer;
   pet.accept(serializer);
   tamagotchi::App::Pet::Pet<uint16_t> deserializedPet;
