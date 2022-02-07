@@ -1,4 +1,4 @@
 idf_component_register(SRCS "StartState.cc"
                     INCLUDE_DIRS "include"
-                    REQUIRES Event Globals Serializer PetGenerator Pet)
+                    REQUIRES Event PetGenerator Serializer Game Globals)
 component_compile_options(-std=gnu++17)

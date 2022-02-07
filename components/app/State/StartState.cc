@@ -1,12 +1,5 @@
 #include "StartState.hpp"
 
-#include "Globals.hpp"
-#include "Graphics/Text/EspGLText.hpp"
-#include "Pet.hpp"
-#include "PetGenerator.hpp"
-#include "Serializer.hpp"
-#include "State.hpp"
-
 namespace tamagotchi {
 
 namespace App {

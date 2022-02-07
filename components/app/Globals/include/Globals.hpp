@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Game.hpp"
 #include "SPIFFSDriver.hpp"
 
 namespace tamagotchi {
@@ -14,7 +13,6 @@ constexpr char FONT_FILE_PATH[] = "fullFont.pbm";
 }  // namespace defaultValues
 
 extern SPIFFS::SPIFFSDriver spiffsDriver;
-extern Game::Game game;
 
 }  // namespace Globals
 }  // namespace App

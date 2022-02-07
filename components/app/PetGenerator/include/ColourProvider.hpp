@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+
 #include <vector>
 
 #include "EspGLUtils.hpp"
@@ -15,7 +16,7 @@ template <typename ColourRepresentation>
 std::vector<EspGL::Colour<ColourRepresentation>> getPossibleColours();
 
 template <>
- std::vector<EspGL::Colour<uint16_t>> getPossibleColours();
+std::vector<EspGL::Colour<uint16_t>> getPossibleColours<uint16_t>();
 
 }  // namespace ColourProvider
 

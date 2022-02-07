@@ -26,8 +26,6 @@ class PetGenerator {
     loadData();
   }
   Pet<ColourRepresentation> generate();
-  Pet<ColourRepresentation> recreatePet(std::string body, std::string eyes,
-                                        std::string face);
 
   inline std::map<std::string, EspGL::Bitmap>& bodies() { return bodies_; }
   inline std::map<std::string, EspGL::Bitmap>& eyes() { return eyes_; }

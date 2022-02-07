@@ -8,7 +8,6 @@
 #include "EspGLUtils.hpp"
 #include "Graphics/EspGLBitmap.hpp"
 #include "Graphics/EspGLPicture.hpp"
-#include "Serializer.hpp"
 
 namespace tamagotchi {
 namespace App {
@@ -43,10 +42,6 @@ class Pet {
 
   void draw(EspGL::Screen<ColourRepresentation>& target, EspGL::Point start,
             uint32_t scale = 5);
-
-  virtual void accept(Serializer::Serializer& serializer) {
-    serializer.serialize(this);
-  }
 
   inline std::pair<std::string, EspGL::Bitmap>& body() { return body_; }
   inline std::pair<std::string, EspGL::Bitmap>& eyes() { return eyes_; }

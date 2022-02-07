@@ -1,6 +1,5 @@
 #include "Globals.hpp"
 
-#include "Game.hpp"
 
 namespace tamagotchi {
 namespace App {
