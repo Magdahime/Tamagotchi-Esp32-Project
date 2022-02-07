@@ -52,8 +52,6 @@ class Text {
   inline void setFont(Font font) { font_ = font; }
 
  private:
-  // void drawLetter(Screen<ColourRepresentation>& target, Bitmap& bitmap,
-  //                 Point cursor);
   Point drawWhitespace(char whitespace, Point cursor);
   uint16_t letterSpacing_;
   uint16_t lineSpacing_;
@@ -109,35 +107,6 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
     }
   }
 }
-
-// template <typename ColourRepresentation>
-// void EspGL::Text<ColourRepresentation>::drawLetter(
-//     Screen<ColourRepresentation>& target, Bitmap& bitmap, Point cursor) {
-//   uint32_t offset = cursor.x_;
-//   size_t widthCounter = bitmap.sizeX() * characterScale_;
-//   for (const auto& bit : bitmap.bitmap()) {
-//     if (background_ && bit == false) {
-//       for (auto i = 0; i < characterScale_; ++i) {
-//         target.screenDriver()->writePixelArea(
-//             cursor.x_, cursor.x_ + characterScale_, cursor.y_ + i,
-//             cursor.y_ + i, background_.value().value());
-//       }
-//     } else if (bit == true) {
-//       for (auto i = 0; i < characterScale_; ++i) {
-//         target.screenDriver()->writePixelArea(
-//             cursor.x_, cursor.x_ + characterScale_, cursor.y_ + i,
-//             cursor.y_ + i, colour_.value());
-//       }
-//     }
-//     cursor.x_ += characterScale_;
-//     widthCounter -= characterScale_;
-//     if (widthCounter <= 0) {
-//       cursor.x_ = offset;
-//       cursor.y_ += characterScale_;
-//       widthCounter = bitmap.sizeX() * characterScale_;
-//     }
-//   }
-// }
 
 }  // namespace EspGL
 }  // namespace tamagotchi

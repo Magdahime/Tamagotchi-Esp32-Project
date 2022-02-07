@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "Globals.hpp"
 #include "SPIFFSDriver.hpp"
 
 namespace tamagotchi {
@@ -15,8 +16,12 @@ xQueueHandle Game::eventQueue_ =
 
 Game::Game() {
   initializeScreen();
+  EspGL::FontLoader fLoader(Globals::spiffsDriver.getFileDescriptor(
+      Globals::defaultValues::FONT_FILE_PATH));
+  font_ = fLoader.load();
   createStates();
   currentState_ = states_[State::StateType::Start].get();
+  currentState_->run();
 }
 
 void Game::createStates() {
@@ -49,6 +54,11 @@ void Game::mainLoop() {
   // while (xQueueReceive(eventQueue_, &(pxRxedPointer), (TickType_t)10) ==
   //        pdPASS) {
   // }
+}
+
+void Game::shiftState(const State::StateType& newState) {
+  currentState_ = states_[newState].get();
+  currentState_->run();
 }
 
 }  // namespace Game

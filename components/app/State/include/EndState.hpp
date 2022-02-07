@@ -1,4 +1,5 @@
 #pragma once
+#include "Event.hpp"
 #include "State.hpp"
 
 namespace tamagotchi {
@@ -10,6 +11,7 @@ namespace State {
 class EndState : public State {
  public:
   virtual void handleEvent(Event::Event Event) override;
+  virtual void run() override;
 
  private:
 };
@@ -18,4 +20,4 @@ class EndState : public State {
 
 }  // namespace App
 
-} 
+}  // namespace tamagotchi

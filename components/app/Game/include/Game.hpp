@@ -7,6 +7,9 @@
 
 #include "EspGLDriver.hpp"
 #include "EspGLScreen.hpp"
+#include "Graphics/Font/EspGLFontLoader.hpp"
+#include "Graphics/Text/EspGLText.hpp"
+#include "Pet.hpp"
 #include "SPIFFSDriver.hpp"
 #include "ST7789Driver.hpp"
 #include "StartState.hpp"
@@ -28,17 +31,27 @@ class Game {
     static Game instance;
     return instance;
   }
+
+  ~Game() = default;
   void mainLoop();
   void shiftState(const State::StateType& newState);
   static bool putQueue(Event::Event* event);
-  ~Game() = default;
+
+  Pet::Pet<uint16_t>& pet() { return pet_; }
+  void setPet(Pet::Pet<uint16_t>& pet) { pet_ = pet; }
+
+  void setFont(EspGL::Font& font) { font_ = font; }
+  EspGL::Font& font() { return font_; }
+
   EspGL::Screen<uint16_t>& screen() { return screen_; }
 
  private:
   State::State* currentState_;
+  Pet::Pet<uint16_t> pet_;
   std::map<State::StateType, std::unique_ptr<State::State>> states_;
   EspGL::Screen<uint16_t> screen_;
   static xQueueHandle eventQueue_;
+  EspGL::Font font_;
 
   void initializeScreen();
   void createStates();

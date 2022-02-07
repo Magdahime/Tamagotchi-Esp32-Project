@@ -9,7 +9,9 @@ namespace State {
 
 class State {
  public:
+  virtual ~State() = default;
   virtual void handleEvent(Event::Event Event) = 0;
+  virtual void run() = 0;
 
  private:
 };

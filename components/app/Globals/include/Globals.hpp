@@ -1,13 +1,21 @@
 #pragma once
 
+#include "Game.hpp"
 #include "SPIFFSDriver.hpp"
 
 namespace tamagotchi {
 namespace App {
 namespace Globals {
 
-extern SPIFFS::SPIFFSDriver spiffsDriver;
+namespace defaultValues {
+constexpr char PET_COMPONENTS_PATH[] = "petComponents.pbm";
+constexpr char SERIALIZED_PET_PATH[] = "pet.ser";
+constexpr char FONT_FILE_PATH[] = "fullFont.pbm";
+}  // namespace defaultValues
 
-}
+extern SPIFFS::SPIFFSDriver spiffsDriver;
+extern Game::Game game;
+
+}  // namespace Globals
 }  // namespace App
 }  // namespace tamagotchi
