@@ -80,7 +80,7 @@ TEST(SerializerTests, SerializePet) {
   tamagotchi::App::Pet::PetGenerator<uint16_t> petGen("petComponents.pbm");
   pet = petGen.generate();
   tamagotchi::App::Serializer::Serializer serializer;
-  pet.accept(serializer);
+  serializer.serialize(&pet);
   tamagotchi::App::Pet::Pet<uint16_t> deserializedPet;
   auto deserializeFileHandle =
       tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("pet.ser");

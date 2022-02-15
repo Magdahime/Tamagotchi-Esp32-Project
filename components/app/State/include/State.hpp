@@ -1,5 +1,6 @@
 #pragma once
 #include "Event.hpp"
+#include "esp_log.h"
 
 namespace tamagotchi {
 

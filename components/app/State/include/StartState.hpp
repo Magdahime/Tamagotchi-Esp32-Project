@@ -1,13 +1,13 @@
 #pragma once
 #include "Event.hpp"
-#include "Globals.hpp"
 #include "Game.hpp"
+#include "Globals.hpp"
 #include "Graphics/Text/EspGLText.hpp"
 #include "Pet.hpp"
 #include "PetGenerator.hpp"
 #include "Serializer.hpp"
 #include "State.hpp"
-
+#include "esp_log.h"
 
 namespace tamagotchi {
 
@@ -22,6 +22,7 @@ class StartState : public State {
   virtual void run() override;
 
  private:
+  static constexpr char TAG_[] = "StartState";
 };
 
 }  // namespace State

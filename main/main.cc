@@ -2,12 +2,17 @@
 
 #include "EspnowDriver.hpp"
 #include "Game.hpp"
+#include "Globals.hpp"
 #include "Joystick.hpp"
 #include "ST7789Driver.hpp"
 #include "esp_spi_flash.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
+namespace tamagotchi::App::Globals {
+Game::Game game = tamagotchi::App::Game::Game();
+}
 
 void cc_app_main() {
   printf("Hello tamagotchi!\n");
@@ -18,8 +23,7 @@ void cc_app_main() {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
-
-  tamagotchi::App::Game::Game::getInstance();
+  tamagotchi::App::Globals::game.run();
 }
 
 extern "C" void app_main() { cc_app_main(); }

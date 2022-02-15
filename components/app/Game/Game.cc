@@ -18,18 +18,25 @@ Game::Game() {
   initializeScreen();
   EspGL::FontLoader fLoader(Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::FONT_FILE_PATH));
+  ESP_LOGI(TAG_, "Loading font");
   font_ = fLoader.load();
   createStates();
+}
+
+void Game::run() {
   currentState_ = states_[State::StateType::Start].get();
+  ESP_LOGI(TAG_, "Running StartingState");
   currentState_->run();
 }
 
 void Game::createStates() {
+  ESP_LOGI(TAG_, "Creating states");
   states_.emplace(State::StateType::Start,
                   std::make_unique<State::StartState>());
 }
 
 void Game::initializeScreen() {
+  ESP_LOGI(TAG_, "Initializing screen");
   ST7789::structs::gpio_config_t gpio = {
       .gpioMosi = (gpio_num_t)ST7789::consts::GPIOMOSI,
       .gpioSclk = (gpio_num_t)ST7789::consts::GPIOSCLK,
