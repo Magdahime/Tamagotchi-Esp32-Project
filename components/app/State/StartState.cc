@@ -16,7 +16,7 @@ void StartState::run() {
   tamagotchi::App::Globals::game.screen().fill(EspGL::colours::BLACK);
   ESP_LOGI(TAG_, "Filling window black");
   EspGL::Text<uint16_t> welcomeText(
-      "Welcome!", tamagotchi::App::Globals::game.font(),
+      "#######\nWelcome!\n#######", tamagotchi::App::Globals::game.font(),
       EspGL::Colour<uint16_t>(EspGL::colours::GREEN));
   welcomeText.draw(tamagotchi::App::Globals::game.screen(), {0, 0});
 

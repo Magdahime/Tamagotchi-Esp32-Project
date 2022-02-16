@@ -52,7 +52,7 @@ class Text {
   inline void setFont(Font font) { font_ = font; }
 
  private:
-  Point drawWhitespace(char whitespace, Point cursor);
+  Point drawWhitespace(char whitespace, Point cursor, Point start);
   uint16_t letterSpacing_;
   uint16_t lineSpacing_;
   uint32_t characterScale_;
@@ -63,11 +63,13 @@ class Text {
 };
 
 template <typename ColourRepresentation>
-Point Text<ColourRepresentation>::drawWhitespace(char whitespace,
-                                                 Point cursor) {
+Point Text<ColourRepresentation>::drawWhitespace(char whitespace, Point cursor,
+                                                 Point start) {
   switch (whitespace) {
     case '\n':
-      cursor.y_ += lineSpacing_ * characterScale_;
+      printf("KUPCIA\n");
+      cursor.y_ += (font_.null().sizeY() + lineSpacing_) * characterScale_;
+      cursor.x_ = start.x_;
       break;
     case ' ':
       cursor.x_ += letterSpacing_ * characterScale_;
@@ -87,7 +89,7 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
   uint32_t offsetY = start.y_;
   for (const auto& letter : text_) {
     if (isspace(letter)) {
-      auto cursor = drawWhitespace(letter, {offsetX, offsetY});
+      auto cursor = drawWhitespace(letter, {offsetX, offsetY}, start);
       offsetX = cursor.x_;
       offsetY = cursor.y_;
     } else {
