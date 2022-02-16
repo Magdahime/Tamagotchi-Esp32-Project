@@ -64,8 +64,19 @@ TEST(EspGLTextTests, PrintingLongTextTest) {
   text.draw(screen, {0, 0});
 }
 
+TEST(EspGLTextTests, DebuggingTest) {
+  tamagotchi::EspGL::FontLoader fLoader(
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
+  Font font = fLoader.load();
+  Text<uint16_t> text(
+      "u u v v w w x x y y z z . . , , : : ; ; ! ! % % ? ? # #",
+      font, Colour<uint16_t>(colours::RED));
+  text.draw(screen, {0, 0});
+}
+
 TEST_GROUP_RUNNER(EspGLTextTests) {
   RUN_TEST_CASE(EspGLTextTests, PrintingTextTest)
   RUN_TEST_CASE(EspGLTextTests, PrintingAlphabetTest)
   RUN_TEST_CASE(EspGLTextTests, PrintingLongTextTest)
+  RUN_TEST_CASE(EspGLTextTests, DebuggingTest)
 }
