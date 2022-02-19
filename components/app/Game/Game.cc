@@ -4,8 +4,10 @@
 
 #include <memory>
 
+#include "EndState.hpp"
 #include "Globals.hpp"
 #include "SPIFFSDriver.hpp"
+#include "StartState.hpp"
 
 namespace tamagotchi {
 namespace App {
@@ -27,12 +29,14 @@ void Game::run() {
   currentState_ = states_[State::StateType::Start].get();
   ESP_LOGI(TAG_, "Running StartingState");
   currentState_->run();
+  ESP_LOGI(TAG_, "End of the Game.");
 }
 
 void Game::createStates() {
   ESP_LOGI(TAG_, "Creating states");
   states_.emplace(State::StateType::Start,
                   std::make_unique<State::StartState>());
+  states_.emplace(State::StateType::End, std::make_unique<State::EndState>());
 }
 
 void Game::initializeScreen() {
@@ -66,6 +70,14 @@ void Game::mainLoop() {
 void Game::shiftState(const State::StateType& newState) {
   currentState_ = states_[newState].get();
   currentState_->run();
+}
+
+void Game::print(std::string message, EspGL::Point position,
+                 EspGL::Colour<uint16_t> colour, int characterSize) {
+  ESP_LOGI(TAG_, "Writing text on screen: %s", message.c_str());
+  EspGL::Text<uint16_t> text(message, font_, colour, characterSize);
+  text.draw(screen_, position);
+  tamagotchi::EspGL::delay(10);
 }
 
 }  // namespace Game

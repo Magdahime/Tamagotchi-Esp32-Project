@@ -14,7 +14,13 @@ namespace tamagotchi::App::Globals {
 Game::Game game = tamagotchi::App::Game::Game();
 }
 
-void cc_app_main() {
+// TASK FUNCTIONS
+static void runGame(void* pvParameters);
+
+// TASK HANDLERS
+TaskHandle_t mainGameTaskHandle;
+
+extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
   // esp_log_level_set("*", ESP_LOG_DEBUG);
   esp_err_t ret = nvs_flash_init();
@@ -23,7 +29,13 @@ void cc_app_main() {
     ESP_ERROR_CHECK(nvs_flash_erase());
     ret = nvs_flash_init();
   }
-  tamagotchi::App::Globals::game.run();
+
+  xTaskCreate(runGame, "MainGameTask", 4096, NULL, tskIDLE_PRIORITY,
+              &mainGameTaskHandle);
+  vTaskStartScheduler();
 }
 
-extern "C" void app_main() { cc_app_main(); }
+static void runGame(void* pvParameters) {
+  tamagotchi::App::Globals::game.run();
+  vTaskDelete(mainGameTaskHandle);
+}

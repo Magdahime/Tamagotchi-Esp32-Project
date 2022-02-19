@@ -16,16 +16,16 @@ template <typename ColourRepresentation>
 class Text {
  public:
   Text(std::string text, Font& font, Colour<ColourRepresentation> colour,
+       uint32_t characterScale = 3,
        std::optional<Colour<ColourRepresentation>> background = std::nullopt,
-       uint16_t letterSpacing = 5, uint16_t lineSpacing = 2,
-       uint32_t characterScale = 3)
+       uint16_t letterSpacing = 5, uint16_t lineSpacing = 2)
       : letterSpacing_(letterSpacing),
         lineSpacing_(lineSpacing),
         characterScale_(characterScale),
         colour_(colour),
         background_(background),
         text_(std::move(text)),
-        font_(std::move(font)) {}
+        font_(font) {}
   Text(Font& font) : font_(font) {}
   void draw(Screen<ColourRepresentation>& target, Point start);
 
@@ -59,7 +59,7 @@ class Text {
   Colour<ColourRepresentation> colour_;
   std::optional<Colour<ColourRepresentation>> background_;
   std::string text_;
-  Font font_;
+  Font& font_;
 };
 
 template <typename ColourRepresentation>
@@ -67,7 +67,6 @@ Point Text<ColourRepresentation>::drawWhitespace(char whitespace, Point cursor,
                                                  Point start) {
   switch (whitespace) {
     case '\n':
-      printf("KUPCIA\n");
       cursor.y_ += (font_.null().sizeY() + lineSpacing_) * characterScale_;
       cursor.x_ = start.x_;
       break;
@@ -93,6 +92,7 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
       offsetX = cursor.x_;
       offsetY = cursor.y_;
     } else {
+      ESP_LOGI(TAG_, "DRAW");
       auto bitmap = font_.at(letter);
       if (offsetX + bitmap.sizeX() * characterScale_ >= target.width()) {
         offsetY += (bitmap.sizeY() + lineSpacing_) * characterScale_;
@@ -100,11 +100,13 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target,
       }
       if (offsetY + (bitmap.sizeY() + lineSpacing_) * characterScale_ >=
           target.height()) {
+        ESP_LOGI(TAG_, "BREAK");
         break;
       }
       Point newStart(offsetX, offsetY);
       bitmap.drawScaled(target, newStart, colour_, characterScale_,
                         background_);
+      ESP_LOGI(TAG_, "DRAWSCALED");
       offsetX += bitmap.sizeX() + letterSpacing_ * characterScale_;
     }
   }

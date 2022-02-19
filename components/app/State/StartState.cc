@@ -13,13 +13,10 @@ void StartState::handleEvent(Event::Event Event) {}
 
 void StartState::run() {
   ESP_LOGI(TAG_, "StartState running...");
-  tamagotchi::App::Globals::game.screen().fill(EspGL::colours::BLACK);
   ESP_LOGI(TAG_, "Filling window black");
-  EspGL::Text<uint16_t> welcomeText(
-      "#######\nWelcome!\n#######", tamagotchi::App::Globals::game.font(),
-      EspGL::Colour<uint16_t>(EspGL::colours::GREEN));
-  welcomeText.draw(tamagotchi::App::Globals::game.screen(), {0, 0});
-
+  tamagotchi::App::Globals::game.screen().fill(EspGL::colours::BLACK);
+  tamagotchi::App::Globals::game.print("###########\nWelcome!\n###########",
+                                       {0, 0}, EspGL::colours::GREEN);
   auto deserializePetFileHandle = Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::SERIALIZED_PET_PATH);
   if (deserializePetFileHandle.is_open()) {
@@ -34,8 +31,19 @@ void StartState::run() {
     auto pet = petGenerator.generate();
     tamagotchi::App::Globals::game.setPet(pet);
   }
-
+  ESP_LOGI(TAG_, "Filling window black");
+  tamagotchi::App::Globals::game.screen().fill(EspGL::colours::BLACK);
+  tamagotchi::App::Globals::game.print(
+      "###########\nThis is your pet:\n###########", {0, 0},
+      EspGL::colours::GREEN);
+  tamagotchi::App::Globals::game.pet().draw(
+      tamagotchi::App::Globals::game.screen(), {0, 0});
+  tamagotchi::App::Globals::game.pet().draw(
+      tamagotchi::App::Globals::game.screen(), {10, 0});
+  tamagotchi::App::Globals::game.pet().draw(
+      tamagotchi::App::Globals::game.screen(), {100, 100});
   ESP_LOGI(TAG_, "StartState exiting...");
+  tamagotchi::App::Globals::game.shiftState(StateType::End);
 }
 
 }  // namespace State

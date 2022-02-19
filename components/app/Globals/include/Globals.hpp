@@ -9,6 +9,7 @@ class Game;
 }
 namespace Globals {
 
+
 namespace defaultValues {
 constexpr char PET_COMPONENTS_PATH[] = "petComponents.pbm";
 constexpr char SERIALIZED_PET_PATH[] = "pet.ser";

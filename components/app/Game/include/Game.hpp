@@ -7,12 +7,12 @@
 
 #include "EspGLDriver.hpp"
 #include "EspGLScreen.hpp"
+#include "EspGLUtils.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
 #include "Graphics/Text/EspGLText.hpp"
 #include "Pet.hpp"
 #include "SPIFFSDriver.hpp"
 #include "ST7789Driver.hpp"
-#include "StartState.hpp"
 #include "State.hpp"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -31,6 +31,7 @@ class Game {
   void run();
   void mainLoop();
   void shiftState(const State::StateType& newState);
+
   static bool putQueue(Event::Event* event);
 
   Pet::Pet<uint16_t>& pet() { return pet_; }
@@ -40,6 +41,8 @@ class Game {
   EspGL::Font& font() { return font_; }
 
   EspGL::Screen<uint16_t>& screen() { return screen_; }
+  void print(std::string message, EspGL::Point position,
+             EspGL::Colour<uint16_t> colour, int characterSize = 3);
 
  private:
   State::State* currentState_;

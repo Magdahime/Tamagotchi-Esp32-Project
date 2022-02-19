@@ -1,5 +1,6 @@
 #pragma once
 #include "Event.hpp"
+#include "Game.hpp"
 #include "State.hpp"
 
 namespace tamagotchi {
@@ -14,6 +15,7 @@ class EndState : public State {
   virtual void run() override;
 
  private:
+  static constexpr char TAG_[] = "EndState";
 };
 
 }  // namespace State
