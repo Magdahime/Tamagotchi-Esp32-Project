@@ -37,11 +37,12 @@ void StartState::run() {
       "###########\nThis is your pet:\n###########", {0, 0},
       EspGL::colours::GREEN);
   tamagotchi::App::Globals::game.pet().draw(
-      tamagotchi::App::Globals::game.screen(), {0, 0});
-  tamagotchi::App::Globals::game.pet().draw(
-      tamagotchi::App::Globals::game.screen(), {10, 0});
-  tamagotchi::App::Globals::game.pet().draw(
-      tamagotchi::App::Globals::game.screen(), {100, 100});
+      tamagotchi::App::Globals::game.screen(),
+      {tamagotchi::App::Globals::game.screen().width() / 2,
+       tamagotchi::App::Globals::game.screen().height() / 2});
+  tamagotchi::App::Globals::game.print(
+      "Click to continue...", {0, 280},
+      EspGL::colours::GREEN,1);
   ESP_LOGI(TAG_, "StartState exiting...");
   tamagotchi::App::Globals::game.shiftState(StateType::End);
 }
