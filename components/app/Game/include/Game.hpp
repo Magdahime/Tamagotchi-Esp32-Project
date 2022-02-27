@@ -29,10 +29,12 @@ class Game {
   Game();
   ~Game() = default;
   void run();
-  void mainLoop();
-  void shiftState(const State::StateType& newState);
+  void shiftState();
 
-  static bool putQueue(Event::Event* event);
+  static bool putQueue(Event::Event event);
+  static void putQueueFromISR(Event::Event event);
+  static void clearQueue();
+  static Event::Event getQueue(int ms);
 
   Pet::Pet<uint16_t>& pet() { return pet_; }
   void setPet(Pet::Pet<uint16_t>& pet) { pet_ = pet; }
@@ -41,11 +43,19 @@ class Game {
   EspGL::Font& font() { return font_; }
 
   EspGL::Screen<uint16_t>& screen() { return screen_; }
+
   void print(std::string message, EspGL::Point position,
              EspGL::Colour<uint16_t> colour, int characterSize = 3);
 
+  State::StateType currentState() { return currentState_; }
+  State::StateType nextState() { return nextState_; }
+
+  void setNextState(State::StateType newState) { nextState_ = newState; }
+
  private:
-  State::State* currentState_;
+  State::StateType currentState_;
+  State::StateType nextState_;
+
   Pet::Pet<uint16_t> pet_;
   std::map<State::StateType, std::unique_ptr<State::State>> states_;
   EspGL::Screen<uint16_t> screen_;

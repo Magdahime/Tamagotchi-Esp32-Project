@@ -19,6 +19,7 @@ static void runGame(void* pvParameters);
 
 // TASK HANDLERS
 TaskHandle_t mainGameTaskHandle;
+TaskHandle_t joystickTask;
 
 extern "C" void app_main() {
   printf("Hello tamagotchi!\n");
@@ -32,10 +33,13 @@ extern "C" void app_main() {
 
   xTaskCreate(runGame, "MainGameTask", 4096, NULL, tskIDLE_PRIORITY,
               &mainGameTaskHandle);
+  xTaskCreate(tamagotchi::Joystick::Joystick::task, "JoystickTask", 4096, NULL,
+              11, &joystickTask);
   vTaskStartScheduler();
 }
 
 static void runGame(void* pvParameters) {
   tamagotchi::App::Globals::game.run();
   vTaskDelete(mainGameTaskHandle);
+  vTaskDelete(joystickTask);
 }

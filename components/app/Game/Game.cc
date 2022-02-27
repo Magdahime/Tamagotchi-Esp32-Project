@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "EndState.hpp"
+#include "Event.hpp"
 #include "Globals.hpp"
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
@@ -26,9 +27,9 @@ Game::Game() {
 }
 
 void Game::run() {
-  currentState_ = states_[State::StateType::Start].get();
-  ESP_LOGI(TAG_, "Running StartingState");
-  currentState_->run();
+  currentState_ = State::StateType::Start;
+  nextState_ = State::StateType::Start;
+  shiftState();
   ESP_LOGI(TAG_, "End of the Game.");
 }
 
@@ -61,15 +62,38 @@ void Game::initializeScreen() {
                               std::make_unique<ST7789::ST7789VWDriver>(config));
 }
 
-void Game::mainLoop() {
-  // while (xQueueReceive(eventQueue_, &(pxRxedPointer), (TickType_t)10) ==
-  //        pdPASS) {
-  // }
+bool Game::putQueue(Event::Event event) {
+  if (uxQueueSpacesAvailable(eventQueue_) == 0) {
+    Event::Event dummy;
+    xQueueReceive(eventQueue_, &(dummy), (TickType_t)10);
+  }
+  return xQueueSendToBack(eventQueue_, (void*)&event, (TickType_t)10);
 }
 
-void Game::shiftState(const State::StateType& newState) {
-  currentState_ = states_[newState].get();
-  currentState_->run();
+void Game::putQueueFromISR(Event::Event event) {
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  if (xQueueIsQueueFullFromISR(eventQueue_)) {
+    Event::Event dummy;
+    xQueueReceiveFromISR(eventQueue_, (void*)&dummy, &xHigherPriorityTaskWoken);
+  }
+
+  xQueueSendToBackFromISR(eventQueue_, &event, &xHigherPriorityTaskWoken);
+}
+
+Event::Event Game::getQueue(int ms) {
+  Event::Event event;
+  int waitTime = ms > 0 ? ms * portTICK_PERIOD_MS : portMAX_DELAY;
+  xQueueReceive(eventQueue_, &(event), (TickType_t)waitTime);
+  return event;
+}
+
+void Game::clearQueue() { xQueueReset(eventQueue_); }
+
+void Game::shiftState() {
+  auto nextState = states_[nextState_].get();
+  ESP_LOGI(TAG_, "Running new state: %s", nextState->toString().c_str());
+  currentState_ = nextState_;
+  nextState->run();
 }
 
 void Game::print(std::string message, EspGL::Point position,

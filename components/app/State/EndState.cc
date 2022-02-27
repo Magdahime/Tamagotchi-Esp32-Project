@@ -12,11 +12,18 @@ namespace State {
 void EndState::handleEvent(Event::Event Event) {}
 
 void EndState::run() {
-  ESP_LOGI(TAG_, "Filling window black");
-  tamagotchi::App::Globals::game.screen().fill(EspGL::colours::BLACK);
-  tamagotchi::App::Globals::game.print("###########\nGAME OVER\n###########",
-                                       {0, 0}, EspGL::colours::GREEN);
+  init();
+  mainLoop();
+  deinit();
 }
+
+void EndState::init() {
+  ESP_LOGI(TAG_, "Filling window black");
+  Globals::game.screen().fill(EspGL::colours::BLACK);
+  Globals::game.print("###########\nGAME OVER\n###########", {0, 0},
+                      EspGL::colours::GREEN);
+}
+
 }  // namespace State
 
 }  // namespace App

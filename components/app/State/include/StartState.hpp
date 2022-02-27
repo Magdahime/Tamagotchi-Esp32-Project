@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+
 #include "Event.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
@@ -19,7 +21,11 @@ class StartState : public State {
  public:
   StartState() = default;
   virtual void handleEvent(Event::Event Event) override;
-  virtual void run() override;
+  virtual void init() override;
+  virtual void mainLoop() override;
+  virtual void deinit() override;
+
+  virtual std::string toString() override { return TAG_; }
 
  private:
   static constexpr char TAG_[] = "StartState";

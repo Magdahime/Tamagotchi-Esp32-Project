@@ -14,14 +14,12 @@
 namespace tamagotchi {
 namespace Joystick {
 class Joystick {
-public:
-  Joystick();
+ public:
   int32_t checkButtonPress();
-
-private:
   static void task(void *arg);
+
+ private:
   static void handler(void *arg);
-  static xQueueHandle joystickEventQueue;
 
   static volatile int numberOfButtonInterrupts_;
   static volatile bool lastState_;
@@ -29,5 +27,5 @@ private:
   static volatile gpio_num_t gpioNum_;
   static const char *TAG_;
 };
-} // namespace Joystick
-} // namespace tamagotchi
+}  // namespace Joystick
+}  // namespace tamagotchi
