@@ -99,8 +99,8 @@ void Game::shiftState() {
 void Game::print(std::string message, EspGL::Point position,
                  EspGL::Colour<uint16_t> colour, int characterSize) {
   ESP_LOGI(TAG_, "Writing text on screen: %s", message.c_str());
-  EspGL::Text<uint16_t> text(message, font_, colour, characterSize);
-  text.draw(screen_, position);
+  EspGL::Text<uint16_t> text(message, position, font_, colour, characterSize);
+  text.draw(screen_);
   tamagotchi::EspGL::delay(10);
 }
 

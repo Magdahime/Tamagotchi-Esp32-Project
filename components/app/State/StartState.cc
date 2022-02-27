@@ -42,7 +42,6 @@ void StartState::init() {
 }
 void StartState::mainLoop() {
   constexpr int timeToWait = 100;
-
   while (tamagotchi::App::Globals::game.getQueue(timeToWait).type_ ==
          Event::EventTypes::gpio) {
     Globals::game.setNextState(StateType::End);

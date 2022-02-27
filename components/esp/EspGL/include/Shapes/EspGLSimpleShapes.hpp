@@ -6,6 +6,7 @@
 #include <optional>
 #include <stdexcept>
 
+#include "Drawable.hpp"
 #include "EspGL.hpp"
 #include "EspGLScreen.hpp"
 #include "EspGLUtils.hpp"
@@ -15,9 +16,8 @@ namespace tamagotchi {
 namespace EspGL {
 
 template <typename ColourRepresentation>
-class Shape {
+class Shape : Drawable<ColourRepresentation> {
  public:
-  virtual void draw(Screen<ColourRepresentation> &target) = 0;
   virtual ~Shape() = default;
 
  protected:

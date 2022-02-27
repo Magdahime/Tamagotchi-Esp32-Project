@@ -17,6 +17,13 @@ void EndState::run() {
   deinit();
 }
 
+void EndState::mainLoop() {
+  ESP_LOGI(TAG_, "Serializing pet");
+  Serializer::Serializer serializer;
+  serializer.serialize(&(Globals::game.pet()),
+                       Globals::defaultValues::SERIALIZED_PET_PATH);
+}
+
 void EndState::init() {
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(EspGL::colours::BLACK);

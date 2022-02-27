@@ -1,6 +1,7 @@
 #pragma once
 #include "Event.hpp"
 #include "Game.hpp"
+#include "Serializer.hpp"
 #include "State.hpp"
 
 namespace tamagotchi {
@@ -13,7 +14,7 @@ class EndState : public State {
  public:
   virtual void handleEvent(Event::Event Event) override;
   virtual void init() override;
-  virtual void mainLoop() override {}
+  virtual void mainLoop() override;
   virtual void deinit() override {}
   void run() override;
   virtual std::string toString() override { return TAG_; }
