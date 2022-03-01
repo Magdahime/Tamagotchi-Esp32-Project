@@ -34,7 +34,7 @@ class Picture : Drawable<ColourRepresentation> {
 template <typename ColourRepresentation>
 void Picture<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
   target.screenDriver()->writePixelArea(
-      start_.x_, start_.x_ + sizeX_, start_.y_, start_.y_ + sizeY_, , picture_);
+      start_.x_, start_.x_ + sizeX_, start_.y_, start_.y_ + sizeY_, picture_);
 }
 
 }  // namespace EspGL

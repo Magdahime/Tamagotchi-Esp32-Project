@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Drawable.hpp"
 #include "EspGL.hpp"
 #include "EspGLUtils.hpp"
 #include "EspGlScreen.hpp"
@@ -104,6 +105,35 @@ void Bitmap::drawScaled(
       widthCounter = sizeX_ * scale;
     }
   }
+}
+
+template <typename ColourRepresentation>
+class BitmapDrawable : Drawable<ColourRepresentation> {
+ public:
+  BitmapDrawable(
+      size_t sizeX, size_t sizeY, std::vector<bool> bitmap, Point start,
+      int scale, Colour<ColourRepresentation> colour,
+      std::optional<Colour<ColourRepresentation>> background = std::nullopt)
+      : bitmap_(sizeX, sizeY, bitmap),
+        start_(start),
+        scale_(scale),
+        colour_(colour),
+        background_(background) {}
+
+  virtual void draw(Screen<ColourRepresentation>& target) override;
+
+ private:
+  Bitmap bitmap_;
+  Point start_;
+  int scale_;
+  Colour<ColourRepresentation> colour_;
+  std::optional<Colour<ColourRepresentation>> background_;
+};
+
+template <typename ColourRepresentation>
+void BitmapDrawable<ColourRepresentation>::draw(
+    Screen<ColourRepresentation>& target) {
+  bitmap_.drawScaled(target, start_, colour_, scale_, background_);
 }
 
 }  // namespace EspGL

@@ -1,6 +1,9 @@
 #pragma once
+#include <memory>
 #include <string>
+#include <vector>
 
+#include "Drawable.hpp"
 #include "Event.hpp"
 #include "esp_log.h"
 
@@ -23,7 +26,10 @@ class State {
   virtual void run();
   void loop();
 
+  void addDrawable(EspGL::Drawable<uint16_t>* drawable);
+
  private:
+  std::vector<EspGL::Drawable<uint16_t>*> drawables_;
 };
 
 }  // namespace State

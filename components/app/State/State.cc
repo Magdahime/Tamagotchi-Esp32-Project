@@ -18,6 +18,11 @@ void State::loop() {
     mainLoop();
   }
 }
+
+void State::addDrawable(EspGL::Drawable<uint16_t>* drawable) {
+  drawables_.push_back(drawable);
+}
+
 }  // namespace State
 }  // namespace App
 }  // namespace tamagotchi
