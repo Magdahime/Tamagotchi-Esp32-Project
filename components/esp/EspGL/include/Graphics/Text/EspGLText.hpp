@@ -17,11 +17,11 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class Text : Drawable<ColourRepresentation> {
  public:
-  Text(std::string text, Point start, Font& font,
+  Text(std::string text, std::pair<Point, Point> textBox, Font& font,
        Colour<ColourRepresentation> colour, uint32_t characterScale = 3,
        std::optional<Colour<ColourRepresentation>> background = std::nullopt,
        uint16_t letterSpacing = 5, uint16_t lineSpacing = 2)
-      : start_(start),
+      : textBox_(textBox),
         letterSpacing_(letterSpacing),
         lineSpacing_(lineSpacing),
         characterScale_(characterScale),
@@ -38,7 +38,9 @@ class Text : Drawable<ColourRepresentation> {
   inline const Colour<ColourRepresentation>& colour() const { return colour_; }
   inline const std::string& text() const { return text_; }
   inline const Font& font() const { return font_; }
-  inline const Point& start() const { return start_; }
+  inline const Point& start() const { return textBox_.first; }
+  inline const Point& end() const { return textBox_.second; }
+  inline const std::pair<Point, Point>& textBox() const { return textBox_; }
 
   inline void setLetterSpacing(uint16_t letterSpacing) {
     letterSpacing_ = letterSpacing;
@@ -54,11 +56,17 @@ class Text : Drawable<ColourRepresentation> {
   }
   inline void setText(std::string text) { text_ = text; }
   inline void setFont(Font font) { font_ = font; }
-  inline void setStart(Point start) { start_ = start; }
+  inline void setStart(Point start) { textBox_.first = start; }
+  inline void setEnd(Point end) { textBox_.second = end; }
+  inline void setTextBox(std::pair<Point, Point> textBox) {
+    textBox_ = textBox;
+  }
+
+  virtual inline std::pair<Point, Point> getHitbox() override;
 
  private:
   Point drawWhitespace(char whitespace, Point cursor, Point start);
-  Point start_;
+  std::pair<Point, Point> textBox_;
   uint16_t letterSpacing_;
   uint16_t lineSpacing_;
   uint32_t characterScale_;
@@ -87,23 +95,23 @@ Point Text<ColourRepresentation>::drawWhitespace(char whitespace, Point cursor,
 
 template <typename ColourRepresentation>
 void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
-  ESP_LOGD(TAG_, "Drawing text at (%d, %d)in colour: 0x%X", start_.x_,
-           start_.y_, colour_.value());
-  uint32_t offsetX = start_.x_;
-  uint32_t offsetY = start_.y_;
+  ESP_LOGD(TAG_, "Drawing text at (%d, %d)in colour: 0x%X", textBox_.first.x_,
+           textBox_.first.y_, colour_.value());
+  uint32_t offsetX = textBox_.first.x_;
+  uint32_t offsetY = textBox_.first.y_;
   for (const auto& letter : text_) {
     if (isspace(letter)) {
-      auto cursor = drawWhitespace(letter, {offsetX, offsetY}, start_);
+      auto cursor = drawWhitespace(letter, {offsetX, offsetY}, textBox_.first);
       offsetX = cursor.x_;
       offsetY = cursor.y_;
     } else {
       auto bitmap = font_.at(letter);
-      if (offsetX + bitmap.sizeX() * characterScale_ >= target.width()) {
+      if (offsetX + bitmap.sizeX() * characterScale_ >= textBox_.second.x_) {
         offsetY += (bitmap.sizeY() + lineSpacing_) * characterScale_;
-        offsetX = start_.x_;
+        offsetX = textBox_.first.x_;
       }
       if (offsetY + (bitmap.sizeY() + lineSpacing_) * characterScale_ >=
-          target.height()) {
+          textBox_.second.y_) {
         break;
       }
       Point newStart(offsetX, offsetY);
@@ -112,6 +120,12 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
       offsetX += bitmap.sizeX() + letterSpacing_ * characterScale_;
     }
   }
+}
+
+template <typename ColourRepresentation>
+std::pair<Point, Point> Text<ColourRepresentation>::getHitbox() {
+  Point maxPoint;
+  return textBox_;
 }
 
 }  // namespace EspGL

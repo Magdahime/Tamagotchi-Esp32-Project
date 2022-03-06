@@ -16,8 +16,11 @@ void StartState::handleEvent(Event::Event Event) {}
 void StartState::init() {
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(EspGL::colours::BLACK);
-  Globals::game.print("###########\nWelcome!\n###########", {0, 0},
-                      EspGL::colours::GREEN);
+  Globals::game.print(
+      "###########\nWelcome!\n###########",
+      {{0, 0},
+       {Globals::game.screen().width(), Globals::game.screen().height()}},
+      EspGL::colours::GREEN);
   auto deserializePetFileHandle = Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::SERIALIZED_PET_PATH);
   if (deserializePetFileHandle.is_open()) {
@@ -33,12 +36,18 @@ void StartState::init() {
   }
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(EspGL::colours::BLACK);
-  Globals::game.print("###########\nThis is your pet:\n###########", {0, 0},
-                      EspGL::colours::GREEN);
+  Globals::game.print(
+      "###########\nThis is your pet:\n###########",
+      {{0, 0},
+       {Globals::game.screen().width(), Globals::game.screen().height()}},
+      EspGL::colours::GREEN);
   Globals::game.pet().draw(Globals::game.screen(),
                            {0, Globals::game.screen().height() / 2});
-  Globals::game.print("Click to continue...", {0, 280}, EspGL::colours::GREEN,
-                      1);
+  Globals::game.print(
+      "Click to continue...",
+      {{0, 280},
+       {Globals::game.screen().width(), Globals::game.screen().height()}},
+      EspGL::colours::GREEN, 1);
 }
 void StartState::mainLoop() {
   constexpr int timeToWait = 100;

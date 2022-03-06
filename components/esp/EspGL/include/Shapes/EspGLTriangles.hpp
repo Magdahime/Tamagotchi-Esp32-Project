@@ -33,6 +33,15 @@ class TriangleBase : public Shape<ColourRepresentation> {
   inline void setPoint2(Point newPoint) { point2_ = newPoint; }
   inline void setPoint3(Point newPoint) { point3_ = newPoint; }
 
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    return std::make_pair(
+        Point{std::min({point1_.x_, point2_.x_, point3_.x_}),
+              std::min({point1_.y_, point2_.y_, point3_.y_})},
+        Point
+        {std::max({point1_.x_, point2_.x_, point3_.x_}),
+              std::max({point1_.y_, point2_.y_, point3_.y_})});
+  }
+
  protected:
   explicit TriangleBase() = default;
   Point point1_;
@@ -52,13 +61,15 @@ class Triangle : public TriangleBase<ColourRepresentation> {
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& fill() const { return fill_; }
-  inline const std::optional<Colour<ColourRepresentation>>& outline() const  {
+  inline const std::optional<Colour<ColourRepresentation>>& outline() const {
     return outline_.value();
   }
 
   inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
 
-  inline void setOutline(Colour<ColourRepresentation> newOutline) { outline_ = newOutline; }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
 
  protected:
   explicit Triangle() = default;
@@ -76,10 +87,12 @@ class TriangleOutline : public TriangleBase<ColourRepresentation> {
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline const std::optional<Colour<ColourRepresentation>>& outline() const  {
+  inline const std::optional<Colour<ColourRepresentation>>& outline() const {
     return outline_.value();
   }
-  inline void setOutline(Colour<ColourRepresentation> newOutline) { outline_ = newOutline; }
+  inline void setOutline(Colour<ColourRepresentation> newOutline) {
+    outline_ = newOutline;
+  }
 
  protected:
   explicit TriangleOutline() = default;

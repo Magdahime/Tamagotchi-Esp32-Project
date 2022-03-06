@@ -3,6 +3,7 @@
 
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include "Drawable.hpp"
@@ -121,6 +122,12 @@ class BitmapDrawable : Drawable<ColourRepresentation> {
         background_(background) {}
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
+
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    return std::make_pair(Point{start_.x_, start_.y_},
+                          Point{start_.x_ + bitmap_.sizeX() * scale_,
+                                start_.y_ + bitmap_.sizeY() * scale_});
+  }
 
  private:
   Bitmap bitmap_;

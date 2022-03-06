@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "EspGLScreen.hpp"
 #include "EspGLUtils.hpp"
 #include "Globals.hpp"
@@ -29,8 +31,11 @@ TEST(EspGLTextTests, PrintingTextTest) {
   tamagotchi::EspGL::FontLoader fLoader(
       tamagotchi::App::Globals::spiffsDriver.getFileDescriptor("fullFont.pbm"));
   Font font = fLoader.load();
-  Text<uint16_t> text("Hello World", font, Colour<uint16_t>(colours::GREEN));
-  text.draw(screen, {0, 0});
+  Text<uint16_t> text(
+      "Hello World",
+      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      Colour<uint16_t>(colours::GREEN));
+  text.draw(screen);
 }
 
 TEST(EspGLTextTests, PrintingAlphabetTest) {
@@ -40,8 +45,9 @@ TEST(EspGLTextTests, PrintingAlphabetTest) {
   Text<uint16_t> text(
       "0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z "
       "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z !?.,:;%#",
-      font, Colour<uint16_t>(colours::RED));
-  text.draw(screen, {0, 0});
+      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      Colour<uint16_t>(colours::RED));
+  text.draw(screen);
 }
 
 TEST(EspGLTextTests, PrintingLongTextTest) {
@@ -60,8 +66,9 @@ TEST(EspGLTextTests, PrintingLongTextTest) {
       "Phasellus at semper nulla. In hac habitasse platea dictumst. "
       "Suspendisse sem lectus, finibus imperdiet aliquet ut, pellentesque a "
       "orci. Etiam luctus ultrices mattis.",
-      font, Colour<uint16_t>(colours::RED));
-  text.draw(screen, {0, 0});
+      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      Colour<uint16_t>(colours::RED));
+  text.draw(screen);
 }
 
 TEST(EspGLTextTests, DebuggingTest) {
@@ -70,8 +77,9 @@ TEST(EspGLTextTests, DebuggingTest) {
   Font font = fLoader.load();
   Text<uint16_t> text(
       "u u v v w w x x y y z z . . , , : : ; ; ! ! % % ? ? # #",
-      font, Colour<uint16_t>(colours::RED));
-  text.draw(screen, {0, 0});
+      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      Colour<uint16_t>(colours::RED));
+  text.draw(screen);
 }
 
 TEST_GROUP_RUNNER(EspGLTextTests) {

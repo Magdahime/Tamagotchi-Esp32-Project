@@ -5,6 +5,7 @@
 #include <array>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 
 #include "Drawable.hpp"
 #include "EspGL.hpp"
@@ -41,6 +42,10 @@ class Line : public Shape<ColourRepresentation> {
   inline void setEnd(Point newEnd) { end_ = newEnd; }
   inline void setColour(Colour<ColourRepresentation> newColour) {
     colour_ = newColour;
+  }
+
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    return std::make_pair(start_, end_);
   }
 
  private:

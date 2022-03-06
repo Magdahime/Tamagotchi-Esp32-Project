@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <optional>
@@ -25,6 +26,20 @@ class PolygonBase : public Shape<ColourRepresentation> {
   }
   inline void setVertices(std::array<Point, Vertices>& newVertices) {
     vertices_ = newVertices;
+  }
+
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    Point minPoint(std::numeric_limits<decltype(vertices_)::value_type>::max(),
+                   std::numeric_limits<decltype(vertices_)::value_type>::max());
+    Point maxPoint(std::numeric_limits<decltype(vertices_)::value_type>::min(),
+                   std::numeric_limits<decltype(vertices_)::value_type>::min());
+    for (const auto& point : vertices_) {
+      minPoint.x_ = std::min(minPoint.x_, point.x_);
+      minPoint.y_ = std::min(minPoint.y_, point.y_);
+      maxPoint.x_ = std::max(maxPoint.x_, point.x_);
+      maxPoint.y_ = std::max(maxPoint.y_, point.y_);
+    }
+    return std::make_pair(minPoint, maxPoint);
   }
 
  protected:
@@ -71,6 +86,11 @@ class RegularPolygonBase : public PolygonBase<ColourRepresentation, Vertices> {
   inline void setRadius(double newRadius) { radius_ = newRadius; }
   inline void setRotation(double newRotation) { rotation_ = newRotation; }
 
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    return std::make_pair(Point{center_.x_ - radius_, center_.y_ - radius_},
+                          Point{center_.x_ + radius_, center_.y_ + radius_});
+  }
+
  protected:
   Point center_;
   double radius_;
@@ -92,9 +112,18 @@ class RegularPolygonOutline
     PolygonBase<ColourRepresentation, Vertices>::drawPolygon(outline_, target);
   }
 
-  inline const Colour<ColourRepresentation>& outline() const { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_;
+  }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
+  }
+
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    return std::make_pair(Point(this->center_.x_ - this->radius_,
+                                this->center_.y_ - this->radius_),
+                          Point(this->center_.x_ + this->radius_,
+                                this->center_.y_ + this->radius_));
   }
 
  protected:
@@ -116,7 +145,9 @@ class RegularPolygon
 
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline const Colour<ColourRepresentation>& outline() const { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_;
+  }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }

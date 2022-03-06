@@ -44,7 +44,8 @@ class Game {
 
   EspGL::Screen<uint16_t>& screen() { return screen_; }
 
-  void print(std::string message, EspGL::Point position,
+  void print(std::string message,
+             std::pair<EspGL::Point, EspGL::Point> position,
              EspGL::Colour<uint16_t> colour, int characterSize = 3);
 
   State::StateType currentState() { return currentState_; }

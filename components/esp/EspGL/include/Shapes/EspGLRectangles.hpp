@@ -43,6 +43,10 @@ class RectangleBase : public Shape<ColourRepresentation> {
   inline void setDimensionX(int16_t dimensionX) { dimensionX_ = dimensionX; }
   inline void setDimensionY(int16_t dimensionY) { dimensionY_ = dimensionY; }
 
+  virtual inline std::pair<Point, Point> getHitbox() override {
+    return std::make_pair(leftUpperPoint_, rightLowerPoint_);
+  }
+
  protected:
   Point leftUpperPoint_;
   Point rightLowerPoint_;
@@ -63,7 +67,9 @@ class Rectangle : public RectangleBase<ColourRepresentation> {
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& fill() const { return fill_; }
-  inline const Colour<ColourRepresentation>& outline() const { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_;
+  }
 
   inline void setFill(Colour<ColourRepresentation> newFill) { fill_ = newFill; }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
@@ -85,7 +91,9 @@ class RectangleOutline : public RectangleBase<ColourRepresentation> {
         outline_(outline) {}
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
-  inline const Colour<ColourRepresentation>& outline() const { return outline_; }
+  inline const Colour<ColourRepresentation>& outline() const {
+    return outline_;
+  }
   inline void setOutline(Colour<ColourRepresentation> newOutline) {
     outline_ = newOutline;
   }
