@@ -29,10 +29,10 @@ class PolygonBase : public Shape<ColourRepresentation> {
   }
 
   virtual inline std::pair<Point, Point> getHitbox() override {
-    Point minPoint(std::numeric_limits<decltype(vertices_)::value_type>::max(),
-                   std::numeric_limits<decltype(vertices_)::value_type>::max());
-    Point maxPoint(std::numeric_limits<decltype(vertices_)::value_type>::min(),
-                   std::numeric_limits<decltype(vertices_)::value_type>::min());
+    Point minPoint(std::numeric_limits<int>::max(),
+                   std::numeric_limits<int>::max());
+    Point maxPoint(std::numeric_limits<int>::min(),
+                   std::numeric_limits<int>::min());
     for (const auto& point : vertices_) {
       minPoint.x_ = std::min(minPoint.x_, point.x_);
       minPoint.y_ = std::min(minPoint.y_, point.y_);

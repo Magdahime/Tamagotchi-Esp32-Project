@@ -9,6 +9,7 @@
 #include "Globals.hpp"
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
+#include "MainMenuState.hpp"
 
 namespace tamagotchi {
 namespace App {
@@ -37,6 +38,8 @@ void Game::createStates() {
   ESP_LOGI(TAG_, "Creating states");
   states_.emplace(State::StateType::Start,
                   std::make_unique<State::StartState>());
+  states_.emplace(State::StateType::MainMenu,
+                  std::make_unique<State::MainMenuState>());
   states_.emplace(State::StateType::End, std::make_unique<State::EndState>());
 }
 

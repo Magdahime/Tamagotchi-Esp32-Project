@@ -20,6 +20,7 @@ namespace State {
 class StartState : public State {
  public:
   StartState() = default;
+  virtual ~StartState() = default;
   virtual void handleEvent(Event::Event Event) override;
   virtual void init() override;
   virtual void mainLoop() override;

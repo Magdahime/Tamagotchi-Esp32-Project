@@ -20,7 +20,7 @@ TEST(EspGLFontLoaderTests, LoadBitmapTest) {
   tamagotchi::EspGL::Font font = fLoader.load();
 
   TEST_ASSERT_EQUAL_INT(0, font.null().empty());
-  TEST_ASSERT_EQUAL_INT(69, font.size());
+  TEST_ASSERT_EQUAL_INT(70, font.size());
 }
 
 TEST_GROUP_RUNNER(EspGLFontLoaderTests) {

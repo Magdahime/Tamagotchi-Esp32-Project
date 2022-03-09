@@ -38,7 +38,7 @@ TEST(BitmapLoaderTests, ParseLettersTest) {
   bitmapLoader.parseDimensions();
   auto bitmapNumber = bitmapLoader.parseBitmapNumber();
   auto letters = bitmapLoader.parseSymbols(bitmapNumber);
-  TEST_ASSERT_EQUAL_INT(69, letters.size());
+  TEST_ASSERT_EQUAL_INT(70, letters.size());
   TEST_ASSERT_EQUAL_STRING(letters.front().c_str(), "0");
   TEST_ASSERT_EQUAL_STRING(letters.back().c_str(), "null");
 }
@@ -55,7 +55,7 @@ TEST(BitmapLoaderTests, ParseBitmapTest) {
     fontMap.insert(std::make_pair(
         letter, bitmapLoader.parseBitmap(dimensions.first, dimensions.second)));
   }
-  TEST_ASSERT_EQUAL_INT(69, fontMap.size());
+  TEST_ASSERT_EQUAL_INT(70, fontMap.size());
   for (auto& [key, value] : fontMap) {
     TEST_ASSERT_EQUAL_INT(value.size(), 48);
   }

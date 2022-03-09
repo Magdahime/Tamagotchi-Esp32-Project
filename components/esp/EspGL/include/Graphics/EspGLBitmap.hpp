@@ -109,7 +109,7 @@ void Bitmap::drawScaled(
 }
 
 template <typename ColourRepresentation>
-class BitmapDrawable : Drawable<ColourRepresentation> {
+class BitmapDrawable : public Drawable<ColourRepresentation> {
  public:
   BitmapDrawable(
       size_t sizeX, size_t sizeY, std::vector<bool> bitmap, Point start,
@@ -120,7 +120,17 @@ class BitmapDrawable : Drawable<ColourRepresentation> {
         scale_(scale),
         colour_(colour),
         background_(background) {}
-
+  BitmapDrawable(
+      Bitmap& bitmap, Point start, int scale,
+      Colour<ColourRepresentation> colour,
+      std::optional<Colour<ColourRepresentation>> background = std::nullopt)
+      : bitmap_(bitmap),
+        start_(start),
+        scale_(scale),
+        colour_(colour),
+        background_(background) {}
+        
+  virtual ~BitmapDrawable() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   virtual inline std::pair<Point, Point> getHitbox() override {
