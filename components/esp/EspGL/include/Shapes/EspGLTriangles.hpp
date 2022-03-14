@@ -22,7 +22,7 @@ class TriangleBase : public Shape<ColourRepresentation> {
       : point1_(std::move(point1)),
         point2_(std::move(point2)),
         point3_(std::move(point3)) {}
-
+  virtual ~TriangleBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
   inline const Point& point1() const { return point1_; }
@@ -37,8 +37,7 @@ class TriangleBase : public Shape<ColourRepresentation> {
     return std::make_pair(
         Point{std::min({point1_.x_, point2_.x_, point3_.x_}),
               std::min({point1_.y_, point2_.y_, point3_.y_})},
-        Point
-        {std::max({point1_.x_, point2_.x_, point3_.x_}),
+        Point{std::max({point1_.x_, point2_.x_, point3_.x_}),
               std::max({point1_.y_, point2_.y_, point3_.y_})});
   }
 
@@ -58,6 +57,7 @@ class Triangle : public TriangleBase<ColourRepresentation> {
       : TriangleBase<ColourRepresentation>(point1, point2, point3),
         fill_(std::move(fill)),
         outline_(outline) {}
+  virtual ~Triangle() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& fill() const { return fill_; }
@@ -84,7 +84,7 @@ class TriangleOutline : public TriangleBase<ColourRepresentation> {
                   Colour<ColourRepresentation> outline)
       : TriangleBase<ColourRepresentation>(point1, point2, point3),
         outline_(std::move(outline)) {}
-
+  virtual ~TriangleOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const std::optional<Colour<ColourRepresentation>>& outline() const {
@@ -121,6 +121,7 @@ class EquilateralTriangle : public Triangle<ColourRepresentation> {
     this->fill_ = fill;
     this->outline_ = outline;
   }
+  virtual ~EquilateralTriangle() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
  protected:
@@ -149,6 +150,7 @@ class EquilateralTriangleOutline
     this->point3_ = point3;
     this->outline_ = outline;
   }
+  virtual ~EquilateralTriangleOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
  protected:

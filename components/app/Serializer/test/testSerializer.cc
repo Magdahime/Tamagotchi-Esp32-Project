@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+#include <iostream>
+
+#include "DrawablePet.hpp"
+#include "EspGLUtils.hpp"
 #include "Globals.hpp"
 #include "PetGenerator.hpp"
 #include "Serializer.hpp"
@@ -134,10 +138,87 @@ TEST(SerializerTests, SerializePet) {
   }
 }
 
+TEST(SerializerTests, SerializeDrawablePet) {
+  tamagotchi::App::Pet::Pet<uint16_t> dummyPet;
+  tamagotchi::App::Pet::PetGenerator<uint16_t> petGen("petComponents.pbm");
+  dummyPet = petGen.generate();
+  tamagotchi::App::Pet::DrawablePet<uint16_t> drawablePet(
+      dummyPet, tamagotchi::EspGL::Point(0, 0), 5);
+  tamagotchi::App::Serializer::Serializer serializer;
+  serializer.serialize(&drawablePet);
+  tamagotchi::App::Pet::DrawablePet<uint16_t> deserializedDrawablePet;
+  auto deserializeFileHandle =
+      tamagotchi::App::Globals::spiffsDriver.getFileDescriptor(
+          "DrawablePet.ser");
+  serializer.deserialize(deserializeFileHandle, deserializedDrawablePet);
+
+  TEST_ASSERT_EQUAL_STRING(drawablePet.name().c_str(),
+                           deserializedDrawablePet.name().c_str());
+  TEST_ASSERT_EQUAL_INT(drawablePet.needs().size(),
+                        deserializedDrawablePet.needs().size());
+  for (int i = 0; i < deserializedDrawablePet.needs().size(); i++) {
+    TEST_ASSERT_EQUAL_INT(drawablePet.needs()[i],
+                          deserializedDrawablePet.needs()[i]);
+  }
+  TEST_ASSERT_EQUAL_INT(drawablePet.colour().value(),
+                        deserializedDrawablePet.colour().value());
+
+  TEST_ASSERT_EQUAL_STRING(drawablePet.body().first.c_str(),
+                           deserializedDrawablePet.body().first.c_str());
+
+  TEST_ASSERT_EQUAL_INT(drawablePet.body().second.sizeX(),
+                        deserializedDrawablePet.body().second.sizeX());
+  TEST_ASSERT_EQUAL_INT(drawablePet.body().second.sizeY(),
+                        deserializedDrawablePet.body().second.sizeY());
+  TEST_ASSERT_EQUAL_INT(drawablePet.body().second.bitmap().size(),
+                        deserializedDrawablePet.body().second.bitmap().size());
+  for (int i = 0; i < deserializedDrawablePet.body().second.bitmap().size();
+       i++) {
+    TEST_ASSERT_EQUAL_INT(drawablePet.body().second.bitmap()[i],
+                          deserializedDrawablePet.body().second.bitmap()[i]);
+  }
+
+  TEST_ASSERT_EQUAL_STRING(drawablePet.eyes().first.c_str(),
+                           deserializedDrawablePet.eyes().first.c_str());
+
+  TEST_ASSERT_EQUAL_INT(drawablePet.eyes().second.sizeX(),
+                        deserializedDrawablePet.eyes().second.sizeX());
+  TEST_ASSERT_EQUAL_INT(drawablePet.eyes().second.sizeY(),
+                        deserializedDrawablePet.eyes().second.sizeY());
+  TEST_ASSERT_EQUAL_INT(drawablePet.eyes().second.bitmap().size(),
+                        deserializedDrawablePet.eyes().second.bitmap().size());
+  for (int i = 0; i < deserializedDrawablePet.eyes().second.bitmap().size();
+       i++) {
+    TEST_ASSERT_EQUAL_INT(drawablePet.eyes().second.bitmap()[i],
+                          deserializedDrawablePet.eyes().second.bitmap()[i]);
+  }
+
+  TEST_ASSERT_EQUAL_STRING(drawablePet.face().first.c_str(),
+                           deserializedDrawablePet.face().first.c_str());
+  TEST_ASSERT_EQUAL_INT(drawablePet.face().second.sizeX(),
+                        deserializedDrawablePet.face().second.sizeX());
+  TEST_ASSERT_EQUAL_INT(drawablePet.face().second.sizeY(),
+                        deserializedDrawablePet.face().second.sizeY());
+  TEST_ASSERT_EQUAL_INT(drawablePet.face().second.bitmap().size(),
+                        deserializedDrawablePet.face().second.bitmap().size());
+  for (int i = 0; i < deserializedDrawablePet.face().second.bitmap().size();
+       i++) {
+    TEST_ASSERT_EQUAL_INT(drawablePet.face().second.bitmap()[i],
+                          deserializedDrawablePet.face().second.bitmap()[i]);
+  }
+
+  TEST_ASSERT_EQUAL_INT(drawablePet.scale(), deserializedDrawablePet.scale());
+  TEST_ASSERT_EQUAL_INT(drawablePet.start().x_,
+                        deserializedDrawablePet.start().x_);
+  TEST_ASSERT_EQUAL_INT(drawablePet.start().y_,
+                        deserializedDrawablePet.start().y_);
+}
+
 TEST_GROUP_RUNNER(SerializerTests) {
   RUN_TEST_CASE(SerializerTests, SerializeString)
   RUN_TEST_CASE(SerializerTests, SerializeArithmeticType)
   RUN_TEST_CASE(SerializerTests, SerializeVectorOfArithmeticType)
   RUN_TEST_CASE(SerializerTests, SerializeVectorOfBool)
   RUN_TEST_CASE(SerializerTests, SerializePet);
+  RUN_TEST_CASE(SerializerTests, SerializeDrawablePet);
 }

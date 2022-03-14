@@ -19,6 +19,7 @@ class PolygonBase : public Shape<ColourRepresentation> {
  public:
   PolygonBase(std::array<Point, Vertices> vertices)
       : vertices_(std::move(vertices)) {}
+  virtual ~PolygonBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
   inline const std::array<Point, Vertices>& vertices() const {
@@ -77,7 +78,7 @@ class RegularPolygonBase : public PolygonBase<ColourRepresentation, Vertices> {
     }
     this->vertices_ = vertices;
   };
-
+  virtual ~RegularPolygonBase() = default;
   inline const Point& center() const { return center_; }
   inline double radius() { return radius_; }
   inline double rotation() { return rotation_; }
@@ -107,7 +108,7 @@ class RegularPolygonOutline
       : RegularPolygonBase<ColourRepresentation, Vertices>(center, radius,
                                                            rotation),
         outline_(outline) {}
-
+  virtual ~RegularPolygonOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override {
     PolygonBase<ColourRepresentation, Vertices>::drawPolygon(outline_, target);
   }
@@ -142,7 +143,7 @@ class RegularPolygon
                                                            rotation),
         fill_(std::move(fill)),
         outline_(std::move(outline)) {}
-
+  virtual ~RegularPolygon() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& outline() const {

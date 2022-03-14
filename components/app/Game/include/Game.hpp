@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 
+#include "DrawablePet.hpp"
 #include "EspGLDriver.hpp"
 #include "EspGLScreen.hpp"
 #include "EspGLUtils.hpp"
@@ -23,6 +24,7 @@ namespace App {
 namespace Game {
 
 constexpr int EVENT_QUEUE_SIZE = 10;
+constexpr int PET_SCALE = 5;
 
 class Game {
  public:
@@ -36,8 +38,8 @@ class Game {
   static void clearQueue();
   static Event::Event getQueue(int ms);
 
-  Pet::Pet<uint16_t>& pet() { return pet_; }
-  void setPet(Pet::Pet<uint16_t>& pet) { pet_ = pet; }
+  Pet::DrawablePet<uint16_t>& pet() { return pet_; }
+  void setPet(Pet::DrawablePet<uint16_t>& pet) { pet_ = pet; }
 
   void setFont(EspGL::Font& font) { font_ = font; }
   EspGL::Font& font() { return font_; }
@@ -57,7 +59,7 @@ class Game {
   State::StateType currentState_;
   State::StateType nextState_;
 
-  Pet::Pet<uint16_t> pet_;
+  Pet::DrawablePet<uint16_t> pet_;
   std::map<State::StateType, std::unique_ptr<State::State>> states_;
   EspGL::Screen<uint16_t> screen_;
   static xQueueHandle eventQueue_;

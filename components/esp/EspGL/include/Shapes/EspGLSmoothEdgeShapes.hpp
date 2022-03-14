@@ -14,6 +14,7 @@ class CircleBase : public Shape<ColourRepresentation> {
  public:
   CircleBase(Point center, double radius)
       : center_(std::move(center)), radius_(std::move(radius)) {}
+  virtual ~CircleBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
   inline const Point& center() const { return center_; }
@@ -42,6 +43,7 @@ class Circle : public CircleBase<ColourRepresentation> {
       : CircleBase<ColourRepresentation>(center, radius),
         fill_(std::move(fill)),
         outline_(std::move(outline)) {}
+  virtual ~Circle() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& fill() const { return fill_; }
@@ -66,7 +68,7 @@ class CircleOutline : public CircleBase<ColourRepresentation> {
                 Colour<ColourRepresentation> outline)
       : CircleBase<ColourRepresentation>(center, radius),
         outline_(std::move(outline)) {}
-
+  virtual ~CircleOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& outline() const {
@@ -87,6 +89,7 @@ class EllipseBase : public Shape<ColourRepresentation> {
       : center_(std::move(center)),
         xRadius_(std::move(xRadius)),
         yRadius_(std::move(yRadius)) {}
+  virtual ~EllipseBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
   inline const Point& center() const { return center_; }
@@ -119,6 +122,7 @@ class Ellipse : public EllipseBase<ColourRepresentation> {
       : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
         fill_(std::move(fill)),
         outline_(std::move(outline)) {}
+  virtual ~Ellipse() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline Colour<ColourRepresentation>& fill() { return fill_; }
@@ -141,6 +145,8 @@ class EllipseOutline : public EllipseBase<ColourRepresentation> {
                  Colour<ColourRepresentation> outline)
       : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
         outline_(std::move(outline)) {}
+
+  virtual ~EllipseOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline Colour<ColourRepresentation>& outline() { return outline_.value(); }

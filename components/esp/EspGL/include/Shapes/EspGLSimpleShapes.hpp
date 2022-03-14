@@ -31,7 +31,7 @@ class Line : public Shape<ColourRepresentation> {
       : start_(std::move(point1)),
         end_(std::move(point2)),
         colour_(std::move(colour)) {}
-
+  virtual ~Line() = default;
   virtual void draw(Screen<ColourRepresentation> &target) override;
 
   inline const Point &start() const { return start_; }

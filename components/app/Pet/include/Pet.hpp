@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 
+#include "Drawable.hpp"
 #include "EspGLUtils.hpp"
 #include "Graphics/EspGLBitmap.hpp"
 #include "Graphics/EspGLPicture.hpp"
@@ -27,7 +28,8 @@ class Pet {
       std::pair<std::string, EspGL::Bitmap> eyes,
       std::pair<std::string, EspGL::Bitmap> face,
       EspGL::Colour<ColourRepresentation> colour)
-      : colour_(std::move(colour)),
+      : name_(),
+        colour_(std::move(colour)),
         body_(std::move(body)),
         eyes_(std::move(eyes)),
         face_(std::move(face)) {
@@ -35,6 +37,7 @@ class Pet {
     std::fill(needs_.begin(), needs_.end(), MAX_NEED_VALUE);
   }
   Pet() = default;
+  virtual ~Pet() = default;
 
   void giveFood();
   void giveSnack();
@@ -53,6 +56,7 @@ class Pet {
  private:
   std::string name_;
   std::vector<int16_t> needs_;
+
   EspGL::Colour<ColourRepresentation> colour_;
   std::pair<std::string, EspGL::Bitmap> body_;
   std::pair<std::string, EspGL::Bitmap> eyes_;

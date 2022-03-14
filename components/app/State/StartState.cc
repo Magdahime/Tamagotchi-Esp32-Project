@@ -1,7 +1,9 @@
 #include "StartState.hpp"
 
+#include "DrawablePet.hpp"
 #include "EspGLUtils.hpp"
 #include "Event.hpp"
+#include "Game.hpp"
 #include "Globals.hpp"
 #include "State.hpp"
 
@@ -32,7 +34,10 @@ void StartState::init() {
     App::Pet::PetGenerator<uint16_t> petGenerator(
         Globals::defaultValues::PET_COMPONENTS_PATH);
     auto pet = petGenerator.generate();
-    Globals::game.setPet(pet);
+    Pet::DrawablePet<uint16_t> drawablePet(
+        pet, EspGL::Point(0, Globals::game.screen().height() / 2),
+        Game::PET_SCALE);
+    Globals::game.setPet(drawablePet);
   }
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(EspGL::colours::BLACK);
@@ -41,8 +46,7 @@ void StartState::init() {
       {{0, 0},
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);
-  Globals::game.pet().draw(Globals::game.screen(),
-                           {0, Globals::game.screen().height() / 2});
+  Globals::game.pet().draw(Globals::game.screen());
   Globals::game.print(
       "Click to continue...",
       {{0, 280},
@@ -53,7 +57,7 @@ void StartState::mainLoop() {
   constexpr int timeToWait = 100;
   while (tamagotchi::App::Globals::game.getQueue(timeToWait).type_ ==
          Event::EventTypes::gpio) {
-    Globals::game.setNextState(StateType::End);
+    Globals::game.setNextState(StateType::MainMenu);
     break;
   }
 }

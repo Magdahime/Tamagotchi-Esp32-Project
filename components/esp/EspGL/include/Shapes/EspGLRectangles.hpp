@@ -27,6 +27,7 @@ class RectangleBase : public Shape<ColourRepresentation> {
           "Dimensions of Rectangle cannot be negative!");
     }
   }
+  virtual ~RectangleBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
   inline const Point& leftUpperPoint() const { return leftUpperPoint_; }
@@ -64,6 +65,7 @@ class Rectangle : public RectangleBase<ColourRepresentation> {
                                             dimensionY),
         fill_(fill),
         outline_(outline) {}
+  virtual ~Rectangle() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& fill() const { return fill_; }
@@ -89,6 +91,7 @@ class RectangleOutline : public RectangleBase<ColourRepresentation> {
       : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
                                             dimensionY),
         outline_(outline) {}
+  virtual ~RectangleOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   inline const Colour<ColourRepresentation>& outline() const {
@@ -117,6 +120,7 @@ class Square : public Rectangle<ColourRepresentation> {
             Point(center.x_ - cos(angle) * (sideLength / 2.0),
                   center.y_ - sin(angle) * (sideLength / 2.0)),
             sideLength, sideLength, fill, outline) {}
+  virtual ~Square() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
  private:
@@ -135,6 +139,7 @@ class SquareOutline : public RectangleOutline<ColourRepresentation> {
             Point(center.x_ - cos(angle) * (sideLength / 2.0),
                   center.y_ - sin(angle) * (sideLength / 2.0)),
             sideLength, sideLength, outline) {}
+  virtual ~SquareOutline() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
  private:

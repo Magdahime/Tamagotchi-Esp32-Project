@@ -17,11 +17,19 @@ void MainMenuState::handleEvent(Event::Event Event) {}
 
 void MainMenuState::init() {
   Globals::game.screen().fill(EspGL::colours::BLACK);
+  ESP_LOGI(TAG_, "Drawing icons.");
+  for (const auto& drawable : drawables_) {
+    drawable.second->draw(Globals::game.screen());
+  }
+  ESP_LOGI(TAG_, "Drawing pet.");
 }
-void MainMenuState::mainLoop() {}
+void MainMenuState::mainLoop() {
+  Globals::game.setNextState(StateType::MainMenu);
+}
 void MainMenuState::deinit() {}
 
 void MainMenuState::deserializeIcons() {
+  ESP_LOGI(TAG_, "Deserializing icons.");
   BitmapLoader::BitmapLoader bitmapLoader(
       Globals::spiffsDriver.getFileDescriptor(
           Globals::defaultValues::ICONS_FILE_PATH));

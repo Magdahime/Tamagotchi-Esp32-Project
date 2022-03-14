@@ -26,7 +26,7 @@ class Bitmap {
     }
   }
   Bitmap() = default;
-
+  virtual ~Bitmap() = default;
   template <typename ColourRepresentation>
   void draw(
       Screen<ColourRepresentation>& target, const Point start,
@@ -129,7 +129,7 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
         scale_(scale),
         colour_(colour),
         background_(background) {}
-        
+
   virtual ~BitmapDrawable() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
