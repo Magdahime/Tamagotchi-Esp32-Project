@@ -36,7 +36,7 @@ class DrawablePet : public Pet<ColourRepresentation>,
   int& scale() { return scale_; }
   EspGL::Point& start() { return start_; }
 
-  void startStart(EspGL::Point newStart) { start_ = newStart; }
+  void setStart(EspGL::Point newStart) { start_ = newStart; }
 
   virtual void draw(EspGL::Screen<ColourRepresentation>& target) override {
     Pet<ColourRepresentation>::draw(target, start_, scale_);

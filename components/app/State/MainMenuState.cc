@@ -1,11 +1,15 @@
 #include "MainMenuState.hpp"
 
+#include <stdint.h>
+
 #include <memory>
 
 #include "BitmapLoader.hpp"
 #include "Drawable.hpp"
+#include "EspGLUtils.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
+#include "Shapes/EspGLRectangles.hpp"
 
 namespace tamagotchi {
 namespace App {
@@ -13,18 +17,38 @@ namespace State {
 
 MainMenuState::MainMenuState() { deserializeIcons(); }
 
+bool MainMenuState::checkCollision(EspGL::Point newPoint) {
+  if (drawables_.size() == 0) {
+    return false;
+  }
+  auto checkIfInside = [&](EspGL::Point leftUpper, EspGL::Point rightLower,
+                           EspGL::Point tested) {
+    return tested.x_ >= leftUpper.x_ and tested.x_ < rightLower.x_ and
+           tested.y_ >= leftUpper.y_ and tested.y_ < rightLower.y_;
+  };
+  for (auto const& [key, val] : drawables_) {
+    auto hitbox = val->getHitbox();
+    if (checkIfInside(hitbox.first, hitbox.second, newPoint) == true) {
+      return true;
+    }
+  }
+  return false;
+}
+
 void MainMenuState::handleEvent(Event::Event Event) {}
 
 void MainMenuState::init() {
   Globals::game.screen().fill(EspGL::colours::BLACK);
   ESP_LOGI(TAG_, "Drawing icons.");
-  for (const auto& drawable : drawables_) {
-    drawable.second->draw(Globals::game.screen());
+  for (auto const& [key, val] : drawables_) {
+    val->draw(Globals::game.screen());
   }
   ESP_LOGI(TAG_, "Drawing pet.");
+  Globals::game.pet().draw(Globals::game.screen());
 }
 void MainMenuState::mainLoop() {
-  Globals::game.setNextState(StateType::MainMenu);
+  movePet();
+  EspGL::delay(2000);
 }
 void MainMenuState::deinit() {}
 
@@ -60,6 +84,25 @@ void MainMenuState::deserializeIcons() {
       break;
     }
   }
+}
+
+void MainMenuState::movePet() {
+  auto newCoordinate = Globals::game.pet().start();
+  do {
+    if (esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD) {
+      newCoordinate.y_ += esp_random() % consts::STEP_Y;
+    } else {
+      newCoordinate.x_ += esp_random() % consts::STEP_X;
+    }
+  } while (checkCollision(newCoordinate));
+  auto hitbox = Globals::game.pet().getHitbox();
+  EspGL::Rectangle<uint16_t>{
+      hitbox.first, static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_),
+      static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_),
+      EspGL::colours::BLACK}
+      .draw(Globals::game.screen());
+  Globals::game.pet().setStart(newCoordinate);
+  Globals::game.pet().draw(Globals::game.screen());
 }
 
 }  // namespace State
