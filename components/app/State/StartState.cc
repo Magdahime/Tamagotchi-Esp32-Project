@@ -13,7 +13,7 @@ namespace App {
 
 namespace State {
 
-void StartState::handleEvent(Event::Event Event) {}
+void StartState::handleEvent(Event::Event event) {}
 
 void StartState::init() {
   ESP_LOGI(TAG_, "Filling window black");
