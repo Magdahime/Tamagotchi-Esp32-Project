@@ -21,7 +21,7 @@ class StartState : public State {
  public:
   StartState() = default;
   virtual ~StartState() = default;
-  virtual void handleEvent(Event::Event Event) override;
+  virtual void handleEvent(Event::Event event) override;
   virtual void init() override;
   virtual void mainLoop() override;
   virtual void deinit() override;

@@ -10,7 +10,7 @@ namespace State {
 
 class GomokuState : public State {
  public:
-  virtual void handleEvent(Event::Event Event) override;
+  virtual void handleEvent(Event::Event event) override;
   virtual void run() override;
 
  private:

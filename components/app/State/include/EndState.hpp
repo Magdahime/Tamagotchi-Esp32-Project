@@ -14,7 +14,7 @@ class EndState : public State {
  public:
   EndState() = default;
   virtual ~EndState() = default;
-  virtual void handleEvent(Event::Event Event) override;
+  virtual void handleEvent(Event::Event event) override;
   virtual void init() override;
   virtual void mainLoop() override;
   virtual void deinit() override {}

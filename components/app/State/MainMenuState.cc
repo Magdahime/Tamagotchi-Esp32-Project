@@ -7,6 +7,7 @@
 #include "BitmapLoader.hpp"
 #include "Drawable.hpp"
 #include "EspGLUtils.hpp"
+#include "Event.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
 #include "Shapes/EspGLRectangles.hpp"
@@ -35,7 +36,23 @@ bool MainMenuState::checkCollision(EspGL::Point newPoint) {
   return false;
 }
 
-void MainMenuState::handleEvent(Event::Event Event) {}
+void MainMenuState::handleEvent(Event::Event event) {
+  // int pressedButton = 0;
+  switch (event.type_) {
+    case Event::EventTypes::gpio:
+      // pressedButton = *reinterpret_cast<int*>(event.data_);
+      break;
+
+    case Event::EventTypes::terminate:
+      Globals::game.setNextState(StateType::End);
+      break;
+
+    case Event::EventTypes::espNow:
+      break;
+    default:
+      break;
+  }
+}
 
 void MainMenuState::init() {
   Globals::game.screen().fill(EspGL::colours::BLACK);
@@ -84,25 +101,39 @@ void MainMenuState::deserializeIcons() {
       break;
     }
   }
+  iconPointer_ = labels_.begin();
 }
 
 void MainMenuState::movePet() {
   auto newCoordinate = Globals::game.pet().start();
   do {
-    if (esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD) {
-      newCoordinate.y_ += esp_random() % consts::STEP_Y;
-    } else {
-      newCoordinate.x_ += esp_random() % consts::STEP_X;
-    }
+    int stepY = esp_random() % consts::STEP_Y;
+    int stepX = esp_random() % consts::STEP_X;
+    newCoordinate.y_ +=
+        esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD ? stepY
+                                                                      : -stepY;
+    newCoordinate.x_ +=
+        esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD ? stepX
+                                                                      : -stepX;
   } while (checkCollision(newCoordinate));
-  auto hitbox = Globals::game.pet().getHitbox();
-  EspGL::Rectangle<uint16_t>{
-      hitbox.first, static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_),
-      static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_),
-      EspGL::colours::BLACK}
-      .draw(Globals::game.screen());
   Globals::game.pet().setStart(newCoordinate);
-  Globals::game.pet().draw(Globals::game.screen());
+  Globals::game.pet().redraw(Globals::game.screen(),
+                             Globals::defaultValues::BACKGROUND_COLOUR);
+}
+
+void MainMenuState::shiftIconPointer() {
+  auto bitmapPointer = static_cast<EspGL::BitmapDrawable<uint16_t>*>(
+      drawables_[*iconPointer_].get());
+  auto currentColour = bitmapPointer->colour();
+  bitmapPointer->setBackground(currentColour);
+  bitmapPointer->setColour(
+      EspGL::Colour<uint16_t>(currentColour.getNegativeColourValue()));
+  drawables_[*iconPointer_]->redraw(Globals::game.screen(),
+                                    Globals::defaultValues::BACKGROUND_COLOUR);
+  iconPointer_++;
+  if (iconPointer_ == labels_.end()) {
+    iconPointer_ = labels_.begin();
+  }
 }
 
 }  // namespace State

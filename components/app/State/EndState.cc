@@ -9,7 +9,7 @@ namespace App {
 
 namespace State {
 
-void EndState::handleEvent(Event::Event Event) {}
+void EndState::handleEvent(Event::Event event) {}
 
 void EndState::run() {
   init();

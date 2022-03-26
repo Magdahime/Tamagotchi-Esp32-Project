@@ -133,6 +133,21 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
   virtual ~BitmapDrawable() = default;
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
+  Bitmap bitmap() { return bitmap_; }
+  Point start() { return start_; }
+  int scale() { return scale_; }
+  Colour<ColourRepresentation> colour() { return colour_; }
+  std::optional<Colour<ColourRepresentation>> background() {
+    return background_;
+  }
+
+  void setColour(Colour<ColourRepresentation> newColour) {
+    colour_ = newColour;
+  }
+  void setBackground(Colour<ColourRepresentation> newBackground) {
+    background_ = newBackground;
+  }
+
   virtual inline std::pair<Point, Point> getHitbox() override {
     return std::make_pair(Point{start_.x_, start_.y_},
                           Point{start_.x_ + bitmap_.sizeX() * scale_,

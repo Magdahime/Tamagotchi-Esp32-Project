@@ -43,6 +43,7 @@ class Colour {
   Colour(ColourRepresentation colour) : value_(colour) {}
   inline ColourRepresentation value() const { return value_; }
   inline void setValue(ColourRepresentation newValue) { value_ = newValue; }
+  inline ColourRepresentation getNegativeColourValue() { return -value_; }
 
  private:
   ColourRepresentation value_;
