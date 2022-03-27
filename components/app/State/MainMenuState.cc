@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#include <algorithm>
+#include <iterator>
 #include <memory>
 
 #include "BitmapLoader.hpp"
@@ -17,24 +19,6 @@ namespace App {
 namespace State {
 
 MainMenuState::MainMenuState() { deserializeIcons(); }
-
-bool MainMenuState::checkCollision(EspGL::Point newPoint) {
-  if (drawables_.size() == 0) {
-    return false;
-  }
-  auto checkIfInside = [&](EspGL::Point leftUpper, EspGL::Point rightLower,
-                           EspGL::Point tested) {
-    return tested.x_ >= leftUpper.x_ and tested.x_ < rightLower.x_ and
-           tested.y_ >= leftUpper.y_ and tested.y_ < rightLower.y_;
-  };
-  for (auto const& [key, val] : drawables_) {
-    auto hitbox = val->getHitbox();
-    if (checkIfInside(hitbox.first, hitbox.second, newPoint) == true) {
-      return true;
-    }
-  }
-  return false;
-}
 
 void MainMenuState::handleEvent(Event::Event event) {
   // int pressedButton = 0;
@@ -64,7 +48,14 @@ void MainMenuState::init() {
   Globals::game.pet().draw(Globals::game.screen());
 }
 void MainMenuState::mainLoop() {
-  movePet();
+  std::vector<std::pair<EspGL::Point, EspGL::Point>> hitboxes;
+  std::transform(
+      drawables_.begin(), drawables_.end(), std::back_inserter(hitboxes),
+      [](auto& drawable_pair) -> std::pair<EspGL::Point, EspGL::Point> {
+        auto& [id, drawable] = drawable_pair;
+        return drawable->hitbox();
+      });
+  StateUtils::movePet(hitboxes);
   EspGL::delay(2000);
 }
 void MainMenuState::deinit() {}
@@ -104,23 +95,6 @@ void MainMenuState::deserializeIcons() {
   iconPointer_ = labels_.begin();
 }
 
-void MainMenuState::movePet() {
-  auto newCoordinate = Globals::game.pet().start();
-  do {
-    int stepY = esp_random() % consts::STEP_Y;
-    int stepX = esp_random() % consts::STEP_X;
-    newCoordinate.y_ +=
-        esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD ? stepY
-                                                                      : -stepY;
-    newCoordinate.x_ +=
-        esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD ? stepX
-                                                                      : -stepX;
-  } while (checkCollision(newCoordinate));
-  Globals::game.pet().setStart(newCoordinate);
-  Globals::game.pet().redraw(Globals::game.screen(),
-                             Globals::defaultValues::BACKGROUND_COLOUR);
-}
-
 void MainMenuState::shiftIconPointer() {
   auto bitmapPointer = static_cast<EspGL::BitmapDrawable<uint16_t>*>(
       drawables_[*iconPointer_].get());
@@ -128,8 +102,7 @@ void MainMenuState::shiftIconPointer() {
   bitmapPointer->setBackground(currentColour);
   bitmapPointer->setColour(
       EspGL::Colour<uint16_t>(currentColour.getNegativeColourValue()));
-  drawables_[*iconPointer_]->redraw(Globals::game.screen(),
-                                    Globals::defaultValues::BACKGROUND_COLOUR);
+  drawables_[*iconPointer_]->redraw(Globals::game.screen());
   iconPointer_++;
   if (iconPointer_ == labels_.end()) {
     iconPointer_ = labels_.begin();
