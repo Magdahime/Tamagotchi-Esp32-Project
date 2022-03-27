@@ -62,7 +62,7 @@ class Text : Drawable<ColourRepresentation> {
     textBox_ = textBox;
   }
 
-  virtual inline std::pair<Point, Point> getHitbox() override;
+  virtual inline std::pair<Point, Point> hitbox() override;
 
  private:
   Point drawWhitespace(char whitespace, Point cursor, Point start);
@@ -123,7 +123,7 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 }
 
 template <typename ColourRepresentation>
-std::pair<Point, Point> Text<ColourRepresentation>::getHitbox() {
+std::pair<Point, Point> Text<ColourRepresentation>::hitbox() {
   Point maxPoint;
   return textBox_;
 }

@@ -44,7 +44,7 @@ class Line : public Shape<ColourRepresentation> {
     colour_ = newColour;
   }
 
-  virtual inline std::pair<Point, Point> getHitbox() override {
+  virtual inline std::pair<Point, Point> hitbox() override {
     return std::make_pair(start_, end_);
   }
 

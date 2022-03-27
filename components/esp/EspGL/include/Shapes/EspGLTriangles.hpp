@@ -33,7 +33,7 @@ class TriangleBase : public Shape<ColourRepresentation> {
   inline void setPoint2(Point newPoint) { point2_ = newPoint; }
   inline void setPoint3(Point newPoint) { point3_ = newPoint; }
 
-  virtual inline std::pair<Point, Point> getHitbox() override {
+  virtual inline std::pair<Point, Point> hitbox() override {
     return std::make_pair(
         Point{std::min({point1_.x_, point2_.x_, point3_.x_}),
               std::min({point1_.y_, point2_.y_, point3_.y_})},

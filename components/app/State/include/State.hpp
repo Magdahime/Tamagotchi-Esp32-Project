@@ -30,7 +30,6 @@ class State {
  private:
 };
 
-
 }  // namespace State
 
 }  // namespace App

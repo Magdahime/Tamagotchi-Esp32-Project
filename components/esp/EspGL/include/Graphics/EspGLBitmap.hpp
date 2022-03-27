@@ -148,7 +148,7 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
     background_ = newBackground;
   }
 
-  virtual inline std::pair<Point, Point> getHitbox() override {
+  virtual inline std::pair<Point, Point> hitbox() override {
     return std::make_pair(Point{start_.x_, start_.y_},
                           Point{start_.x_ + bitmap_.sizeX() * scale_,
                                 start_.y_ + bitmap_.sizeY() * scale_});

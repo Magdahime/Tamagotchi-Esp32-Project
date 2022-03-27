@@ -2,10 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "Globals.hpp"
+#include "Game.hpp"
 #include "unity.h"
 
 extern "C" {
 #include "unity_fixture.h"
+}
+namespace tamagotchi::App::Globals {
+Game::Game game = tamagotchi::App::Game::Game();
 }
 
 static void run_all_tests(void) {
@@ -21,7 +26,8 @@ static void run_all_tests(void) {
   // RUN_TEST_GROUP(PetTests);
   // RUN_TEST_GROUP(GomokuTests);
   // RUN_TEST_GROUP(GameTests);
-  RUN_TEST_GROUP(SerializerTests);
+  // RUN_TEST_GROUP(SerializerTests);
+  RUN_TEST_GROUP(StateUtilsTests);
 }
 
 static void print_banner(const char* text) {
