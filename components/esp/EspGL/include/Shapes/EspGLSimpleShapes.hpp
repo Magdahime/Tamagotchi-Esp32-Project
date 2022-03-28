@@ -44,7 +44,7 @@ class Line : public Shape<ColourRepresentation> {
     colour_ = newColour;
   }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+  virtual inline EspGLHitbox hitbox() override {
     return std::make_pair(start_, end_);
   }
 

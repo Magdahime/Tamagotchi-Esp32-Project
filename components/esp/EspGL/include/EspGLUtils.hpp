@@ -3,10 +3,9 @@
 #include <stdint.h>
 
 #include <algorithm>
-#include <cmath>
 #include <tuple>
 #include <utility>
-
+#include "EspGLVect2.hpp"
 #include "EspGLUtils.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -14,25 +13,7 @@
 namespace tamagotchi {
 namespace EspGL {
 
-struct Vect2 {
-  int32_t x_;
-  int32_t y_;
-  template <typename T, typename Y>
-  Vect2(T x, Y y) : x_(std::round(x)), y_(std::round(y)) {}
-  Vect2() : x_(0), y_(0) {}
-  Vect2 operator+(Vect2 const &point2);
-  Vect2 operator-(Vect2 const &point2);
-  template <
-      typename ArithmeticType,
-      typename = typename std::enable_if<
-          std::is_arithmetic<ArithmeticType>::value, ArithmeticType>::type>
-  Vect2 operator+(ArithmeticType constant);
-  template <
-      typename ArithmeticType,
-      typename = typename std::enable_if<
-          std::is_arithmetic<ArithmeticType>::value, ArithmeticType>::type>
-  Vect2 operator-(ArithmeticType constant);
-};
+
 
 enum class Coordinate { X, Y };
 

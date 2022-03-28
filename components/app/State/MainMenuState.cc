@@ -48,10 +48,10 @@ void MainMenuState::init() {
   Globals::game.pet().draw(Globals::game.screen());
 }
 void MainMenuState::mainLoop() {
-  std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>> hitboxes;
+  std::vector<EspGL::EspGLHitbox> hitboxes;
   std::transform(
       drawables_.begin(), drawables_.end(), std::back_inserter(hitboxes),
-      [](auto& drawable_pair) -> std::pair<EspGL::Vect2, EspGL::Vect2> {
+      [](auto& drawable_pair) -> EspGL::EspGLHitbox {
         auto& [id, drawable] = drawable_pair;
         return drawable->hitbox();
       });

@@ -29,7 +29,7 @@ class PolygonBase : public Shape<ColourRepresentation> {
     vertices_ = newVertices;
   }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+  virtual inline EspGLHitbox hitbox() override {
     Vect2 minPoint(std::numeric_limits<int>::max(),
                    std::numeric_limits<int>::max());
     Vect2 maxPoint(std::numeric_limits<int>::min(),
@@ -87,7 +87,7 @@ class RegularPolygonBase : public PolygonBase<ColourRepresentation, Vertices> {
   inline void setRadius(double newRadius) { radius_ = newRadius; }
   inline void setRotation(double newRotation) { rotation_ = newRotation; }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+  virtual inline EspGLHitbox hitbox() override {
     return std::make_pair(Vect2{center_.x_ - radius_, center_.y_ - radius_},
                           Vect2{center_.x_ + radius_, center_.y_ + radius_});
   }
@@ -120,7 +120,7 @@ class RegularPolygonOutline
     outline_ = newOutline;
   }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+  virtual inline EspGLHitbox hitbox() override {
     return std::make_pair(Vect2(this->center_.x_ - this->radius_,
                                 this->center_.y_ - this->radius_),
                           Vect2(this->center_.x_ + this->radius_,

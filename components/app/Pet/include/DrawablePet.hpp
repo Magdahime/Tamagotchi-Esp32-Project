@@ -41,7 +41,7 @@ class DrawablePet : public Pet<ColourRepresentation>,
   virtual void draw(EspGL::Screen<ColourRepresentation>& target) override {
     Pet<ColourRepresentation>::draw(target, start_, scale_);
   }
-  virtual std::pair<EspGL::Vect2, EspGL::Vect2> hitbox() override {
+  virtual EspGL::EspGLHitbox hitbox() override {
     return std::make_pair(
         EspGL::Vect2(start_.x_, start_.y_),
         EspGL::Vect2(start_.x_ + this->body().second.sizeX() * scale_,

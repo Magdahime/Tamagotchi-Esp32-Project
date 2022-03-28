@@ -148,7 +148,7 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
     background_ = newBackground;
   }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+  virtual inline EspGLHitbox hitbox() override {
     return std::make_pair(Vect2{start_.x_, start_.y_},
                           Vect2{start_.x_ + bitmap_.sizeX() * scale_,
                                 start_.y_ + bitmap_.sizeY() * scale_});

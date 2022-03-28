@@ -7,6 +7,8 @@
 namespace tamagotchi {
 namespace EspGL {
 
+using EspGLHitbox = std::pair<Vect2, Vect2>;
+
 template <typename ColourRepresentation>
 class Drawable {
  public:
@@ -15,7 +17,7 @@ class Drawable {
 
   void erase(Screen<ColourRepresentation>& target,
              Colour<ColourRepresentation> backgroundColour);
-  virtual std::pair<Vect2, Vect2> hitbox() = 0;
+  virtual EspGLHitbox hitbox() = 0;
 
   virtual ~Drawable() = default;
 

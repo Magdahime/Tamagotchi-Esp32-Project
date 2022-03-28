@@ -44,7 +44,7 @@ class RectangleBase : public Shape<ColourRepresentation> {
   inline void setDimensionX(int16_t dimensionX) { dimensionX_ = dimensionX; }
   inline void setDimensionY(int16_t dimensionY) { dimensionY_ = dimensionY; }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+  virtual inline EspGLHitbox hitbox() override {
     return std::make_pair(leftUpperPoint_, rightLowerPoint_);
   }
 

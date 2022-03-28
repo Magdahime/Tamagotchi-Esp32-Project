@@ -17,7 +17,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class Text : Drawable<ColourRepresentation> {
  public:
-  Text(std::string text, std::pair<Vect2, Vect2> textBox, Font& font,
+  Text(std::string text, EspGLHitbox textBox, Font& font,
        Colour<ColourRepresentation> colour, uint32_t characterScale = 3,
        std::optional<Colour<ColourRepresentation>> background = std::nullopt,
        uint16_t letterSpacing = 5, uint16_t lineSpacing = 2)
@@ -40,7 +40,7 @@ class Text : Drawable<ColourRepresentation> {
   inline const Font& font() const { return font_; }
   inline const Vect2& start() const { return textBox_.first; }
   inline const Vect2& end() const { return textBox_.second; }
-  inline const std::pair<Vect2, Vect2>& textBox() const { return textBox_; }
+  inline const EspGLHitbox& textBox() const { return textBox_; }
 
   inline void setLetterSpacing(uint16_t letterSpacing) {
     letterSpacing_ = letterSpacing;
@@ -58,15 +58,15 @@ class Text : Drawable<ColourRepresentation> {
   inline void setFont(Font font) { font_ = font; }
   inline void setStart(Vect2 start) { textBox_.first = start; }
   inline void setEnd(Vect2 end) { textBox_.second = end; }
-  inline void setTextBox(std::pair<Vect2, Vect2> textBox) {
+  inline void setTextBox(EspGLHitbox textBox) {
     textBox_ = textBox;
   }
 
-  virtual inline std::pair<Vect2, Vect2> hitbox() override;
+  virtual inline EspGLHitbox hitbox() override;
 
  private:
   Vect2 drawWhitespace(char whitespace, Vect2 cursor, Vect2 start);
-  std::pair<Vect2, Vect2> textBox_;
+  EspGLHitbox textBox_;
   uint16_t letterSpacing_;
   uint16_t lineSpacing_;
   uint32_t characterScale_;
@@ -123,7 +123,7 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 }
 
 template <typename ColourRepresentation>
-std::pair<Vect2, Vect2> Text<ColourRepresentation>::hitbox() {
+EspGLHitbox Text<ColourRepresentation>::hitbox() {
   Vect2 maxPoint;
   return textBox_;
 }
