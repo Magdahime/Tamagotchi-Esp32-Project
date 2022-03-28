@@ -17,7 +17,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class Text : Drawable<ColourRepresentation> {
  public:
-  Text(std::string text, std::pair<Point, Point> textBox, Font& font,
+  Text(std::string text, std::pair<Vect2, Vect2> textBox, Font& font,
        Colour<ColourRepresentation> colour, uint32_t characterScale = 3,
        std::optional<Colour<ColourRepresentation>> background = std::nullopt,
        uint16_t letterSpacing = 5, uint16_t lineSpacing = 2)
@@ -38,9 +38,9 @@ class Text : Drawable<ColourRepresentation> {
   inline const Colour<ColourRepresentation>& colour() const { return colour_; }
   inline const std::string& text() const { return text_; }
   inline const Font& font() const { return font_; }
-  inline const Point& start() const { return textBox_.first; }
-  inline const Point& end() const { return textBox_.second; }
-  inline const std::pair<Point, Point>& textBox() const { return textBox_; }
+  inline const Vect2& start() const { return textBox_.first; }
+  inline const Vect2& end() const { return textBox_.second; }
+  inline const std::pair<Vect2, Vect2>& textBox() const { return textBox_; }
 
   inline void setLetterSpacing(uint16_t letterSpacing) {
     letterSpacing_ = letterSpacing;
@@ -56,17 +56,17 @@ class Text : Drawable<ColourRepresentation> {
   }
   inline void setText(std::string text) { text_ = text; }
   inline void setFont(Font font) { font_ = font; }
-  inline void setStart(Point start) { textBox_.first = start; }
-  inline void setEnd(Point end) { textBox_.second = end; }
-  inline void setTextBox(std::pair<Point, Point> textBox) {
+  inline void setStart(Vect2 start) { textBox_.first = start; }
+  inline void setEnd(Vect2 end) { textBox_.second = end; }
+  inline void setTextBox(std::pair<Vect2, Vect2> textBox) {
     textBox_ = textBox;
   }
 
-  virtual inline std::pair<Point, Point> hitbox() override;
+  virtual inline std::pair<Vect2, Vect2> hitbox() override;
 
  private:
-  Point drawWhitespace(char whitespace, Point cursor, Point start);
-  std::pair<Point, Point> textBox_;
+  Vect2 drawWhitespace(char whitespace, Vect2 cursor, Vect2 start);
+  std::pair<Vect2, Vect2> textBox_;
   uint16_t letterSpacing_;
   uint16_t lineSpacing_;
   uint32_t characterScale_;
@@ -77,8 +77,8 @@ class Text : Drawable<ColourRepresentation> {
 };
 
 template <typename ColourRepresentation>
-Point Text<ColourRepresentation>::drawWhitespace(char whitespace, Point cursor,
-                                                 Point start) {
+Vect2 Text<ColourRepresentation>::drawWhitespace(char whitespace, Vect2 cursor,
+                                                 Vect2 start) {
   switch (whitespace) {
     case '\n':
       cursor.y_ += (font_.null().sizeY() + lineSpacing_) * characterScale_;
@@ -114,7 +114,7 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
           textBox_.second.y_) {
         break;
       }
-      Point newStart(offsetX, offsetY);
+      Vect2 newStart(offsetX, offsetY);
       bitmap.drawScaled(target, newStart, colour_, characterScale_,
                         background_);
       offsetX += bitmap.sizeX() + letterSpacing_ * characterScale_;
@@ -123,8 +123,8 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 }
 
 template <typename ColourRepresentation>
-std::pair<Point, Point> Text<ColourRepresentation>::hitbox() {
-  Point maxPoint;
+std::pair<Vect2, Vect2> Text<ColourRepresentation>::hitbox() {
+  Vect2 maxPoint;
   return textBox_;
 }
 

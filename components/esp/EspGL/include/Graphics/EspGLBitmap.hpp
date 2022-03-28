@@ -29,17 +29,17 @@ class Bitmap {
   virtual ~Bitmap() = default;
   template <typename ColourRepresentation>
   void draw(
-      Screen<ColourRepresentation>& target, const Point start,
+      Screen<ColourRepresentation>& target, const Vect2 start,
       Colour<ColourRepresentation> colour,
       std::optional<Colour<ColourRepresentation>> background = std::nullopt);
 
   template <typename ColourRepresentation>
   void drawScaled(
-      Screen<ColourRepresentation>& target, Point start,
+      Screen<ColourRepresentation>& target, Vect2 start,
       Colour<ColourRepresentation> colour, uint32_t scale,
       std::optional<Colour<ColourRepresentation>> background = std::nullopt);
 
-  void overlay(Bitmap& bitmap, Point& start);
+  void overlay(Bitmap& bitmap, Vect2& start);
 
   inline size_t& sizeX() { return sizeX_; }
   inline size_t& sizeY() { return sizeY_; }
@@ -54,7 +54,7 @@ class Bitmap {
 };
 
 template <typename ColourRepresentation>
-void Bitmap::draw(Screen<ColourRepresentation>& target, const Point start,
+void Bitmap::draw(Screen<ColourRepresentation>& target, const Vect2 start,
                   Colour<ColourRepresentation> colour,
                   std::optional<Colour<ColourRepresentation>> background) {
   ESP_LOGD(TAG_, "Drawing bitmap of size (%zu, %zu)in colour: 0x%X", sizeX_,
@@ -77,7 +77,7 @@ void Bitmap::draw(Screen<ColourRepresentation>& target, const Point start,
 
 template <typename ColourRepresentation>
 void Bitmap::drawScaled(
-    Screen<ColourRepresentation>& target, Point start,
+    Screen<ColourRepresentation>& target, Vect2 start,
     Colour<ColourRepresentation> colour, uint32_t scale,
     std::optional<Colour<ColourRepresentation>> background) {
   ESP_LOGD(TAG_, "Drawing bitmap of size (%zu, %zu)in colour: 0x%X", sizeX_,
@@ -112,7 +112,7 @@ template <typename ColourRepresentation>
 class BitmapDrawable : public Drawable<ColourRepresentation> {
  public:
   BitmapDrawable(
-      size_t sizeX, size_t sizeY, std::vector<bool> bitmap, Point start,
+      size_t sizeX, size_t sizeY, std::vector<bool> bitmap, Vect2 start,
       int scale, Colour<ColourRepresentation> colour,
       std::optional<Colour<ColourRepresentation>> background = std::nullopt)
       : bitmap_(sizeX, sizeY, bitmap),
@@ -121,7 +121,7 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
         colour_(colour),
         background_(background) {}
   BitmapDrawable(
-      Bitmap& bitmap, Point start, int scale,
+      Bitmap& bitmap, Vect2 start, int scale,
       Colour<ColourRepresentation> colour,
       std::optional<Colour<ColourRepresentation>> background = std::nullopt)
       : bitmap_(bitmap),
@@ -134,7 +134,7 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
   virtual void draw(Screen<ColourRepresentation>& target) override;
 
   Bitmap bitmap() { return bitmap_; }
-  Point start() { return start_; }
+  Vect2 start() { return start_; }
   int scale() { return scale_; }
   Colour<ColourRepresentation> colour() { return colour_; }
   std::optional<Colour<ColourRepresentation>> background() {
@@ -148,15 +148,15 @@ class BitmapDrawable : public Drawable<ColourRepresentation> {
     background_ = newBackground;
   }
 
-  virtual inline std::pair<Point, Point> hitbox() override {
-    return std::make_pair(Point{start_.x_, start_.y_},
-                          Point{start_.x_ + bitmap_.sizeX() * scale_,
+  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+    return std::make_pair(Vect2{start_.x_, start_.y_},
+                          Vect2{start_.x_ + bitmap_.sizeX() * scale_,
                                 start_.y_ + bitmap_.sizeY() * scale_});
   }
 
  private:
   Bitmap bitmap_;
-  Point start_;
+  Vect2 start_;
   int scale_;
   Colour<ColourRepresentation> colour_;
   std::optional<Colour<ColourRepresentation>> background_;

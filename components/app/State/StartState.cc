@@ -35,7 +35,7 @@ void StartState::init() {
         Globals::defaultValues::PET_COMPONENTS_PATH);
     auto pet = petGenerator.generate();
     Pet::DrawablePet<uint16_t> drawablePet(
-        pet, EspGL::Point(0, Globals::game.screen().height() / 2),
+        pet, EspGL::Vect2(0, Globals::game.screen().height() / 2),
         Game::PET_SCALE);
     Globals::game.setPet(drawablePet);
   }

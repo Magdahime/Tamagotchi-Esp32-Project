@@ -16,9 +16,9 @@ TEST_TEAR_DOWN(EspGLUtilsTests) {
 
 
 TEST(EspGLUtilsTests, sort3PointsTest) {
-  Point point1{0, 2};
-  Point point2{1, 1};
-  Point point3{2, 0};
+  Vect2 point1{0, 2};
+  Vect2 point2{1, 1};
+  Vect2 point3{2, 0};
   auto [a, b, c] = sort3Points(point2, point3, point1, Coordinate::X);
   TEST_ASSERT_EQUAL_INT(a.x_, point3.x_);
   TEST_ASSERT_EQUAL_INT(a.y_, point3.y_);

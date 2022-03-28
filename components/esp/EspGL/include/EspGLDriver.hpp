@@ -13,7 +13,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class Driver {
  public:
-  virtual void drawPixel(const Point& point, ColourRepresentation colour) = 0;
+  virtual void drawPixel(const Vect2& point, ColourRepresentation colour) = 0;
   virtual void writePixelArea(int16_t startX, int16_t endX, int16_t startY,
                               int16_t endY, ColourRepresentation colour) = 0;
   virtual void writePixelArea(int16_t startX, int16_t endX, int16_t startY,

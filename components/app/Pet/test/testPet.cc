@@ -5,7 +5,7 @@
 #include "unity_fixture.h"
 
 extern tamagotchi::EspGL::Screen<uint16_t> screen;
-extern tamagotchi::EspGL::Point center;
+extern tamagotchi::EspGL::Vect2 center;
 
 TEST_GROUP(PetTests);
 
@@ -21,7 +21,7 @@ TEST_TEAR_DOWN(PetTests) {}
 TEST(PetTests, DrawGeneratedPetOnScreenTest) {
   tamagotchi::App::Pet::PetGenerator<uint16_t> petGen("petComponents.pbm");
   auto pet = petGen.generate();
-  tamagotchi::EspGL::Point start(0, 0);
+  tamagotchi::EspGL::Vect2 start(0, 0);
   pet.draw(screen, start);
 }
 

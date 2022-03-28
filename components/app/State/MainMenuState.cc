@@ -48,10 +48,10 @@ void MainMenuState::init() {
   Globals::game.pet().draw(Globals::game.screen());
 }
 void MainMenuState::mainLoop() {
-  std::vector<std::pair<EspGL::Point, EspGL::Point>> hitboxes;
+  std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>> hitboxes;
   std::transform(
       drawables_.begin(), drawables_.end(), std::back_inserter(hitboxes),
-      [](auto& drawable_pair) -> std::pair<EspGL::Point, EspGL::Point> {
+      [](auto& drawable_pair) -> std::pair<EspGL::Vect2, EspGL::Vect2> {
         auto& [id, drawable] = drawable_pair;
         return drawable->hitbox();
       });
@@ -76,7 +76,7 @@ void MainMenuState::deserializeIcons() {
         bitmapLoader.parseBitmap(dimensions.first, dimensions.second)));
   }
 
-  EspGL::Point nextIconStart = {consts::START_ICONS.first,
+  EspGL::Vect2 nextIconStart = {consts::START_ICONS.first,
                                 consts::START_ICONS.second};
   for (auto i = 0; i < bitmapNumber; i++) {
     drawables_.emplace(labels_[i],

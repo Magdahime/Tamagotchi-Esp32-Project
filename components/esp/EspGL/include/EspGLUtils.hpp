@@ -14,20 +14,32 @@
 namespace tamagotchi {
 namespace EspGL {
 
-struct Point {
+struct Vect2 {
   int32_t x_;
   int32_t y_;
   template <typename T, typename Y>
-  Point(T x, Y y) : x_(std::round(x)), y_(std::round(y)) {}
-  Point() : x_(0), y_(0) {}
+  Vect2(T x, Y y) : x_(std::round(x)), y_(std::round(y)) {}
+  Vect2() : x_(0), y_(0) {}
+  Vect2 operator+(Vect2 const &point2);
+  Vect2 operator-(Vect2 const &point2);
+  template <
+      typename ArithmeticType,
+      typename = typename std::enable_if<
+          std::is_arithmetic<ArithmeticType>::value, ArithmeticType>::type>
+  Vect2 operator+(ArithmeticType constant);
+  template <
+      typename ArithmeticType,
+      typename = typename std::enable_if<
+          std::is_arithmetic<ArithmeticType>::value, ArithmeticType>::type>
+  Vect2 operator-(ArithmeticType constant);
 };
 
 enum class Coordinate { X, Y };
 
-std::tuple<Point, Point, Point> sort3Points(const Point &a, const Point &b,
-                                            const Point &c, Coordinate orderBy);
-Point straightLineEquation(const Point &start, const Point &end,
-                           const Point &search, const Coordinate coordinate);
+std::tuple<Vect2, Vect2, Vect2> sort3Points(const Vect2 &a, const Vect2 &b,
+                                            const Vect2 &c, Coordinate orderBy);
+Vect2 straightLineEquation(const Vect2 &start, const Vect2 &end,
+                           const Vect2 &search, const Coordinate coordinate);
 void delay(const uint32_t ms);
 
 struct RGB888 {

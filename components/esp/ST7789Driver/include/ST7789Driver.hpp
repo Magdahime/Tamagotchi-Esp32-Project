@@ -18,7 +18,7 @@ class ST7789VWDriver : public tamagotchi::EspGL::Driver<uint16_t> {
  public:
   ST7789VWDriver(structs::st7789_config_t config);
   ~ST7789VWDriver();
-  virtual void drawPixel(const EspGL::Point &point, uint16_t colour) override;
+  virtual void drawPixel(const EspGL::Vect2 &point, uint16_t colour) override;
 
   virtual void writePixelArea(int16_t startX, int16_t endX, int16_t startY,
                               int16_t endY, uint16_t colour) override;
@@ -42,8 +42,8 @@ class ST7789VWDriver : public tamagotchi::EspGL::Driver<uint16_t> {
                          uint16_t endY);
   virtual void writeColour(uint16_t colour) override;
   virtual void writeColour(uint16_t colour, size_t size) override;
-  std::vector<uint16_t> readDisplayMemory(const EspGL::Point &start,
-                                          const EspGL::Point &stop);
+  std::vector<uint16_t> readDisplayMemory(const EspGL::Vect2 &start,
+                                          const EspGL::Vect2 &stop);
 
   Spi::SpiDriver spiDriver_;
   uint16_t width_;

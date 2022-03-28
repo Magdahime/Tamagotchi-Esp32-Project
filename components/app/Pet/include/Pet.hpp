@@ -43,7 +43,7 @@ class Pet {
   void giveSnack();
   void play();
 
-  void draw(EspGL::Screen<ColourRepresentation>& target, EspGL::Point start,
+  void draw(EspGL::Screen<ColourRepresentation>& target, EspGL::Vect2 start,
             uint32_t scale = 5);
 
   inline std::pair<std::string, EspGL::Bitmap>& body() { return body_; }
@@ -65,12 +65,12 @@ class Pet {
 
 template <typename ColourRepresentation>
 void Pet<ColourRepresentation>::draw(
-    EspGL::Screen<ColourRepresentation>& target, EspGL::Point start,
+    EspGL::Screen<ColourRepresentation>& target, EspGL::Vect2 start,
     uint32_t scale) {
   body_.second.drawScaled(target, start, colour_, scale);
-  EspGL::Point eyesPoint{start.x_ + EYES_OFFSETX * scale,
+  EspGL::Vect2 eyesPoint{start.x_ + EYES_OFFSETX * scale,
                          start.y_ + EYES_OFFSETY * scale};
-  EspGL::Point facePoint{start.x_ + EYES_OFFSETX * scale,
+  EspGL::Vect2 facePoint{start.x_ + EYES_OFFSETX * scale,
                          start.y_ + FACE_OFFSETY * scale};
   eyes_.second.drawScaled(target, eyesPoint, colour_, scale);
   face_.second.drawScaled(target, facePoint, colour_, scale);

@@ -3,7 +3,7 @@
 namespace tamagotchi {
 namespace EspGL {
 
-void Bitmap::overlay(Bitmap& bitmap, Point& start) {
+void Bitmap::overlay(Bitmap& bitmap, Vect2& start) {
   if (!bitmap.empty()) {
     if (bitmap_.empty()) {
       throw std::runtime_error("Primary bitmap in overlay() method is empty!");

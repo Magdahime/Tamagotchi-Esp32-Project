@@ -15,7 +15,7 @@ class Drawable {
 
   void erase(Screen<ColourRepresentation>& target,
              Colour<ColourRepresentation> backgroundColour);
-  virtual std::pair<Point, Point> hitbox() = 0;
+  virtual std::pair<Vect2, Vect2> hitbox() = 0;
 
   virtual ~Drawable() = default;
 

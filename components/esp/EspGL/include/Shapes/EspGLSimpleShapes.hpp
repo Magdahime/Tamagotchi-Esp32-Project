@@ -27,30 +27,30 @@ class Shape : Drawable<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Line : public Shape<ColourRepresentation> {
  public:
-  Line(Point point1, Point point2, Colour<ColourRepresentation> colour)
+  Line(Vect2 point1, Vect2 point2, Colour<ColourRepresentation> colour)
       : start_(std::move(point1)),
         end_(std::move(point2)),
         colour_(std::move(colour)) {}
   virtual ~Line() = default;
   virtual void draw(Screen<ColourRepresentation> &target) override;
 
-  inline const Point &start() const { return start_; }
-  inline const Point &end() const { return end_; }
+  inline const Vect2 &start() const { return start_; }
+  inline const Vect2 &end() const { return end_; }
   inline const Colour<ColourRepresentation> &colour() const { return colour_; }
 
-  inline void setStart(Point newStart) { start_ = newStart; }
-  inline void setEnd(Point newEnd) { end_ = newEnd; }
+  inline void setStart(Vect2 newStart) { start_ = newStart; }
+  inline void setEnd(Vect2 newEnd) { end_ = newEnd; }
   inline void setColour(Colour<ColourRepresentation> newColour) {
     colour_ = newColour;
   }
 
-  virtual inline std::pair<Point, Point> hitbox() override {
+  virtual inline std::pair<Vect2, Vect2> hitbox() override {
     return std::make_pair(start_, end_);
   }
 
  private:
-  Point start_;
-  Point end_;
+  Vect2 start_;
+  Vect2 end_;
   Colour<ColourRepresentation> colour_;
 };
 

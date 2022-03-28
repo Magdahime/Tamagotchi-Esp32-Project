@@ -17,13 +17,13 @@ constexpr int THRESHHOLD = 10;
 namespace StateUtils {
 
 void movePet(
-    const std::vector<std::pair<EspGL::Point, EspGL::Point>>& hitboxes);
+    const std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>>& hitboxes);
 void movePet(
-    std::pair<EspGL::Point, EspGL::Point> newHitbox,
-    const std::vector<std::pair<EspGL::Point, EspGL::Point>>& hitboxes);
+    std::pair<EspGL::Vect2, EspGL::Vect2> newHitbox,
+    const std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>>& hitboxes);
 bool checkCollision(
-    std::pair<EspGL::Point, EspGL::Point> newHitbox,
-    const std::vector<std::pair<EspGL::Point, EspGL::Point>>& hitboxes);
+    std::pair<EspGL::Vect2, EspGL::Vect2> newHitbox,
+    const std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>>& hitboxes);
 
 }  // namespace StateUtils
 }  // namespace State

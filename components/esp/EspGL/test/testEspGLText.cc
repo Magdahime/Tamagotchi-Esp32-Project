@@ -15,7 +15,7 @@ using namespace tamagotchi::SPIFFS;
 constexpr int SHORT_PAUSE = 1000;
 
 extern tamagotchi::EspGL::Screen<uint16_t> screen;
-extern Point center;
+extern Vect2 center;
 
 TEST_GROUP(EspGLTextTests);
 
@@ -33,7 +33,7 @@ TEST(EspGLTextTests, PrintingTextTest) {
   Font font = fLoader.load();
   Text<uint16_t> text(
       "Hello World",
-      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      std::make_pair(Vect2(0, 0), Vect2(screen.width(), screen.height())), font,
       Colour<uint16_t>(colours::GREEN));
   text.draw(screen);
 }
@@ -45,7 +45,7 @@ TEST(EspGLTextTests, PrintingAlphabetTest) {
   Text<uint16_t> text(
       "0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p q r s t u v w x y z "
       "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z !?.,:;%#",
-      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      std::make_pair(Vect2(0, 0), Vect2(screen.width(), screen.height())), font,
       Colour<uint16_t>(colours::RED));
   text.draw(screen);
 }
@@ -66,7 +66,7 @@ TEST(EspGLTextTests, PrintingLongTextTest) {
       "Phasellus at semper nulla. In hac habitasse platea dictumst. "
       "Suspendisse sem lectus, finibus imperdiet aliquet ut, pellentesque a "
       "orci. Etiam luctus ultrices mattis.",
-      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      std::make_pair(Vect2(0, 0), Vect2(screen.width(), screen.height())), font,
       Colour<uint16_t>(colours::RED));
   text.draw(screen);
 }
@@ -77,7 +77,7 @@ TEST(EspGLTextTests, DebuggingTest) {
   Font font = fLoader.load();
   Text<uint16_t> text(
       "u u v v w w x x y y z z . . , , : : ; ; ! ! % % ? ? # #",
-      std::make_pair(Point(0, 0), Point(screen.width(), screen.height())), font,
+      std::make_pair(Vect2(0, 0), Vect2(screen.width(), screen.height())), font,
       Colour<uint16_t>(colours::RED));
   text.draw(screen);
 }

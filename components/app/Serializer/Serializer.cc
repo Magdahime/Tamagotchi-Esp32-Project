@@ -139,7 +139,7 @@ void Serializer::deserialize(std::fstream& fileHandle,
     deserialize(fileHandle, startX);
     deserialize(fileHandle, startY);
     pet = Pet::DrawablePet(std::move(deserializedPet),
-                           EspGL::Point(startX, startY), scale);
+                           EspGL::Vect2(startX, startY), scale);
   }
 }
 

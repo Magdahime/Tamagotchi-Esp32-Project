@@ -14,7 +14,7 @@ TEST(EspGLBitmapTests, OverlayEmptyBitmap) {
   std::vector<bool> bitmap{false, false, true, true};
   tamagotchi::EspGL::Bitmap bitmap1;
   tamagotchi::EspGL::Bitmap bitmap2(2, 2, bitmap);
-  tamagotchi::EspGL::Point point{0, 0};
+  tamagotchi::EspGL::Vect2 point{0, 0};
   try {
     bitmap1.overlay(bitmap2, point);
   }
@@ -33,7 +33,7 @@ TEST(EspGLBitmapTests, OverlayTwoBitmaps) {
                                     std::vector<bool>{true, true, true, true});
   tamagotchi::EspGL::Bitmap bitmap2(
       2, 2, std::vector<bool>{false, false, false, false});
-  tamagotchi::EspGL::Point point{0, 0};
+  tamagotchi::EspGL::Vect2 point{0, 0};
   bitmap1.overlay(bitmap2, point);
   TEST_ASSERT_EQUAL_INT(0, bitmap1.at(0));
   TEST_ASSERT_EQUAL_INT(0, bitmap1.at(1));

@@ -12,16 +12,16 @@ namespace State {
 namespace StateUtils {
 
 bool checkCollision(
-    std::pair<EspGL::Point, EspGL::Point> newHitbox,
-    const std::vector<std::pair<EspGL::Point, EspGL::Point>>& hitboxes) {
-  auto checkIfInside = [&](EspGL::Point leftUpper, EspGL::Point rightLower,
-                           EspGL::Point tested) -> bool {
+    std::pair<EspGL::Vect2, EspGL::Vect2> newHitbox,
+    const std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>>& hitboxes) {
+  auto checkIfInside = [&](EspGL::Vect2 leftUpper, EspGL::Vect2 rightLower,
+                           EspGL::Vect2 tested) -> bool {
     return tested.x_ >= leftUpper.x_ and tested.x_ <= rightLower.x_ and
            tested.y_ >= leftUpper.y_ and tested.y_ <= rightLower.y_;
   };
 
   auto checkIfOutOfBound =
-      [&](std::pair<EspGL::Point, EspGL::Point> hitbox) -> bool {
+      [&](std::pair<EspGL::Vect2, EspGL::Vect2> hitbox) -> bool {
     return hitbox.first.x_ < 0 or hitbox.first.y_ < 0 or
            hitbox.second.x_ > Globals::game.screen().width() or
            hitbox.second.y_ > Globals::game.screen().height();
@@ -39,9 +39,9 @@ bool checkCollision(
 }
 
 void movePet(
-    const std::vector<std::pair<EspGL::Point, EspGL::Point>>& hitboxes) {
+    const std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>>& hitboxes) {
   auto oldPetHitbox = Globals::game.pet().hitbox();
-  EspGL::Point newCoordinate{oldPetHitbox.first};
+  EspGL::Vect2 newCoordinate{oldPetHitbox.first};
 
   newCoordinate = Globals::game.pet().start();
   int stepY = esp_random() % consts::STEP_Y;
@@ -57,7 +57,7 @@ void movePet(
 
   auto newHitbox = std::make_pair(
       newCoordinate,
-      EspGL::Point(oldPetHitbox.second.x_ +
+      EspGL::Vect2(oldPetHitbox.second.x_ +
                        (Globals::game.pet().start().x_ - newCoordinate.x_),
                    oldPetHitbox.second.y_ +
                        (Globals::game.pet().start().y_ - newCoordinate.y_)));
@@ -74,8 +74,8 @@ void movePet(
 }
 
 void movePet(
-    std::pair<EspGL::Point, EspGL::Point> newHitbox,
-    const std::vector<std::pair<EspGL::Point, EspGL::Point>>& hitboxes) {
+    std::pair<EspGL::Vect2, EspGL::Vect2> newHitbox,
+    const std::vector<std::pair<EspGL::Vect2, EspGL::Vect2>>& hitboxes) {
   if (!checkCollision(newHitbox, hitboxes)) {
     Globals::game.pet().erase(Globals::game.screen(),
                               Globals::defaultValues::BACKGROUND_COLOUR);

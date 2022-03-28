@@ -24,7 +24,7 @@ tamagotchi::ST7789::ST7789VWDriver st7789driver = initializeDisplay();
 std::unique_ptr<tamagotchi::ST7789::ST7789VWDriver> ptr(&st7789driver);
 tamagotchi::EspGL::Screen<uint16_t> screen(consts::WIDTH, consts::HEIGHT,
                                            std::move(ptr));
-Point center(screen.width() / 2, screen.height() / 2);
+Vect2 center(screen.width() / 2, screen.height() / 2);
 
 TEST_GROUP(EspGLShapesTests);
 

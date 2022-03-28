@@ -1,0 +1,6 @@
+CompileFlags:
+  Remove: [-I]
+  Add: [-Wno-unknown-warning-option,
+        -isystem..\..\..\..\..\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch2-8.4.0\xtensa-esp32-elf\xtensa-esp32-elf\sys-include,
+        -nostdinc++]
+  Compiler: clang++

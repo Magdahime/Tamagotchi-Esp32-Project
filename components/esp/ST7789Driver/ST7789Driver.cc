@@ -169,7 +169,7 @@ void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
   }
 }
 
-void ST7789VWDriver::drawPixel(const EspGL::Point &point, uint16_t colour) {
+void ST7789VWDriver::drawPixel(const EspGL::Vect2 &point, uint16_t colour) {
   if (point.x_ >= width_ || point.y_ >= height_) {
     ESP_LOGE(TAG_,
              "Incorrect data was provided to drawPixel()! Pixel "
@@ -203,7 +203,7 @@ void ST7789VWDriver::writePixelArea(int16_t startX, int16_t endX,
 }
 
 std::vector<uint16_t> ST7789VWDriver::readDisplayMemory(
-    const EspGL::Point &start, const EspGL::Point &stop) {
+    const EspGL::Vect2 &start, const EspGL::Vect2 &stop) {
   writeCommand(commands::memoryRead);
   setDisplayAddress(start.x_, stop.x_, start.y_, stop.y_);
   size_t size = abs((stop.x_ - start.x_) * (stop.y_ - start.y_));

@@ -143,7 +143,7 @@ TEST(SerializerTests, SerializeDrawablePet) {
   tamagotchi::App::Pet::PetGenerator<uint16_t> petGen("petComponents.pbm");
   dummyPet = petGen.generate();
   tamagotchi::App::Pet::DrawablePet<uint16_t> drawablePet(
-      dummyPet, tamagotchi::EspGL::Point(0, 0), 5);
+      dummyPet, tamagotchi::EspGL::Vect2(0, 0), 5);
   tamagotchi::App::Serializer::Serializer serializer;
   serializer.serialize(&drawablePet);
   tamagotchi::App::Pet::DrawablePet<uint16_t> deserializedDrawablePet;

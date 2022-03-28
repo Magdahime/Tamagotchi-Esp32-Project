@@ -16,7 +16,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class RectangleBase : public Shape<ColourRepresentation> {
  public:
-  RectangleBase(Point leftUpperPoint, int16_t dimensionX, int16_t dimensionY)
+  RectangleBase(Vect2 leftUpperPoint, int16_t dimensionX, int16_t dimensionY)
       : leftUpperPoint_(std::move(leftUpperPoint)),
         rightLowerPoint_(
             {leftUpperPoint.x_ + dimensionX, leftUpperPoint.y_ + dimensionY}),
@@ -30,27 +30,27 @@ class RectangleBase : public Shape<ColourRepresentation> {
   virtual ~RectangleBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline const Point& leftUpperPoint() const { return leftUpperPoint_; }
-  inline const Point& rightLowerPoint() const { return rightLowerPoint_; }
+  inline const Vect2& leftUpperPoint() const { return leftUpperPoint_; }
+  inline const Vect2& rightLowerPoint() const { return rightLowerPoint_; }
   inline int16_t dimensionX() { return dimensionX_; }
   inline int16_t dimensionY() { return dimensionY_; }
 
-  inline void setLeftUpperPoint(Point leftUpperPoint) {
+  inline void setLeftUpperPoint(Vect2 leftUpperPoint) {
     leftUpperPoint_ = leftUpperPoint;
   }
-  inline void setRightLowerPoint(Point rightLowerPoint) {
+  inline void setRightLowerPoint(Vect2 rightLowerPoint) {
     rightLowerPoint_ = rightLowerPoint;
   }
   inline void setDimensionX(int16_t dimensionX) { dimensionX_ = dimensionX; }
   inline void setDimensionY(int16_t dimensionY) { dimensionY_ = dimensionY; }
 
-  virtual inline std::pair<Point, Point> hitbox() override {
+  virtual inline std::pair<Vect2, Vect2> hitbox() override {
     return std::make_pair(leftUpperPoint_, rightLowerPoint_);
   }
 
  protected:
-  Point leftUpperPoint_;
-  Point rightLowerPoint_;
+  Vect2 leftUpperPoint_;
+  Vect2 rightLowerPoint_;
   int16_t dimensionX_;
   int16_t dimensionY_;
 };
@@ -58,7 +58,7 @@ class RectangleBase : public Shape<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Rectangle : public RectangleBase<ColourRepresentation> {
  public:
-  Rectangle(Point leftUpperPoint, int16_t dimensionX, int16_t dimensionY,
+  Rectangle(Vect2 leftUpperPoint, int16_t dimensionX, int16_t dimensionY,
             Colour<ColourRepresentation> fill,
             std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
@@ -86,7 +86,7 @@ class Rectangle : public RectangleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class RectangleOutline : public RectangleBase<ColourRepresentation> {
  public:
-  RectangleOutline(Point leftUpperPoint, int16_t dimensionX, int16_t dimensionY,
+  RectangleOutline(Vect2 leftUpperPoint, int16_t dimensionX, int16_t dimensionY,
                    Colour<ColourRepresentation> outline)
       : RectangleBase<ColourRepresentation>(leftUpperPoint, dimensionX,
                                             dimensionY),
@@ -108,16 +108,16 @@ class RectangleOutline : public RectangleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Square : public Rectangle<ColourRepresentation> {
  public:
-  Square(Point leftUpperPoint, int16_t dimension,
+  Square(Vect2 leftUpperPoint, int16_t dimension,
          Colour<ColourRepresentation> fill,
          std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : Rectangle<ColourRepresentation>(leftUpperPoint, dimension, dimension,
                                         fill, outline) {}
-  Square(Point center, int16_t sideLength, Colour<ColourRepresentation> fill,
+  Square(Vect2 center, int16_t sideLength, Colour<ColourRepresentation> fill,
          double angle,
          std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : Rectangle<ColourRepresentation>(
-            Point(center.x_ - cos(angle) * (sideLength / 2.0),
+            Vect2(center.x_ - cos(angle) * (sideLength / 2.0),
                   center.y_ - sin(angle) * (sideLength / 2.0)),
             sideLength, sideLength, fill, outline) {}
   virtual ~Square() = default;
@@ -129,14 +129,14 @@ class Square : public Rectangle<ColourRepresentation> {
 template <typename ColourRepresentation>
 class SquareOutline : public RectangleOutline<ColourRepresentation> {
  public:
-  SquareOutline(Point leftUpperPoint, int16_t dimension,
+  SquareOutline(Vect2 leftUpperPoint, int16_t dimension,
                 Colour<ColourRepresentation> outline)
       : RectangleOutline<ColourRepresentation>(leftUpperPoint, dimension,
                                                dimension, outline) {}
-  SquareOutline(Point center, int16_t sideLength,
+  SquareOutline(Vect2 center, int16_t sideLength,
                 Colour<ColourRepresentation> outline, double angle)
       : RectangleOutline<ColourRepresentation>(
-            Point(center.x_ - cos(angle) * (sideLength / 2.0),
+            Vect2(center.x_ - cos(angle) * (sideLength / 2.0),
                   center.y_ - sin(angle) * (sideLength / 2.0)),
             sideLength, sideLength, outline) {}
   virtual ~SquareOutline() = default;
@@ -195,29 +195,29 @@ void RectangleOutline<ColourRepresentation>::draw(
       this->leftUpperPoint_.y_ + this->dimensionY_, this->leftUpperPoint_.x_,
       this->leftUpperPoint_.y_ + this->dimensionY_, outline_.value());
   Line<ColourRepresentation>{
-      Point(this->leftUpperPoint_.x_, this->leftUpperPoint_.y_),
-      Point(this->leftUpperPoint_.x_ + this->dimensionX_,
+      Vect2(this->leftUpperPoint_.x_, this->leftUpperPoint_.y_),
+      Vect2(this->leftUpperPoint_.x_ + this->dimensionX_,
             this->leftUpperPoint_.y_),
       outline_.value()}
       .draw(target);
   Line<ColourRepresentation>{
-      Point(this->leftUpperPoint_.x_ + this->dimensionX_,
+      Vect2(this->leftUpperPoint_.x_ + this->dimensionX_,
             this->leftUpperPoint_.y_),
-      Point(this->leftUpperPoint_.x_ + this->dimensionX_,
+      Vect2(this->leftUpperPoint_.x_ + this->dimensionX_,
             this->leftUpperPoint_.y_ + this->dimensionY_),
       outline_.value()}
       .draw(target);
   Line<ColourRepresentation>{
-      Point(this->leftUpperPoint_.x_ + this->dimensionX_,
+      Vect2(this->leftUpperPoint_.x_ + this->dimensionX_,
             this->leftUpperPoint_.y_ + this->dimensionY_),
-      Point(this->leftUpperPoint_.x_,
+      Vect2(this->leftUpperPoint_.x_,
             this->leftUpperPoint_.y_ + this->dimensionY_),
       outline_.value()}
       .draw(target);
   Line<ColourRepresentation>{
-      Point(this->leftUpperPoint_.x_,
+      Vect2(this->leftUpperPoint_.x_,
             this->leftUpperPoint_.y_ + this->dimensionY_),
-      Point(this->leftUpperPoint_.x_, this->leftUpperPoint_.y_),
+      Vect2(this->leftUpperPoint_.x_, this->leftUpperPoint_.y_),
       outline_.value()}
       .draw(target);
 }

@@ -20,13 +20,13 @@ class DrawablePet : public Pet<ColourRepresentation>,
   DrawablePet(std::pair<std::string, EspGL::Bitmap> body,
               std::pair<std::string, EspGL::Bitmap> eyes,
               std::pair<std::string, EspGL::Bitmap> face,
-              EspGL::Colour<ColourRepresentation> colour, EspGL::Point start,
+              EspGL::Colour<ColourRepresentation> colour, EspGL::Vect2 start,
               int scale = 5)
       : Pet<ColourRepresentation>(body, eyes, face, colour),
         scale_(scale),
         start_(start) {}
 
-  DrawablePet(Pet<ColourRepresentation> pet, EspGL::Point start, int scale = 5)
+  DrawablePet(Pet<ColourRepresentation> pet, EspGL::Vect2 start, int scale = 5)
       : Pet<ColourRepresentation>(std::move(pet)),
         scale_(scale),
         start_(start) {}
@@ -34,23 +34,23 @@ class DrawablePet : public Pet<ColourRepresentation>,
   ~DrawablePet() = default;
 
   int& scale() { return scale_; }
-  EspGL::Point& start() { return start_; }
+  EspGL::Vect2& start() { return start_; }
 
-  void setStart(EspGL::Point newStart) { start_ = newStart; }
+  void setStart(EspGL::Vect2 newStart) { start_ = newStart; }
 
   virtual void draw(EspGL::Screen<ColourRepresentation>& target) override {
     Pet<ColourRepresentation>::draw(target, start_, scale_);
   }
-  virtual std::pair<EspGL::Point, EspGL::Point> hitbox() override {
+  virtual std::pair<EspGL::Vect2, EspGL::Vect2> hitbox() override {
     return std::make_pair(
-        EspGL::Point(start_.x_, start_.y_),
-        EspGL::Point(start_.x_ + this->body().second.sizeX() * scale_,
+        EspGL::Vect2(start_.x_, start_.y_),
+        EspGL::Vect2(start_.x_ + this->body().second.sizeX() * scale_,
                      start_.y_ + this->body().second.sizeY() * scale_));
   }
 
  private:
   int scale_;
-  EspGL::Point start_;
+  EspGL::Vect2 start_;
 };
 
 }  // namespace Pet

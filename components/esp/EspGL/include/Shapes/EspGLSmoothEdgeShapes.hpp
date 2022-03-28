@@ -12,33 +12,33 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class CircleBase : public Shape<ColourRepresentation> {
  public:
-  CircleBase(Point center, double radius)
+  CircleBase(Vect2 center, double radius)
       : center_(std::move(center)), radius_(std::move(radius)) {}
   virtual ~CircleBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline const Point& center() const { return center_; }
+  inline const Vect2& center() const { return center_; }
   inline double radius() { return radius_; }
 
-  inline void setCenter(Point newCenter) { center_ = newCenter; }
+  inline void setCenter(Vect2 newCenter) { center_ = newCenter; }
   inline void setRadius(double newRadius) { radius_ = newRadius; }
 
-  virtual inline std::pair<Point, Point> hitbox() override {
-    return std::make_pair(Point{this->center_.x_ - this->radius_,
+  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+    return std::make_pair(Vect2{this->center_.x_ - this->radius_,
                                 this->center_.y_ - this->radius_},
-                          Point{this->center_.x_ + this->radius_,
+                          Vect2{this->center_.x_ + this->radius_,
                                 this->center_.y_ + this->radius_});
   }
 
  protected:
-  Point center_;
+  Vect2 center_;
   double radius_;
 };
 
 template <typename ColourRepresentation>
 class Circle : public CircleBase<ColourRepresentation> {
  public:
-  Circle(Point center, double radius, Colour<ColourRepresentation> fill,
+  Circle(Vect2 center, double radius, Colour<ColourRepresentation> fill,
          std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : CircleBase<ColourRepresentation>(center, radius),
         fill_(std::move(fill)),
@@ -64,7 +64,7 @@ class Circle : public CircleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class CircleOutline : public CircleBase<ColourRepresentation> {
  public:
-  CircleOutline(Point center, double radius,
+  CircleOutline(Vect2 center, double radius,
                 Colour<ColourRepresentation> outline)
       : CircleBase<ColourRepresentation>(center, radius),
         outline_(std::move(outline)) {}
@@ -85,30 +85,30 @@ class CircleOutline : public CircleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class EllipseBase : public Shape<ColourRepresentation> {
  public:
-  EllipseBase(Point center, double xRadius, double yRadius)
+  EllipseBase(Vect2 center, double xRadius, double yRadius)
       : center_(std::move(center)),
         xRadius_(std::move(xRadius)),
         yRadius_(std::move(yRadius)) {}
   virtual ~EllipseBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline const Point& center() const { return center_; }
+  inline const Vect2& center() const { return center_; }
   inline double xRadius() { return xRadius_; }
   inline double yRadius() { return yRadius_; }
 
-  inline void setCenter(Point newCenter) { center_ = newCenter; }
+  inline void setCenter(Vect2 newCenter) { center_ = newCenter; }
   inline void setXRadius(double newRadius) { xRadius_ = newRadius; }
   inline void setYRadius(double newRadius) { yRadius_ = newRadius; }
 
-  virtual inline std::pair<Point, Point> hitbox() override {
-    return std::make_pair(Point(this->center_.x_ - this->xRadius_,
+  virtual inline std::pair<Vect2, Vect2> hitbox() override {
+    return std::make_pair(Vect2(this->center_.x_ - this->xRadius_,
                                 this->center_.y_ - this->yRadius_),
-                          Point(this->center_.x_ + this->xRadius_,
+                          Vect2(this->center_.x_ + this->xRadius_,
                                 this->center_.y_ + this->yRadius_));
   }
 
  protected:
-  Point center_;
+  Vect2 center_;
   double xRadius_;
   double yRadius_;
 };
@@ -116,7 +116,7 @@ class EllipseBase : public Shape<ColourRepresentation> {
 template <typename ColourRepresentation>
 class Ellipse : public EllipseBase<ColourRepresentation> {
  public:
-  Ellipse(Point center, double xRadius, double yRadius,
+  Ellipse(Vect2 center, double xRadius, double yRadius,
           Colour<ColourRepresentation> fill,
           std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
@@ -141,7 +141,7 @@ class Ellipse : public EllipseBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class EllipseOutline : public EllipseBase<ColourRepresentation> {
  public:
-  EllipseOutline(Point center, double xRadius, double yRadius,
+  EllipseOutline(Vect2 center, double xRadius, double yRadius,
                  Colour<ColourRepresentation> outline)
       : EllipseBase<ColourRepresentation>(center, xRadius, yRadius),
         outline_(std::move(outline)) {}

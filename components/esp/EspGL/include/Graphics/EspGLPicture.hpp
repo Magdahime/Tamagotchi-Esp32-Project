@@ -13,7 +13,7 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class Picture : Drawable<ColourRepresentation> {
  public:
-  Picture(Point start, size_t sizeX, size_t sizeY,
+  Picture(Vect2 start, size_t sizeX, size_t sizeY,
           std::vector<ColourRepresentation> picture)
       : start_(start),
         sizeX_(std::move(sizeX)),
@@ -25,7 +25,7 @@ class Picture : Drawable<ColourRepresentation> {
   inline std::vector<ColourRepresentation>& picture() { return picture_; }
 
  private:
-  Point start_;
+  Vect2 start_;
   size_t sizeX_;
   size_t sizeY_;
   std::vector<ColourRepresentation> picture_;

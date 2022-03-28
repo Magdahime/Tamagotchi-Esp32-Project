@@ -18,40 +18,40 @@ namespace EspGL {
 template <typename ColourRepresentation>
 class TriangleBase : public Shape<ColourRepresentation> {
  public:
-  TriangleBase(Point point1, Point point2, Point point3)
+  TriangleBase(Vect2 point1, Vect2 point2, Vect2 point3)
       : point1_(std::move(point1)),
         point2_(std::move(point2)),
         point3_(std::move(point3)) {}
   virtual ~TriangleBase() = default;
   virtual void draw(Screen<ColourRepresentation>& target) = 0;
 
-  inline const Point& point1() const { return point1_; }
-  inline const Point& point2() const { return point2_; }
-  inline const Point& point3() const { return point3_; }
+  inline const Vect2& point1() const { return point1_; }
+  inline const Vect2& point2() const { return point2_; }
+  inline const Vect2& point3() const { return point3_; }
 
-  inline void setPoint1(Point newPoint) { point1_ = newPoint; }
-  inline void setPoint2(Point newPoint) { point2_ = newPoint; }
-  inline void setPoint3(Point newPoint) { point3_ = newPoint; }
+  inline void setPoint1(Vect2 newPoint) { point1_ = newPoint; }
+  inline void setPoint2(Vect2 newPoint) { point2_ = newPoint; }
+  inline void setPoint3(Vect2 newPoint) { point3_ = newPoint; }
 
-  virtual inline std::pair<Point, Point> hitbox() override {
+  virtual inline std::pair<Vect2, Vect2> hitbox() override {
     return std::make_pair(
-        Point{std::min({point1_.x_, point2_.x_, point3_.x_}),
+        Vect2{std::min({point1_.x_, point2_.x_, point3_.x_}),
               std::min({point1_.y_, point2_.y_, point3_.y_})},
-        Point{std::max({point1_.x_, point2_.x_, point3_.x_}),
+        Vect2{std::max({point1_.x_, point2_.x_, point3_.x_}),
               std::max({point1_.y_, point2_.y_, point3_.y_})});
   }
 
  protected:
   explicit TriangleBase() = default;
-  Point point1_;
-  Point point2_;
-  Point point3_;
+  Vect2 point1_;
+  Vect2 point2_;
+  Vect2 point3_;
 };
 
 template <typename ColourRepresentation>
 class Triangle : public TriangleBase<ColourRepresentation> {
  public:
-  Triangle(Point point1, Point point2, Point point3,
+  Triangle(Vect2 point1, Vect2 point2, Vect2 point3,
            Colour<ColourRepresentation> fill,
            std::optional<Colour<ColourRepresentation>> outline = std::nullopt)
       : TriangleBase<ColourRepresentation>(point1, point2, point3),
@@ -80,7 +80,7 @@ class Triangle : public TriangleBase<ColourRepresentation> {
 template <typename ColourRepresentation>
 class TriangleOutline : public TriangleBase<ColourRepresentation> {
  public:
-  TriangleOutline(Point point1, Point point2, Point point3,
+  TriangleOutline(Vect2 point1, Vect2 point2, Vect2 point3,
                   Colour<ColourRepresentation> outline)
       : TriangleBase<ColourRepresentation>(point1, point2, point3),
         outline_(std::move(outline)) {}
@@ -103,17 +103,17 @@ template <typename ColourRepresentation>
 class EquilateralTriangle : public Triangle<ColourRepresentation> {
  public:
   EquilateralTriangle(
-      Point center, double sideLength, Colour<ColourRepresentation> fill,
+      Vect2 center, double sideLength, Colour<ColourRepresentation> fill,
       std::optional<Colour<ColourRepresentation>> outline = std::nullopt,
       double angle = 0)
       : Triangle<ColourRepresentation>() {
     double radius = std::sqrt(3) * sideLength / 3;
     double radians = M_PI * 2.0 / 3.0;
-    Point point1{center.x_ + cos(angle) * radius,
+    Vect2 point1{center.x_ + cos(angle) * radius,
                  center.y_ + sin(angle) * radius};
-    Point point2{center.x_ + cos(angle + radians) * radius,
+    Vect2 point2{center.x_ + cos(angle + radians) * radius,
                  center.y_ + sin(angle + radians) * radius};
-    Point point3{center.x_ + cos(angle + 2 * radians) * radius,
+    Vect2 point3{center.x_ + cos(angle + 2 * radians) * radius,
                  center.y_ + sin(angle + 2 * radians) * radius};
     this->point1_ = point1;
     this->point2_ = point2;
@@ -126,24 +126,24 @@ class EquilateralTriangle : public Triangle<ColourRepresentation> {
 
  protected:
   double sideLength_;
-  Point center_;
+  Vect2 center_;
   double angle_;
 };
 template <typename ColourRepresentation>
 class EquilateralTriangleOutline
     : public TriangleOutline<ColourRepresentation> {
  public:
-  EquilateralTriangleOutline(Point center, double sideLength,
+  EquilateralTriangleOutline(Vect2 center, double sideLength,
                              Colour<ColourRepresentation> outline,
                              double angle = 0)
       : TriangleOutline<ColourRepresentation>() {
     double radius = std::sqrt(3) * sideLength / 3;
     double radians = M_PI * 2.0 / 3.0;
-    Point point1{center.x_ + cos(angle) * radius,
+    Vect2 point1{center.x_ + cos(angle) * radius,
                  center.y_ + sin(angle) * radius};
-    Point point2{center.x_ + cos(angle + radians) * radius,
+    Vect2 point2{center.x_ + cos(angle + radians) * radius,
                  center.y_ + sin(angle + radians) * radius};
-    Point point3{center.x_ + cos(angle + 2 * radians) * radius,
+    Vect2 point3{center.x_ + cos(angle + 2 * radians) * radius,
                  center.y_ + sin(angle + 2 * radians) * radius};
     this->point1_ = point1;
     this->point2_ = point2;
@@ -155,7 +155,7 @@ class EquilateralTriangleOutline
 
  protected:
   double sideLength_;
-  Point center_;
+  Vect2 center_;
   float angle_;
 };
 
