@@ -23,7 +23,7 @@ class CircleBase : public Shape<ColourRepresentation> {
   inline void setCenter(Vect2 newCenter) { center_ = newCenter; }
   inline void setRadius(double newRadius) { radius_ = newRadius; }
 
-  virtual inline EspGLHitbox hitbox() override {
+  virtual inline Hitbox hitbox() override {
     return std::make_pair(Vect2{this->center_.x_ - this->radius_,
                                 this->center_.y_ - this->radius_},
                           Vect2{this->center_.x_ + this->radius_,
@@ -100,7 +100,7 @@ class EllipseBase : public Shape<ColourRepresentation> {
   inline void setXRadius(double newRadius) { xRadius_ = newRadius; }
   inline void setYRadius(double newRadius) { yRadius_ = newRadius; }
 
-  virtual inline EspGLHitbox hitbox() override {
+  virtual inline Hitbox hitbox() override {
     return std::make_pair(Vect2(this->center_.x_ - this->xRadius_,
                                 this->center_.y_ - this->yRadius_),
                           Vect2(this->center_.x_ + this->xRadius_,

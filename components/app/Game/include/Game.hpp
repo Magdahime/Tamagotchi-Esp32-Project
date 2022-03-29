@@ -47,7 +47,7 @@ class Game {
   EspGL::Screen<uint16_t>& screen() { return screen_; }
 
   void print(std::string message,
-             EspGL::EspGLHitbox position,
+             EspGL::Hitbox position,
              EspGL::Colour<uint16_t> colour, int characterSize = 3);
 
   State::StateType currentState() { return currentState_; }

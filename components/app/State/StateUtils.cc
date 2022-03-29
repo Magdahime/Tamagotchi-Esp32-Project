@@ -12,8 +12,8 @@ namespace State {
 namespace StateUtils {
 
 bool checkCollision(
-    EspGL::EspGLHitbox newHitbox,
-    const std::vector<EspGL::EspGLHitbox>& hitboxes) {
+    EspGL::Hitbox newHitbox,
+    const std::vector<EspGL::Hitbox>& hitboxes) {
   auto checkIfInside = [&](EspGL::Vect2 leftUpper, EspGL::Vect2 rightLower,
                            EspGL::Vect2 tested) -> bool {
     return tested.x_ >= leftUpper.x_ and tested.x_ <= rightLower.x_ and
@@ -21,7 +21,7 @@ bool checkCollision(
   };
 
   auto checkIfOutOfBound =
-      [&](EspGL::EspGLHitbox hitbox) -> bool {
+      [&](EspGL::Hitbox hitbox) -> bool {
     return hitbox.first.x_ < 0 or hitbox.first.y_ < 0 or
            hitbox.second.x_ > Globals::game.screen().width() or
            hitbox.second.y_ > Globals::game.screen().height();
@@ -39,7 +39,7 @@ bool checkCollision(
 }
 
 void movePet(
-    const std::vector<EspGL::EspGLHitbox>& hitboxes) {
+    const std::vector<EspGL::Hitbox>& hitboxes) {
   auto oldPetHitbox = Globals::game.pet().hitbox();
   EspGL::Vect2 newCoordinate{oldPetHitbox.first};
 
@@ -74,8 +74,8 @@ void movePet(
 }
 
 void movePet(
-    EspGL::EspGLHitbox newHitbox,
-    const std::vector<EspGL::EspGLHitbox>& hitboxes) {
+    EspGL::Hitbox newHitbox,
+    const std::vector<EspGL::Hitbox>& hitboxes) {
   if (!checkCollision(newHitbox, hitboxes)) {
     Globals::game.pet().erase(Globals::game.screen(),
                               Globals::defaultValues::BACKGROUND_COLOUR);

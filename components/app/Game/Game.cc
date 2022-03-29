@@ -100,7 +100,7 @@ void Game::shiftState() {
 }
 
 void Game::print(std::string message,
-                 EspGL::EspGLHitbox position,
+                 EspGL::Hitbox position,
                  EspGL::Colour<uint16_t> colour, int characterSize) {
   ESP_LOGI(TAG_, "Writing text on screen: %s", message.c_str());
   EspGL::Text<uint16_t> text(message, position, font_, colour, characterSize);

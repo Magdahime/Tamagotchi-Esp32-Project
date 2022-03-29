@@ -12,26 +12,39 @@
 #include "Event.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
+#include "Gpioconf.hpp"
 #include "Shapes/EspGLRectangles.hpp"
 
 namespace tamagotchi {
 namespace App {
 namespace State {
 
-MainMenuState::MainMenuState() { deserializeIcons(); }
+MainMenuState::MainMenuState() {
+  deserializeIcons();
+  std::transform(drawables_.begin(), drawables_.end(),
+                 std::back_inserter(hitboxes_),
+                 [](auto& drawable_pair) -> EspGL::Hitbox {
+                   auto& [id, drawable] = drawable_pair;
+                   return drawable->hitbox();
+                 });
+}
 
 void MainMenuState::handleEvent(Event::Event event) {
-  // int pressedButton = 0;
+  int pressedButton = 0;
   switch (event.type_) {
     case Event::EventTypes::gpio:
-      // pressedButton = *reinterpret_cast<int*>(event.data_);
+      ESP_LOGI(TAG_, "GPIO EVENT");
+      pressedButton = *reinterpret_cast<int*>(event.data_);
+      handleGpioInput(pressedButton);
       break;
 
     case Event::EventTypes::terminate:
+      ESP_LOGI(TAG_, "TERMINATE EVENT");
       Globals::game.setNextState(StateType::End);
       break;
 
     case Event::EventTypes::espNow:
+      ESP_LOGI(TAG_, "ESPNOW EVENT");
       break;
     default:
       break;
@@ -48,14 +61,7 @@ void MainMenuState::init() {
   Globals::game.pet().draw(Globals::game.screen());
 }
 void MainMenuState::mainLoop() {
-  std::vector<EspGL::EspGLHitbox> hitboxes;
-  std::transform(
-      drawables_.begin(), drawables_.end(), std::back_inserter(hitboxes),
-      [](auto& drawable_pair) -> EspGL::EspGLHitbox {
-        auto& [id, drawable] = drawable_pair;
-        return drawable->hitbox();
-      });
-  StateUtils::movePet(hitboxes);
+  StateUtils::movePet(hitboxes_);
   EspGL::delay(2000);
 }
 void MainMenuState::deinit() {}
@@ -95,7 +101,8 @@ void MainMenuState::deserializeIcons() {
   iconPointer_ = labels_.begin();
 }
 
-void MainMenuState::shiftIconPointer() {
+void MainMenuState::shiftIconPointer(MainMenuState::Direction direction) {
+  ESP_LOGI(TAG_, "Shifting Icon Pointer.");
   auto bitmapPointer = static_cast<EspGL::BitmapDrawable<uint16_t>*>(
       drawables_[*iconPointer_].get());
   auto currentColour = bitmapPointer->colour();
@@ -106,6 +113,21 @@ void MainMenuState::shiftIconPointer() {
   iconPointer_++;
   if (iconPointer_ == labels_.end()) {
     iconPointer_ = labels_.begin();
+  }
+}
+
+void MainMenuState::handleGpioInput(int pressedButton) {
+  switch (pressedButton) {
+    case static_cast<int>(Gpio::GpioInputs::GPIO_LEFT):
+      shiftIconPointer(MainMenuState::Direction::BACKWARDS);
+      break;
+
+    case static_cast<int>(Gpio::GpioInputs::GPIO_RIGHT):
+      shiftIconPointer(MainMenuState::Direction::FORWARDS);
+      break;
+
+    default:
+      break;
   }
 }
 

@@ -33,7 +33,7 @@ class TriangleBase : public Shape<ColourRepresentation> {
   inline void setPoint2(Vect2 newPoint) { point2_ = newPoint; }
   inline void setPoint3(Vect2 newPoint) { point3_ = newPoint; }
 
-  virtual inline EspGLHitbox hitbox() override {
+  virtual inline Hitbox hitbox() override {
     return std::make_pair(
         Vect2{std::min({point1_.x_, point2_.x_, point3_.x_}),
               std::min({point1_.y_, point2_.y_, point3_.y_})},

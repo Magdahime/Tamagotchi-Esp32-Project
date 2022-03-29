@@ -19,10 +19,10 @@ TEST_TEAR_DOWN(StateUtilsTests) {}
 
 TEST(StateUtilsTests, MovePetTest) {
   int pets = 10;
-  tamagotchi::EspGL::Point start{239, 0};
+  tamagotchi::EspGL::Vect2 start{239, 0};
   for (auto i = 0; i < pets; ++i) {
     tamagotchi::App::State::StateUtils::movePet(
-        tamagotchi::EspGL::Point(
+        tamagotchi::EspGL::Vect2(
             start.x_,
             start.y_ + tamagotchi::App::Globals::game.screen().height() / pets),
         {});

@@ -30,9 +30,12 @@ class MainMenuState : public State {
   virtual std::string toString() override { return TAG_; }
 
  private:
+  enum class Direction { FORWARDS, BACKWARDS };
+  void handleGpioInput(int pressedButton);
   void deserializeIcons();
-  void shiftIconPointer();
+  void shiftIconPointer(Direction direction);
   static constexpr char TAG_[] = "MainMenuState";
+  std::vector<EspGL::Hitbox> hitboxes_;
   std::vector<std::string> labels_;
   std::vector<std::string>::iterator iconPointer_;
   std::map<std::string, std::unique_ptr<EspGL::Drawable<uint16_t>>> drawables_;
