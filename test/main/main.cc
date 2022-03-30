@@ -2,21 +2,22 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Globals.hpp"
 #include "Game.hpp"
+#include "Globals.hpp"
 #include "unity.h"
+
 
 extern "C" {
 #include "unity_fixture.h"
 }
 namespace tamagotchi::App::Globals {
-Game::Game game = tamagotchi::App::Game::Game();
+// Game::Game game = tamagotchi::App::Game::Game();
 }
 
 static void run_all_tests(void) {
   // RUN_TEST_GROUP(RecyclingContainerTests);
   // RUN_TEST_GROUP(EspGLUtilsTests);
-  // RUN_TEST_GROUP(EspGLShapesTests);
+  RUN_TEST_GROUP(EspGLShapesTests);
   // RUN_TEST_GROUP(SPIFFSDriverTests);
   // RUN_TEST_GROUP(EspGLFontLoaderTests);
   // RUN_TEST_GROUP(BitmapLoaderTests);
@@ -27,7 +28,7 @@ static void run_all_tests(void) {
   // RUN_TEST_GROUP(GomokuTests);
   // RUN_TEST_GROUP(GameTests);
   // RUN_TEST_GROUP(SerializerTests);
-  RUN_TEST_GROUP(StateUtilsTests);
+  // RUN_TEST_GROUP(StateUtilsTests);
 }
 
 static void print_banner(const char* text) {

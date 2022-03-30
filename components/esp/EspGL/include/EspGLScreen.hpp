@@ -21,7 +21,7 @@ class Screen {
     return screenDriver_.get();
   }
   inline void fill(Colour<ColourRepresentation> colour) {
-    screenDriver_->writePixelArea(0, width_, 0, height_, colour.value());
+    screenDriver_->writePixelArea(0, width_-1, 0, height_-1, colour.value());
   }
 
  private:

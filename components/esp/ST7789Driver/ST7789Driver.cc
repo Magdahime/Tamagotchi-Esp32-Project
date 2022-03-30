@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -30,7 +31,7 @@ void ST7789VWDriver::setDisplayAddress(uint16_t beginX, uint16_t endX,
   writeAddress(beginY, endY);
 }
 ST7789VWDriver::ST7789VWDriver(structs::st7789_config_t config)
-    : spiDriver_(consts::LCD_HOST) {
+    : spiDriver_(consts::LCD_HOST), dataBuffer_(spiDriver_.spiBuffer()) {
   gpioInit(config.gpio);
   lcdInit(config.lcd);
 }
@@ -162,10 +163,21 @@ void ST7789VWDriver::writeColour(uint16_t colour) {
 void ST7789VWDriver::writeColour(uint16_t colour, size_t size) {
   colour = (colour << 8) + (colour >> 8);
   startDataTransfer();
-  const uint8_t *bytes = reinterpret_cast<const uint8_t *>(&colour);
-  for (auto counter = 0; counter < size; counter++) {
-    spiDriver_.writeBytes(spiHandle_, bytes,
-                          tamagotchi::Spi::consts::DATA_WORD_BYTES);
+  // ESP_LOGE(TAG_, "Przed FILLEM");
+  std::fill(dataBuffer_.begin(), dataBuffer_.end(), colour);
+  int remaining = size;
+  // ESP_LOGE(TAG_, "Przed Petlą");
+  while (remaining > 0) {
+    // ESP_LOGE(TAG_, "W pętli\t%p %d %d %d %d",
+    //          reinterpret_cast<uint8_t *>(dataBuffer_.data()), remaining,
+    //          dataBuffer_.size(), colour, *(uint16_t *)(dataBuffer_.data()));
+    spiDriver_.writeBytes(
+        spiHandle_, reinterpret_cast<uint8_t *>(dataBuffer_.data()),
+        (remaining > Spi::consts::SPI_BUFFER_SIZE ? Spi::consts::SPI_BUFFER_SIZE
+                                                  : remaining) *
+            Spi::consts::DATA_WORD_BYTES);
+    remaining -= Spi::consts::SPI_BUFFER_SIZE;
+    // ESP_LOGE(TAG_, "SRAM");
   }
 }
 

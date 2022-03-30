@@ -70,7 +70,10 @@ esp_err_t SpiDriver::transaction(const uint64_t descriptor,
 
 esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
                                 const size_t dataLength) {
-  if (dataLength > 0 && devices_[descriptor] && data != nullptr) {
+  if (dataLength < consts::SMALL_DATA_THRESHHOLD) {
+    return writeBits(descriptor, data, dataLength);
+  }
+  if (devices_[descriptor] && data != nullptr) {
     spi_transaction_t spiTransaction;
     memset(&spiTransaction, 0, sizeof(spi_transaction_t));
     spiTransaction.length = dataLength * consts::BYTE;
@@ -79,7 +82,8 @@ esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
     if (err == ESP_OK)
       ESP_LOGD(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
     else
-      ESP_LOGE(TAG_, "FAIL! Cannot transmit %d bits", spiTransaction.length);
+      ESP_LOGE(TAG_, "FAIL! writeBytes cannot transmit %d bits",
+               spiTransaction.length);
     return err;
   }
   ESP_LOGE(TAG_, "FAIL! Incorrect data provided to writeBytes()");
@@ -88,6 +92,26 @@ esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
 
 esp_err_t SpiDriver::writeByte(const uint64_t descriptor, const uint8_t data) {
   return writeBytes(descriptor, &data, 1);
+}
+
+esp_err_t SpiDriver::writeBits(const uint64_t descriptor, const uint8_t *data,
+                               const size_t dataLength) {
+  if (devices_[descriptor] && data != nullptr && dataLength > 0) {
+    spi_transaction_t spiTransaction;
+    memset(&spiTransaction, 0, sizeof(spi_transaction_t));
+    spiTransaction.flags |= SPI_TRANS_USE_TXDATA;
+    memcpy(&spiTransaction.tx_data, data, dataLength);
+    spiTransaction.length = dataLength * consts::BYTE;
+    esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
+    if (err == ESP_OK)
+      ESP_LOGD(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
+    else
+      ESP_LOGE(TAG_, "FAIL! writeBits cannot transmit %d bits",
+               spiTransaction.length);
+    return err;
+  }
+  ESP_LOGE(TAG_, "FAIL! Incorrect data provided to writeBits()");
+  return ESP_FAIL;
 }
 
 esp_err_t SpiDriver::writeDataWords(const uint64_t descriptor,

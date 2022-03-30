@@ -27,6 +27,10 @@ class ST7789VWDriver : public tamagotchi::EspGL::Driver<uint16_t> {
                               int16_t endY,
                               std::vector<uint16_t> &data) override;
 
+  inline std::array<uint16_t, Spi::consts::SPI_BUFFER_SIZE> &dataBuffer() {
+    return dataBuffer_;
+  }
+
  private:
   static const char *TAG_;
 
@@ -37,6 +41,7 @@ class ST7789VWDriver : public tamagotchi::EspGL::Driver<uint16_t> {
   virtual void writeCommand(uint8_t command) override;
   virtual void writeBytes(const uint8_t *bytes, size_t size) override;
   virtual void writeByte(const uint8_t byte) override;
+
   void writeAddress(uint16_t address1, uint16_t address2);
   void setDisplayAddress(uint16_t beginX, uint16_t endX, uint16_t beginY,
                          uint16_t endY);
@@ -46,6 +51,7 @@ class ST7789VWDriver : public tamagotchi::EspGL::Driver<uint16_t> {
                                           const EspGL::Vect2 &stop);
 
   Spi::SpiDriver spiDriver_;
+  std::array<uint16_t, Spi::consts::SPI_BUFFER_SIZE> &dataBuffer_;
   uint16_t width_;
   uint16_t height_;
   uint16_t offsetx_;

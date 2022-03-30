@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 
+#include <array>
 #include <cstring>
 
 #include "RecyclingContainer.hpp"
@@ -16,8 +17,12 @@ namespace tamagotchi {
 namespace Spi {
 class SpiDriver {
  public:
-  SpiDriver(spi_host_device_t host) : host_(host){};
-  ~SpiDriver() { spi_bus_free(host_); };
+  SpiDriver(spi_host_device_t host) : host_(host){}
+  ~SpiDriver() { spi_bus_free(host_); }
+
+  inline std::array<uint16_t, consts::SPI_BUFFER_SIZE> &spiBuffer() {
+    return spiBuffer_;
+  }
 
   esp_err_t initialize(const int mosiNum, const int misoNum, const int sclkNum,
                        const int quadwpNum = -1, const int quadhdNum = -1,
@@ -30,6 +35,8 @@ class SpiDriver {
   esp_err_t writeBytes(const uint64_t descriptor, const uint8_t *data,
                        const size_t dataLength);
   esp_err_t writeByte(const uint64_t descriptor, const uint8_t data);
+  esp_err_t writeBits(const uint64_t descriptor, const uint8_t *data,
+                      const size_t dataLength);
   esp_err_t writeDataWords(const uint64_t descriptor, const uint16_t *data,
                            const size_t dataLength);
   esp_err_t writeCommand(const uint64_t descriptor, const uint8_t command);
@@ -43,6 +50,7 @@ class SpiDriver {
   spi_host_device_t host_;
   RecyclingContainer<spi_device_handle_t, consts::MAX_NUMBER_SPI_DEVICES>
       devices_;
+  std::array<uint16_t, consts::SPI_BUFFER_SIZE> spiBuffer_;
   static const char *TAG_;
 };
 }  // namespace Spi
