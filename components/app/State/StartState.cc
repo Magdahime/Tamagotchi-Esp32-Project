@@ -1,6 +1,7 @@
 #include "StartState.hpp"
 
 #include "DrawablePet.hpp"
+#include "StateUtils.hpp"
 #include "EspGLUtils.hpp"
 #include "Event.hpp"
 #include "Game.hpp"
@@ -23,6 +24,7 @@ void StartState::init() {
       {{0, 0},
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);
+     EspGL::delay(2000); 
   auto deserializePetFileHandle = Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::SERIALIZED_PET_PATH);
   if (deserializePetFileHandle.is_open()) {
@@ -54,8 +56,8 @@ void StartState::init() {
       EspGL::colours::GREEN, 1);
 }
 void StartState::mainLoop() {
-  constexpr int timeToWait = 100;
-  while (tamagotchi::App::Globals::game.getQueue(timeToWait).type_ ==
+  
+  while (tamagotchi::App::Globals::game.eventQueue().getQueue(consts::USER_INPUT_WAIT_TIME).type_ ==
          Event::EventTypes::gpio) {
     Globals::game.setNextState(StateType::MainMenu);
     break;

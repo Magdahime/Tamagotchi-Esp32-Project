@@ -47,12 +47,12 @@ void movePet(
   int stepY = esp_random() % consts::STEP_Y;
   int stepX = esp_random() % consts::STEP_X;
   newCoordinate.y_ +=
-      esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD ? stepY
+      esp_random() % consts::THRESHOLD >= 0.5 * consts::THRESHOLD ? stepY
                                                                     : -stepY;
   newCoordinate.x_ +=
-      esp_random() % consts::THRESHHOLD >= 0.5 * consts::THRESHHOLD ? stepX
+      esp_random() % consts::THRESHOLD >= 0.5 * consts::THRESHOLD ? stepX
                                                                     : -stepX;
-  ESP_LOGI("StateUtils", "Trying to move pet: (%d, %d).", newCoordinate.x_,
+  ESP_LOGD("StateUtils", "Trying to move pet: (%d, %d).", newCoordinate.x_,
            newCoordinate.y_);
 
   auto newHitbox = std::make_pair(
@@ -65,7 +65,7 @@ void movePet(
     newCoordinate = {Globals::game.screen().width() / 2,
                      Globals::game.screen().height() / 2};
   }
-  ESP_LOGI("StateUtils", "Moved pet to: (%d, %d).", newCoordinate.x_,
+  ESP_LOGD("StateUtils", "Moved pet to: (%d, %d).", newCoordinate.x_,
            newCoordinate.y_);
   Globals::game.pet().erase(Globals::game.screen(),
                             Globals::defaultValues::BACKGROUND_COLOUR);

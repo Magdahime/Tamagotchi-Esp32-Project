@@ -60,6 +60,13 @@ void Line<ColourRepresentation>::draw(Screen<ColourRepresentation> &target) {
            "Drawing line: (%d,%d) -> (%d,%d) in "
            "colour: 0x%X",
            start_.x_, start_.y_, end_.x_, end_.y_, colour_.value());
+  if (start_.x_ == end_.x_ || start_.y_ == end_.y_) {
+    if (start_.x_ > end_.x_) std::swap(start_.x_, end_.x_);
+    if (start_.y_ > end_.y_) std::swap(start_.y_, end_.y_);
+    target.screenDriver()->writePixelArea(start_.x_, end_.x_, start_.y_,
+                                          end_.y_, colour_.value());
+    return;
+  }
   int16_t kx = end_.x_ >= start_.x_ ? 1 : -1;
   int16_t ky = end_.y_ >= start_.y_ ? 1 : -1;
   int16_t dx = abs(end_.x_ - start_.x_);

@@ -62,7 +62,13 @@ void MainMenuState::init() {
 }
 void MainMenuState::mainLoop() {
   StateUtils::movePet(hitboxes_);
-  EspGL::delay(2000);
+  Event::Event event = tamagotchi::App::Globals::game.eventQueue().getQueue(
+      consts::USER_INPUT_WAIT_TIME);
+  if (!event.empty()) {
+    handleEvent(event);
+  }
+
+  EspGL::delay(1000);
 }
 void MainMenuState::deinit() {}
 
@@ -117,12 +123,15 @@ void MainMenuState::shiftIconPointer(MainMenuState::Direction direction) {
 }
 
 void MainMenuState::handleGpioInput(int pressedButton) {
+  ESP_LOGI(TAG_, "handleGpioInput.");
   switch (pressedButton) {
     case static_cast<int>(Gpio::GpioInputs::GPIO_LEFT):
+      ESP_LOGI(TAG_, "LEFT.");
       shiftIconPointer(MainMenuState::Direction::BACKWARDS);
       break;
 
     case static_cast<int>(Gpio::GpioInputs::GPIO_RIGHT):
+      ESP_LOGI(TAG_, "RIGHT.");
       shiftIconPointer(MainMenuState::Direction::FORWARDS);
       break;
 

@@ -7,18 +7,16 @@
 #include "EndState.hpp"
 #include "Event.hpp"
 #include "Globals.hpp"
+#include "MainMenuState.hpp"
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
-#include "MainMenuState.hpp"
+
 
 namespace tamagotchi {
 namespace App {
 namespace Game {
 
-xQueueHandle Game::eventQueue_ =
-    xQueueCreate(EVENT_QUEUE_SIZE, sizeof(Event::Event));
-
-Game::Game() {
+Game::Game() : eventQueue_(EVENT_QUEUE_SIZE) {
   initializeScreen();
   EspGL::FontLoader fLoader(Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::FONT_FILE_PATH));
@@ -65,33 +63,6 @@ void Game::initializeScreen() {
                               std::make_unique<ST7789::ST7789VWDriver>(config));
 }
 
-bool Game::putQueue(Event::Event event) {
-  if (uxQueueSpacesAvailable(eventQueue_) == 0) {
-    Event::Event dummy;
-    xQueueReceive(eventQueue_, &(dummy), (TickType_t)10);
-  }
-  return xQueueSendToBack(eventQueue_, (void*)&event, (TickType_t)10);
-}
-
-void Game::putQueueFromISR(Event::Event event) {
-  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  if (xQueueIsQueueFullFromISR(eventQueue_)) {
-    Event::Event dummy;
-    xQueueReceiveFromISR(eventQueue_, (void*)&dummy, &xHigherPriorityTaskWoken);
-  }
-
-  xQueueSendToBackFromISR(eventQueue_, &event, &xHigherPriorityTaskWoken);
-}
-
-Event::Event Game::getQueue(int ms) {
-  Event::Event event;
-  int waitTime = ms > 0 ? ms * portTICK_PERIOD_MS : portMAX_DELAY;
-  xQueueReceive(eventQueue_, &(event), (TickType_t)waitTime);
-  return event;
-}
-
-void Game::clearQueue() { xQueueReset(eventQueue_); }
-
 void Game::shiftState() {
   auto nextState = states_[nextState_].get();
   ESP_LOGI(TAG_, "Running new state: %s", nextState->toString().c_str());
@@ -99,8 +70,7 @@ void Game::shiftState() {
   nextState->run();
 }
 
-void Game::print(std::string message,
-                 EspGL::Hitbox position,
+void Game::print(std::string message, EspGL::Hitbox position,
                  EspGL::Colour<uint16_t> colour, int characterSize) {
   ESP_LOGI(TAG_, "Writing text on screen: %s", message.c_str());
   EspGL::Text<uint16_t> text(message, position, font_, colour, characterSize);

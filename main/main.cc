@@ -31,10 +31,10 @@ extern "C" void app_main() {
     ret = nvs_flash_init();
   }
 
-  xTaskCreate(runGame, "MainGameTask", 4096, NULL, tskIDLE_PRIORITY,
+  xTaskCreate(runGame, "MainGameTask", 4096, NULL, configMAX_PRIORITIES - 1,
               &mainGameTaskHandle);
   xTaskCreate(tamagotchi::Joystick::Joystick::task, "JoystickTask", 4096, NULL,
-              11, &joystickTask);
+              tskIDLE_PRIORITY, &joystickTask);
   vTaskStartScheduler();
 }
 

@@ -20,7 +20,7 @@ typedef struct {
 namespace consts {
 constexpr int MAX_NUMBER_SPI_DEVICES = 5;
 constexpr int SPI_BUFFER_SIZE = 128;
-constexpr char SMALL_DATA_THRESHHOLD = 4;
+constexpr char SMALL_DATA_THRESHOLD = 4;
 constexpr char BYTE = 8;
 constexpr char DATA_WORD_BYTES = 2;
 }  // namespace consts

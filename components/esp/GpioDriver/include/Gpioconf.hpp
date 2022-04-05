@@ -35,9 +35,7 @@ static const std::vector<gpio_num_t> gpios = {
 } // namespace GpioInputs
 
 namespace consts {
-constexpr int DEBOUNCE_TIME = 10;
 constexpr int SUCCESS_DELAY = 10 / portTICK_PERIOD_MS;
-constexpr int FAILURE_DELAY = 10 / portTICK_PERIOD_MS;
 constexpr int ESP_INTR_FLAG_DEFAULT = 0;
 
 } // namespace consts

@@ -70,7 +70,7 @@ esp_err_t SpiDriver::transaction(const uint64_t descriptor,
 
 esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
                                 const size_t dataLength) {
-  if (dataLength < consts::SMALL_DATA_THRESHHOLD) {
+  if (dataLength < consts::SMALL_DATA_THRESHOLD) {
     return writeBits(descriptor, data, dataLength);
   }
   if (devices_[descriptor] && data != nullptr) {
@@ -80,7 +80,7 @@ esp_err_t SpiDriver::writeBytes(const uint64_t descriptor, const uint8_t *data,
     spiTransaction.tx_buffer = data;
     esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
     if (err == ESP_OK)
-      ESP_LOGD(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
+      ESP_LOGD(TAG_, "writeBytes: Successfully transmitted %d bits", spiTransaction.length);
     else
       ESP_LOGE(TAG_, "FAIL! writeBytes cannot transmit %d bits",
                spiTransaction.length);
@@ -104,7 +104,7 @@ esp_err_t SpiDriver::writeBits(const uint64_t descriptor, const uint8_t *data,
     spiTransaction.length = dataLength * consts::BYTE;
     esp_err_t err = spi_device_transmit(devices_[descriptor], &spiTransaction);
     if (err == ESP_OK)
-      ESP_LOGD(TAG_, "Successfully transmitted %d bits", spiTransaction.length);
+      ESP_LOGD(TAG_, "writeBits: Successfully transmitted %d bits", spiTransaction.length);
     else
       ESP_LOGE(TAG_, "FAIL! writeBits cannot transmit %d bits",
                spiTransaction.length);

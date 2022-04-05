@@ -11,6 +11,7 @@
 #include "EspGLUtils.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
 #include "Graphics/Text/EspGLText.hpp"
+#include "MessageQueue.hpp"
 #include "Pet.hpp"
 #include "SPIFFSDriver.hpp"
 #include "ST7789Driver.hpp"
@@ -33,11 +34,6 @@ class Game {
   void run();
   void shiftState();
 
-  static bool putQueue(Event::Event event);
-  static void putQueueFromISR(Event::Event event);
-  static void clearQueue();
-  static Event::Event getQueue(int ms);
-
   Pet::DrawablePet<uint16_t>& pet() { return pet_; }
   void setPet(Pet::DrawablePet<uint16_t>& pet) { pet_ = pet; }
 
@@ -45,9 +41,9 @@ class Game {
   EspGL::Font& font() { return font_; }
 
   EspGL::Screen<uint16_t>& screen() { return screen_; }
+  MessageQueue::MessageQueue<Event::Event>& eventQueue() { return eventQueue_; }
 
-  void print(std::string message,
-             EspGL::Hitbox position,
+  void print(std::string message, EspGL::Hitbox position,
              EspGL::Colour<uint16_t> colour, int characterSize = 3);
 
   State::StateType currentState() { return currentState_; }
@@ -62,7 +58,8 @@ class Game {
   Pet::DrawablePet<uint16_t> pet_;
   std::map<State::StateType, std::unique_ptr<State::State>> states_;
   EspGL::Screen<uint16_t> screen_;
-  static xQueueHandle eventQueue_;
+  MessageQueue::MessageQueue<Event::Event> eventQueue_;
+
   static constexpr char TAG_[] = "Game";
   EspGL::Font font_;
 

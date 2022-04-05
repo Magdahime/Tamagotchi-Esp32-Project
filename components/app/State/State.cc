@@ -13,7 +13,7 @@ void State::run() {
   Globals::game.shiftState();
 }
 void State::loop() {
-  Game::Game::clearQueue();
+  Globals::game.eventQueue().clearQueue();
   while (Globals::game.currentState() == Globals::game.nextState()) {
     mainLoop();
   }
