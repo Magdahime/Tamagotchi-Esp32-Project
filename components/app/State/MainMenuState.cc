@@ -104,22 +104,38 @@ void MainMenuState::deserializeIcons() {
       break;
     }
   }
-  iconPointer_ = labels_.begin();
+  currentSelection_ = 0;
+  lastSelection_ = 0;
 }
 
 void MainMenuState::shiftIconPointer(MainMenuState::Direction direction) {
   ESP_LOGI(TAG_, "Shifting Icon Pointer.");
-  auto bitmapPointer = static_cast<EspGL::BitmapDrawable<uint16_t>*>(
-      drawables_[*iconPointer_].get());
-  auto currentColour = bitmapPointer->colour();
-  bitmapPointer->setBackground(currentColour);
-  bitmapPointer->setColour(
-      EspGL::Colour<uint16_t>(currentColour.getNegativeColourValue()));
-  drawables_[*iconPointer_]->redraw(Globals::game.screen());
-  iconPointer_++;
-  if (iconPointer_ == labels_.end()) {
-    iconPointer_ = labels_.begin();
+  if (direction == MainMenuState::Direction::FORWARDS) {
+    currentSelection_++;
+    if (currentSelection_ == labels_.size()) {
+      currentSelection_ = 0;
+    }
+  } else {
+    currentSelection_--;
+    if (currentSelection_ < 0) {
+      currentSelection_ = labels_.size() - 1;
+    }
   }
+
+  auto lastSel = static_cast<EspGL::BitmapDrawable<uint16_t>*>(
+      drawables_[labels_[lastSelection_]].get());
+  lastSel->setBackground(Globals::defaultValues::BACKGROUND_COLOUR);
+  lastSel->setColour(EspGL::Colour<uint16_t>(consts::ICON_COLOUR));
+  drawables_[labels_[lastSelection_]]->redraw(Globals::game.screen());
+
+  auto currSel = static_cast<EspGL::BitmapDrawable<uint16_t>*>(
+      drawables_[labels_[currentSelection_]].get());
+  currSel->setBackground(consts::ICON_COLOUR);
+  currSel->setColour(
+      EspGL::Colour<uint16_t>(Globals::defaultValues::BACKGROUND_COLOUR));
+  drawables_[labels_[currentSelection_]]->redraw(Globals::game.screen());
+
+  lastSelection_ = currentSelection_;
 }
 
 void MainMenuState::handleGpioInput(int pressedButton) {

@@ -20,10 +20,10 @@ class Joystick {
 
  private:
   static void handler(void *arg);
-  static SemaphoreHandle_t  mutex_;
-  static volatile int numberOfButtonInterrupts_;
-  static volatile bool lastState_;
-  static volatile gpio_num_t gpioNum_;
+  static SemaphoreHandle_t mutex_;
+  static int numberOfButtonInterrupts_;
+  static bool lastState_;
+  static gpio_num_t gpioNum_;
   static const char *TAG_;
 };
 }  // namespace Joystick

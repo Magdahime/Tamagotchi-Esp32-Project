@@ -11,9 +11,9 @@
 
 namespace tamagotchi {
 namespace Joystick {
-volatile int Joystick::numberOfButtonInterrupts_ = 0;
-volatile bool Joystick::lastState_ = false;
-volatile gpio_num_t Joystick::gpioNum_;
+int Joystick::numberOfButtonInterrupts_ = 0;
+bool Joystick::lastState_ = false;
+gpio_num_t Joystick::gpioNum_;
 const char *Joystick::TAG_ = "ESP32 Joystick";
 SemaphoreHandle_t Joystick::mutex_ = xSemaphoreCreateBinary();
 
@@ -28,7 +28,6 @@ void Joystick::task(void *arg) {
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
   while (xSemaphoreTake(mutex_, 0xffff) == pdTRUE) {
-
     taskENTER_CRITICAL(&mux);
 
     save = numberOfButtonInterrupts_;
@@ -42,8 +41,8 @@ void Joystick::task(void *arg) {
     if (save != 0 && (currentState == savelastState) &&
         savegpioNum == gpioNum_) {
       App::Event::Event event{App::Event::EventTypes::gpio};
-      *(reinterpret_cast<App::Event::GpioEvent *>(&event.data_)) =
-          App::Event::GpioEvent{true, gpioNum_};
+      memcpy(event.data_, reinterpret_cast<uint8_t *>(&gpioNum_),
+             sizeof(gpioNum_));
       App::Globals::game.eventQueue().putQueue(event);
       numberOfButtonInterrupts_ = 0;
       gpioNum_ = static_cast<gpio_num_t>(0);

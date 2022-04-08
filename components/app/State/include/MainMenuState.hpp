@@ -35,9 +35,10 @@ class MainMenuState : public State {
   void deserializeIcons();
   void shiftIconPointer(Direction direction);
   static constexpr char TAG_[] = "MainMenuState";
+  int currentSelection_;
+  int lastSelection_;
   std::vector<EspGL::Hitbox> hitboxes_;
   std::vector<std::string> labels_;
-  std::vector<std::string>::iterator iconPointer_;
   std::map<std::string, std::unique_ptr<EspGL::Drawable<uint16_t>>> drawables_;
 };
 
