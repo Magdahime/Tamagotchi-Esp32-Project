@@ -18,7 +18,7 @@ void StartState::handleEvent(Event::Event event) {}
 
 void StartState::init() {
   ESP_LOGI(TAG_, "Filling window black");
-  Globals::game.screen().fill(EspGL::colours::BLACK);
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "###########\nWelcome!\n###########",
       {{0, 0},
@@ -42,7 +42,7 @@ void StartState::init() {
     Globals::game.setPet(drawablePet);
   }
   ESP_LOGI(TAG_, "Filling window black");
-  Globals::game.screen().fill(EspGL::colours::BLACK);
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "###########\nThis is your pet:\n###########",
       {{0, 0},

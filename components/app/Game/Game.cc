@@ -8,9 +8,9 @@
 #include "Event.hpp"
 #include "Globals.hpp"
 #include "MainMenuState.hpp"
+#include "MiniGameState.hpp"
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
-
 
 namespace tamagotchi {
 namespace App {
@@ -38,6 +38,8 @@ void Game::createStates() {
                   std::make_unique<State::StartState>());
   states_.emplace(State::StateType::MainMenu,
                   std::make_unique<State::MainMenuState>());
+  states_.emplace(State::StateType::MiniGame,
+                  std::make_unique<State::MiniGameState>());
   states_.emplace(State::StateType::End, std::make_unique<State::EndState>());
 }
 

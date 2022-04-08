@@ -26,7 +26,7 @@ void EndState::mainLoop() {
 
 void EndState::init() {
   ESP_LOGI(TAG_, "Filling window black");
-  Globals::game.screen().fill(EspGL::colours::BLACK);
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "###########\nGAME OVER\n###########",
       {{0, 0},

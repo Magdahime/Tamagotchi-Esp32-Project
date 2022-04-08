@@ -39,6 +39,7 @@ class MainMenuState : public State {
   int lastSelection_;
   std::vector<EspGL::Hitbox> hitboxes_;
   std::vector<std::string> labels_;
+  std::vector<StateType> stateTransitions_;
   std::map<std::string, std::unique_ptr<EspGL::Drawable<uint16_t>>> drawables_;
 };
 

@@ -27,6 +27,10 @@ MainMenuState::MainMenuState() {
                    auto& [id, drawable] = drawable_pair;
                    return drawable->hitbox();
                  });
+  stateTransitions_.resize(labels_.size());
+  std::fill(stateTransitions_.begin(), stateTransitions_.end(),
+            StateType::MainMenu);
+  stateTransitions_[2] = StateType::MiniGame;
 }
 
 void MainMenuState::handleEvent(Event::Event event) {
@@ -52,7 +56,7 @@ void MainMenuState::handleEvent(Event::Event event) {
 }
 
 void MainMenuState::init() {
-  Globals::game.screen().fill(EspGL::colours::BLACK);
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   ESP_LOGI(TAG_, "Drawing icons.");
   for (auto const& [key, val] : drawables_) {
     val->draw(Globals::game.screen());
@@ -149,6 +153,11 @@ void MainMenuState::handleGpioInput(int pressedButton) {
     case static_cast<int>(Gpio::GpioInputs::GPIO_RIGHT):
       ESP_LOGI(TAG_, "RIGHT.");
       shiftIconPointer(MainMenuState::Direction::FORWARDS);
+      break;
+
+    case static_cast<int>(Gpio::GpioInputs::GPIO_MIDDLE):
+      ESP_LOGI(TAG_, "MIDDLE.");
+      Globals::game.setNextState(stateTransitions_[currentSelection_]);
       break;
 
     default:
