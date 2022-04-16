@@ -1,6 +1,10 @@
 #pragma once
+#include <stdint.h>
+
 #include "Event.hpp"
+#include "GomokuDrawable.hpp"
 #include "State.hpp"
+#include "StateUtils.hpp"
 
 namespace tamagotchi {
 
@@ -19,6 +23,12 @@ class MiniGameState : public State {
   virtual std::string toString() override { return TAG_; }
 
  private:
+  Gomoku::GomokuDrawable<consts::GOMOKU_WIDTH, consts::GOMOKU_HEIGHT, uint16_t>
+      gomokuBoard_;
+  std::vector<uint8_t> players_;
+  void evaluateEvents();
+  void updateBoard(std::vector<Gomoku::PlayerMove> moves);
+  void printWinner(uint8_t winner);
   static constexpr char TAG_[] = "MiniGameState";
 };
 

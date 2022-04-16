@@ -12,7 +12,7 @@ namespace App {
 
 namespace Gomoku {
 
-constexpr int POINT_COUNT = 5;
+constexpr int POINT_COUNT = 3;
 constexpr int INITIAL_VALUE = 0;
 
 struct BoardCoordinate {
@@ -24,21 +24,21 @@ template <unsigned width_s, unsigned height_s>
 class Gomoku {
  public:
   Gomoku() { board_.fill(INITIAL_VALUE); }
-  uint8_t checkWinner(uint8_t sign, const BoardCoordinate& move) const;
+  uint8_t checkWinner(uint8_t playerSign, const BoardCoordinate& move) const;
   inline std::array<uint8_t, width_s * height_s>& board() { return board_; }
   constexpr unsigned width() const { return width_s; }
   constexpr unsigned height() const { return height_s; }
-  uint8_t markMove(uint8_t sign, const BoardCoordinate& move);
+  uint8_t markMove(uint8_t playerSign, const BoardCoordinate& move);
 
  private:
   std::array<uint8_t, width_s * height_s> board_;
 };
 
 template <unsigned width_s, unsigned height_s>
-uint8_t Gomoku<width_s, height_s>::markMove(uint8_t sign,
+uint8_t Gomoku<width_s, height_s>::markMove(uint8_t playerSign,
                                             const BoardCoordinate& move) {
-  if (sign == 0) {
-    throw std::runtime_error("Marking sign shouldn't be zero!");
+  if (playerSign == 0) {
+    throw std::runtime_error("Marking playerSign shouldn't be zero!");
   }
   if (move.x_ * move.y_ > width_s * height_s) {
     throw std::runtime_error("Move coordinates are out of bounds: (" +
@@ -50,13 +50,13 @@ uint8_t Gomoku<width_s, height_s>::markMove(uint8_t sign,
                              std::to_string(move.x_) + ", " +
                              std::to_string(move.y_) + ")");
   }
-  board_[move.y_ * width_s + move.x_] = sign;
-  return checkWinner(sign, move);
+  board_[move.y_ * width_s + move.x_] = playerSign;
+  return checkWinner(playerSign, move);
 }
 
 template <unsigned width_s, unsigned height_s>
 uint8_t Gomoku<width_s, height_s>::checkWinner(
-    uint8_t sign, const BoardCoordinate& move) const {
+    uint8_t playerSign, const BoardCoordinate& move) const {
   auto calculateArrayCoord = [&](int16_t x, int16_t y) {
     return y * width_s + x;
   };
@@ -97,7 +97,7 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
     };
     for (auto coords = std::make_pair(beginX, beginY); compare(coords);
          coords.first += stepX, coords.second += stepY) {
-      if (board_[calculateArrayCoord(coords.first, coords.second)] == sign) {
+      if (board_[calculateArrayCoord(coords.first, coords.second)] == playerSign) {
         counter++;
       } else {
         counter = 0;
@@ -113,7 +113,7 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
       checkLoop(move.x_, move.y_, 0, 1, POINT_COUNT) ||
       checkLoop(move.x_, move.y_, 1, 1, POINT_COUNT) ||
       checkLoop(move.x_, move.y_, -1, 1, POINT_COUNT)) {
-    return sign;
+    return playerSign;
   }
   return 0;
 }

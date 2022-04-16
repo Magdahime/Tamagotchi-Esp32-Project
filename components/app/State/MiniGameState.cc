@@ -7,17 +7,31 @@ namespace tamagotchi {
 namespace App {
 namespace State {
 
-MiniGameState::MiniGameState() {}
+MiniGameState::MiniGameState() { gomokuBoard_.draw(Globals::game.screen());}
 
 void MiniGameState::handleEvent(Event::Event event) {}
 
 void MiniGameState::init() {}
 
 void MiniGameState::mainLoop() {
-  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
+  evaluateEvents();
+  updateBoard();
+  EspGL::delay(4000);
+}
+
+void MiniGameState::evaluateEvents() {}
+void MiniGameState::updateBoard(std::vector<Gomoku::PlayerMove> moves) {
+  for (const auto& move : moves) {
+    if (gomokuBoard_.update(Globals::game.screen(), move) != 0) {
+      printWinner(move.first);
+      return;
+    }
+  }
+}
+void MiniGameState::printWinner(uint8_t winner) {
   Globals::game.print(
-      "###########\nUNDER CONSTRUCTION\n###########",
-      {{0, 0},
+      "######\Player " + winner + " wins!\n######\nCONGRATULATIONS !",
+      {{0, 50},
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);
   EspGL::delay(4000);
