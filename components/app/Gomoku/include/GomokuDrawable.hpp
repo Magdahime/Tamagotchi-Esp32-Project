@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Drawable.hpp"
+#include "EspGLVect2.hpp"
 #include "Globals.hpp"
 #include "Gomoku.hpp"
 #include "Shapes/EspGLRectangles.hpp"
@@ -27,18 +28,34 @@ constexpr auto LINE_COLOUR = EspGL::colours::WHITE;
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
 class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
  public:
-  GomokuDrawable() = default;
-  GomokuDrawable(EspGL::Hitbox canvas);
+  GomokuDrawable(EspGL::Vect2 start, EspGL::Vect2 end)
+      : leftUpperCanvas_(start), rightLowerCanvas_(end) {}
+
+  GomokuDrawable(EspGL::Hitbox canvas)
+      : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {}
+
   ~GomokuDrawable() = default;
 
   void draw(EspGL::Screen<ColourRepresentation>& target) override;
   uint8_t update(EspGL::Screen<ColourRepresentation>& target,
                  PlayerMove nextMove);
-  EspGL::Hitbox hitbox() override;
+  EspGL::Hitbox hitbox() override {
+    return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
+  }
 
   const Gomoku<width_s, height_s>& gomokuBoard() { return gomokuBoard_; }
 
+  inline const EspGL::Vect2& leftUpperCanvas() const {
+    return leftUpperCanvas_;
+  }
+
+  inline const EspGL::Vect2& rightLowerCanvas() const {
+    return rightLowerCanvas_;
+  }
+
  private:
+  EspGL::Vect2 leftUpperCanvas_;
+  EspGL::Vect2 rightLowerCanvas_;
   std::vector<EspGL::Hitbox> cellHitboxes_;
   std::map<uint8_t, EspGL::Colour<ColourRepresentation>> player2Colour_;
   Gomoku<width_s, height_s> gomokuBoard_;
@@ -49,21 +66,22 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
     EspGL::Screen<ColourRepresentation>& target) {
   auto width = target.width();
   auto height = target.height();
-  EspGL::Vect2 start{0, 0};
 
-  auto drawRectangles = [=, &target](
-                            EspGL::Vect2 start, int sizeX, int sizeY,
-                            EspGL::Colour<ColourRepresentation> colour) {
+  auto drawRectangle = [=, &target](
+                           EspGL::Vect2 start, int16_t sizeX, int16_t sizeY,
+                           EspGL::Colour<ColourRepresentation> colour) {
     EspGL::Rectangle<ColourRepresentation>{start, sizeX, sizeY, colour}.draw(
         target);
   };
+
+  EspGL::Vect2 start{width / width_s, 0};
 
   for (auto i = 0; i < width_s - 1; i++) {
     drawRectangle(start, consts::GOMOKU_LINE_WIDTH, height - 1,
                   consts::LINE_COLOUR);
     start.x_ += consts::GOMOKU_LINE_WIDTH + width / width_s;
   }
-  start = {0, 0};
+  start = {0, height / height_s};
   for (auto i = 0; i < height_s - 1; i++) {
     drawRectangle(start, width - 1, consts::GOMOKU_LINE_WIDTH,
                   consts::LINE_COLOUR);

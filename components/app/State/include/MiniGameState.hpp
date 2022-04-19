@@ -26,7 +26,7 @@ class MiniGameState : public State {
   Gomoku::GomokuDrawable<consts::GOMOKU_WIDTH, consts::GOMOKU_HEIGHT, uint16_t>
       gomokuBoard_;
   std::vector<uint8_t> players_;
-  void evaluateEvents();
+  std::vector<Gomoku::PlayerMove> evaluateEvents();
   void updateBoard(std::vector<Gomoku::PlayerMove> moves);
   void printWinner(uint8_t winner);
   static constexpr char TAG_[] = "MiniGameState";
