@@ -54,6 +54,7 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
   }
 
  private:
+ 
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
   std::vector<EspGL::Hitbox> cellHitboxes_;
@@ -64,8 +65,8 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
 void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
     EspGL::Screen<ColourRepresentation>& target) {
-  auto width = target.width();
-  auto height = target.height();
+  auto width = rightLowerCanvas_.x_ - leftUpperCanvas_.x_;
+  auto height = rightLowerCanvas_.y_ - leftUpperCanvas_.y_;
 
   auto drawRectangle = [=, &target](
                            EspGL::Vect2 start, int16_t sizeX, int16_t sizeY,
@@ -74,14 +75,14 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
         target);
   };
 
-  EspGL::Vect2 start{width / width_s, 0};
+  EspGL::Vect2 start{width / width_s, leftUpperCanvas_.y_};
 
   for (auto i = 0; i < width_s - 1; i++) {
     drawRectangle(start, consts::GOMOKU_LINE_WIDTH, height - 1,
                   consts::LINE_COLOUR);
     start.x_ += consts::GOMOKU_LINE_WIDTH + width / width_s;
   }
-  start = {0, height / height_s};
+  start = {leftUpperCanvas_.x_, height / height_s};
   for (auto i = 0; i < height_s - 1; i++) {
     drawRectangle(start, width - 1, consts::GOMOKU_LINE_WIDTH,
                   consts::LINE_COLOUR);

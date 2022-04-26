@@ -55,49 +55,7 @@ void EspnowDriver::wifiInit() {
   ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-void EspnowDriver::sendData(const uint8_t *macAddress,
-                            esp_now_send_status_t status) {
-  structs::espNowEvent event;
-  structs::espNowEventSendCallback *sendCallback = &event.info.sendCallback;
 
-  if (macAddress == NULL) {
-    ESP_LOGE(consts::TAG, "SEND CALLBACK ERROR - MAC ADDRESS NULL");
-    return;
-  }
-
-  event.id = structs::espNowEventID::espNowSendCallback;
-  memcpy(sendCallback->macAddress, macAddress, ESP_NOW_ETH_ALEN);
-  sendCallback->status = status;
-  if (xQueueSend(ESPNOWqueue_, &event, consts::ESPNOW_MAXDELAY) != pdTRUE) {
-    ESP_LOGW(consts::TAG, "SEND QUEUE FAIL");
-  }
-}
-
-void EspnowDriver::receiveData(const uint8_t *macAddress, const uint8_t *data,
-                               const int length) {
-  structs::espNowEvent event;
-  structs::espNowEventReceiveCallback *receiveCallback =
-      &event.info.receiveCallback;
-
-  if (macAddress == NULL || data == NULL || length <= 0) {
-    ESP_LOGE(consts::TAG, "RECEIVE CALLBACK ARGUMENT ERROR");
-    return;
-  }
-  event.id = structs::espNowEventID::espNowReceiveCallback;
-  memcpy(receiveCallback->macAddress, macAddress, ESP_NOW_ETH_ALEN);
-  receiveCallback->data = new uint8_t[length];
-  if (receiveCallback->data == NULL) {
-    ESP_LOGE(consts::TAG, "MALLOC RECEIVE DATA FAILURE");
-    return;
-  }
-
-  memcpy(receiveCallback->data, data, length);
-  receiveCallback->dataLength = length;
-  if (xQueueSend(ESPNOWqueue_, &event, consts::ESPNOW_MAXDELAY) != pdTRUE) {
-    ESP_LOGW(consts::TAG, "RECEIVE QUEUE FAIL");
-    delete[] receiveCallback->data;
-  }
-}
 
 structs::espNowCommunicationType
 EspnowDriver::parseData(structs::espNowData *data, uint16_t dataLength,
@@ -148,7 +106,6 @@ void EspnowDriver::ESPNOWtask(void *pvParameter) {
 
   vTaskDelay(5000 / portTICK_RATE_MS);
   ESP_LOGD(consts::TAG, "Start sending broadcast data");
-
   /* Start sending broadcast ESPNOW data. */
   structs::espNowParams *sendParams = (structs::espNowParams *)pvParameter;
   if (esp_now_send(sendParams->destinationMac, sendParams->buffer,

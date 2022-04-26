@@ -1,6 +1,5 @@
 #include <cstdio>
 
-#include "EspnowDriver.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
 #include "Joystick.hpp"
@@ -9,6 +8,8 @@
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "nvs_flash.h"
+
 
 namespace tamagotchi::App::Globals {
 Game::Game game = tamagotchi::App::Game::Game();

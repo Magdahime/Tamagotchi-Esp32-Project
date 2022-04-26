@@ -1,10 +1,13 @@
 #pragma once
+
 #include <stdint.h>
 #include <stdio.h>
 
 #include <array>
 #include <stdexcept>
 #include <string>
+
+#include "GomokuNetworking.hpp"
 
 namespace tamagotchi {
 
@@ -29,9 +32,12 @@ class Gomoku {
   constexpr unsigned width() const { return width_s; }
   constexpr unsigned height() const { return height_s; }
   uint8_t markMove(uint8_t playerSign, const BoardCoordinate& move);
+  void findFriends();
 
  private:
+  static constexpr char TAG_[] = "Gomoku";
   std::array<uint8_t, width_s * height_s> board_;
+  GomokuNetworking networkingModule_;
 };
 
 template <unsigned width_s, unsigned height_s>
@@ -97,7 +103,8 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
     };
     for (auto coords = std::make_pair(beginX, beginY); compare(coords);
          coords.first += stepX, coords.second += stepY) {
-      if (board_[calculateArrayCoord(coords.first, coords.second)] == playerSign) {
+      if (board_[calculateArrayCoord(coords.first, coords.second)] ==
+          playerSign) {
         counter++;
       } else {
         counter = 0;
@@ -116,6 +123,11 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
     return playerSign;
   }
   return 0;
+}
+
+template <unsigned width_s, unsigned height_s>
+void Gomoku<width_s, height_s>::findFriends() {
+  networkingModule_.searchForFriends();
 }
 
 }  // namespace Gomoku

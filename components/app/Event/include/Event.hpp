@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <cstring>
 
-#include "EspNowConf.hpp"
 namespace tamagotchi {
 namespace App {
 namespace Event {
@@ -25,11 +25,11 @@ struct Event {
   bool empty() { return type_ == 0; }
 };
 
-struct EspNowEvent {
-  uint8_t macAddress_[ESP_NOW_ETH_ALEN];
-  int length_;
-  uint8_t data_[EspNow::consts::ESPNOW_MAXMSGLENGTH];
-};
+// struct EspNowEvent {
+//   uint8_t macAddress_[ESP_NOW_ETH_ALEN];
+//   int length_;
+//   uint8_t data_[EspNow::consts::ESPNOW_MAXMSGLENGTH];
+// };
 
 }  // namespace Event
 }  // namespace App

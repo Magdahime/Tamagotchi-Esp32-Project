@@ -18,6 +18,8 @@ class MessageQueue {
   void clearQueue();
   T getQueue(int ms);
 
+  xQueueHandle& messageQueue() { return messageQueue_; }
+
  private:
   SemaphoreHandle_t mutex_;
   static constexpr char TAG_[] = "MessageQueue";
@@ -36,8 +38,10 @@ bool MessageQueue<T>::putQueue(T event) {
     T dummy;
     xQueueReceive(messageQueue_, &(dummy), (TickType_t)WAIT_TIME);
   }
-  xQueueSendToBack(messageQueue_, (void*)&event, (TickType_t)WAIT_TIME);
-  return xSemaphoreGive(mutex_);
+  auto result =
+      xQueueSendToBack(messageQueue_, (void*)&event, (TickType_t)WAIT_TIME);
+  xSemaphoreGive(mutex_);
+  return result;
 }
 
 template <typename T>
