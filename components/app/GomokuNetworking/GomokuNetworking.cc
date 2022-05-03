@@ -1,8 +1,10 @@
 #include "GomokuNetworking.hpp"
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "esp_mac.h"
+#include "nvs_flash.h"
 
 namespace tamagotchi {
 
@@ -10,46 +12,57 @@ namespace App {
 
 namespace Gomoku {
 
+TaskHandle_t GomokuNetworking::gomokuNetworkingTask = nullptr;
 MessageQueue::MessageQueue<structs::GomokuEvent> GomokuNetworking::gomokuQueue_(
     10);
+SemaphoreHandle_t GomokuNetworking::mutex_ = xSemaphoreCreateBinary();
+uint8_t GomokuNetworking::hostAddress_[ESP_NOW_ETH_ALEN] = {};
+structs::GomokuParams GomokuNetworking::sendParams_ = {
+    false,
+    true,
+    0,
+    esp_random(),
+    0,
+    consts::ESPNOW_SEND_DELAY,
+    consts::ESPNOW_SEND_LEN,
+    new uint8_t[consts::ESPNOW_SEND_LEN],
+    {0}};
 
-GomokuNetworking::GomokuNetworking()
-    : players_(1),
-      sendParams_{false,
-                  true,
-                  0,
-                  esp_random(),
-                  0,
-                  consts::ESPNOW_SEND_DELAY,
-                  consts::ESPNOW_SEND_LEN,
-                  nullptr,
-                  {0}} {
-  ESP_ERROR_CHECK(esp_netif_init());
-  ESP_ERROR_CHECK(esp_event_loop_create_default());
-  wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-  ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-  ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-  ESP_ERROR_CHECK(esp_wifi_set_mode(ESPNOW_WIFI_MODE));
-  ESP_ERROR_CHECK(esp_wifi_start());
-
-  /* Initialize ESPNOW and register sending and receiving callback function. */
-  ESP_ERROR_CHECK(esp_now_init());
-  ESP_ERROR_CHECK(esp_now_register_send_cb(sendData));
-  ESP_ERROR_CHECK(esp_now_register_recv_cb(receiveData));
-
+void GomokuNetworking::init() {
   esp_base_mac_addr_get(hostAddress_);
   memcpy(sendParams_.destinationMac, consts::EXAMPLE_BROADCAST_MAC,
          ESP_NOW_ETH_ALEN);
+  xSemaphoreGive(mutex_);
+  ESP_LOGI(TAG_, "Successfully initialized networking module!");
+}
 
-  ESP_LOGI(TAG_, "Successfully initialized sending parameters!");
+void GomokuNetworking::run() {
+  xTaskCreate(task, "GomokuNetworkingTask", 4096, NULL,
+              configMAX_PRIORITIES - 1, &gomokuNetworkingTask);
+}
+
+void GomokuNetworking::deinit() {
+  delete sendParams_.buffer;
+  esp_now_deinit();
+  vTaskDelete(gomokuNetworkingTask);
+}
+
+void GomokuNetworking::task(void *pvParameters) {
+  ESP_LOGI(TAG_, "Created GomokuNetworking task!");
+  searchForFriends();
+  ESP_LOGI(TAG_, "Found players!");
+  // LET KNOW THAT PLAYERS ARE READY
+  xSemaphoreGive(mutex_);
 }
 
 void GomokuNetworking::searchForFriends() {
+  // Current number of players is 1, because it's us.
+  int players = 1;
+  addPeer(consts::EXAMPLE_BROADCAST_MAC);
   structs::GomokuEventReceiveCallback receiveCallback;
   while (true) {
-    if (players_ == consts::MAX_GOMOKU_PLAYERS) break;
+    if (players == consts::MAX_GOMOKU_PLAYERS) break;
     sendGameInvite(sendParams_);
-
     auto msg = gomokuQueue_.getQueue(consts::MAX_DELAY);
     if (msg.id == structs::GomokuEventID::GomokuReceiveCallback) {
       receiveCallback = std::get<structs::GomokuEventReceiveCallback>(msg.info);
@@ -61,17 +74,17 @@ void GomokuNetworking::searchForFriends() {
                receiveCallback.dataLength);
 
       if (summary.corrupted == true) continue;
-      if (players_ < consts::MAX_GOMOKU_PLAYERS && summary.unicast == false &&
+      if (players < consts::MAX_GOMOKU_PLAYERS && summary.unicast == false &&
           esp_now_is_peer_exist(msg.macAddress) == false) {
         addPeer(msg.macAddress);
-        players_++;
+        players++;
       }
 
       if (summary.receiveMagic > sendParams_.magic) {
         memcpy(hostAddress_, msg.macAddress, ESP_NOW_ETH_ALEN);
       }
 
-      if (sendParams_.state == 0 && players_ == consts::MAX_GOMOKU_PLAYERS) {
+      if (sendParams_.state == 0 && players == consts::MAX_GOMOKU_PLAYERS) {
         sendParams_.state = 1;
         break;
       }
@@ -83,18 +96,19 @@ void GomokuNetworking::addPeer(const uint8_t *macAddress) {
   esp_now_peer_info_t peer;
   peer.channel = consts::ESPNOW_CHANNEL;
   peer.ifidx = static_cast<wifi_interface_t>(ESPNOW_WIFI_IF);
-  peer.encrypt = true;
+  peer.encrypt = isBroadcastAddress(macAddress) ? false : true;
   memcpy((&peer)->lmk, consts::LMK, ESP_NOW_KEY_LEN);
   memcpy((&peer)->peer_addr, macAddress, ESP_NOW_ETH_ALEN);
   ESP_ERROR_CHECK(esp_now_add_peer(&peer));
-  ESP_LOGE(TAG_, "ADD PEER SUCCESS");
+  ESP_LOGI(TAG_, "ADD PEER SUCCESS: " MACSTR, MAC2STR(macAddress));
 }
 
 void GomokuNetworking::sendGameInvite(structs::GomokuParams &sendParams) {
   ESP_LOGI(TAG_, "SENDING GAME INVITE TO BROADCAST");
-  if (esp_now_send(sendParams.destinationMac, sendParams.buffer,
-                   sendParams.len) != ESP_OK) {
-    ESP_LOGE(TAG_, "ESPNOW SEND ERROR");
+  auto result = esp_now_send(sendParams.destinationMac, sendParams.buffer,
+                             sendParams.len);
+  if (result != ESP_OK) {
+    ESP_LOGE(TAG_, "ESPNOW SEND ERROR: %d", result);
   }
 }
 

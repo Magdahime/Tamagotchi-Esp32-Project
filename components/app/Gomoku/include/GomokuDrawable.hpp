@@ -26,7 +26,8 @@ constexpr auto LINE_COLOUR = EspGL::colours::WHITE;
 }  // namespace consts
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
+class GomokuDrawable : public EspGL::Drawable<ColourRepresentation>,
+                       public Gomoku<width_s, height_s> {
  public:
   GomokuDrawable(EspGL::Vect2 start, EspGL::Vect2 end)
       : leftUpperCanvas_(start), rightLowerCanvas_(end) {}
@@ -43,8 +44,6 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
     return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
   }
 
-  const Gomoku<width_s, height_s>& gomokuBoard() { return gomokuBoard_; }
-
   inline const EspGL::Vect2& leftUpperCanvas() const {
     return leftUpperCanvas_;
   }
@@ -54,12 +53,10 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
   }
 
  private:
- 
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
   std::vector<EspGL::Hitbox> cellHitboxes_;
   std::map<uint8_t, EspGL::Colour<ColourRepresentation>> player2Colour_;
-  Gomoku<width_s, height_s> gomokuBoard_;
 };
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
@@ -93,7 +90,8 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
 uint8_t GomokuDrawable<width_s, height_s, ColourRepresentation>::update(
     EspGL::Screen<ColourRepresentation>& target, PlayerMove nextMove) {
-  auto result = gomokuBoard_.markMove(nextMove.first, nextMove.second);
+  auto result =
+      Gomoku<width_s, height_s>::markMove(nextMove.first, nextMove.second);
   auto cellHitbox =
       cellHitboxes_[nextMove.second.x_ + width_s * nextMove.second.y_];
   EspGL::Circle<ColourRepresentation>{

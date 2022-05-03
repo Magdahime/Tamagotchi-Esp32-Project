@@ -17,19 +17,18 @@ void MiniGameState::handleEvent(Event::Event event) {}
 void MiniGameState::init() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
-      "### WELCOME TO GOMOKU ###",
-      {{0, 50},
+      "## WELCOME TO GOMOKU ##",
+      {{0, 0},
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);
-  EspGL::delay(1000);
 
   Globals::game.print(
       "### Finding players... ###",
       {{0, 100},
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);
-
-
+  EspGL::delay(3000);
+  gomokuBoard_.startNetworkingTask();
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   gomokuBoard_.draw(Globals::game.screen());
 }

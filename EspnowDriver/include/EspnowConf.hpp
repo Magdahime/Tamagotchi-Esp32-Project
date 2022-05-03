@@ -4,8 +4,7 @@
 #include <cstring>
 #include <stdint.h>
 
-#define ESPNOW_WIFI_MODE WIFI_MODE_AP
-#define ESPNOW_WIFI_IF ESP_IF_WIFI_AP
+
 
 namespace tamagotchi {
 namespace EspNow {

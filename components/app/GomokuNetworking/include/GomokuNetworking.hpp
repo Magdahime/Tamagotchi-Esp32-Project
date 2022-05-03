@@ -26,23 +26,27 @@ namespace Gomoku {
 
 class GomokuNetworking {
  public:
-  GomokuNetworking();
-  void searchForFriends();
-
- private:
-  int players_;
-  structs::GomokuParams sendParams_;
-  uint8_t hostAddress_[ESP_NOW_ETH_ALEN];
-  static constexpr char TAG_[] = "GomokuNetworking";
-  static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue_;
-  
-  structs::receiveCallbackSummary parseData(structs::GomokuData *data,
-                                            int dataLength);
-  void sendGameInvite(structs::GomokuParams &sendParams);
-  void addPeer(const uint8_t *macAddress);
+  static void init();
+  static void run();
   static void sendData(const uint8_t *macAddress, esp_now_send_status_t status);
   static void receiveData(const uint8_t *macAddress, const uint8_t *data,
                           const int length);
+  static SemaphoreHandle_t &mutex() { return mutex_; }
+  static void deinit();
+
+ private:
+  static void task(void *pvParameters);
+  static TaskHandle_t gomokuNetworkingTask;
+  static structs::GomokuParams sendParams_;
+  static uint8_t hostAddress_[ESP_NOW_ETH_ALEN];
+  static constexpr char TAG_[] = "GomokuNetworking";
+  static SemaphoreHandle_t mutex_;
+  static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue_;
+  static void searchForFriends();
+  static structs::receiveCallbackSummary parseData(structs::GomokuData *data,
+                                                   int dataLength);
+  static void sendGameInvite(structs::GomokuParams &sendParams);
+  static void addPeer(const uint8_t *macAddress);
 };
 
 }  // namespace Gomoku

@@ -32,12 +32,11 @@ class Gomoku {
   constexpr unsigned width() const { return width_s; }
   constexpr unsigned height() const { return height_s; }
   uint8_t markMove(uint8_t playerSign, const BoardCoordinate& move);
-  void findFriends();
+  void startNetworkingTask();
 
- private:
+ protected:
   static constexpr char TAG_[] = "Gomoku";
   std::array<uint8_t, width_s * height_s> board_;
-  GomokuNetworking networkingModule_;
 };
 
 template <unsigned width_s, unsigned height_s>
@@ -126,8 +125,10 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
 }
 
 template <unsigned width_s, unsigned height_s>
-void Gomoku<width_s, height_s>::findFriends() {
-  networkingModule_.searchForFriends();
+void Gomoku<width_s, height_s>::startNetworkingTask() {
+  GomokuNetworking::init();
+  GomokuNetworking::run();
+  xSemaphoreTake(GomokuNetworking::mutex(), portMAX_DELAY);
 }
 
 }  // namespace Gomoku
