@@ -20,6 +20,7 @@ constexpr char LMK[] = "lmk1234567890123";
 
 constexpr int QUEUE_SIZE = 10;
 constexpr int MAX_DELAY = 512;
+constexpr int SENDING_INVITE_DELAY = 2000;
 
 constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
@@ -27,7 +28,6 @@ constexpr int ESPNOW_SEND_DELAY = 1000;
 constexpr int ESPNOW_SEND_LEN = 200;
 
 constexpr int ESPNOW_MAXMSGLENGTH = 256;
-constexpr int ESPNOW_DATA_MAX = 2;
 
 constexpr uint8_t EXAMPLE_BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF,
                                                              0xFF, 0xFF, 0xFF};
@@ -35,37 +35,37 @@ constexpr uint8_t EXAMPLE_BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF,
 
 namespace structs {
 
-typedef struct {
+struct ReceiveCallbackSummary {
   bool corrupted;
   bool unicast;
   uint8_t receiveState;
   uint16_t receiveSeq;
   int receiveMagic;
-} receiveCallbackSummary;
+};
 
 enum class GomokuEventID {
   GomokuSendCallback,
   GomokuReceiveCallback,
 };
 
-typedef struct {
+struct GomokuEventSendCallback {
   esp_now_send_status_t status;
-} GomokuEventSendCallback;
+};
 
-typedef struct {
+struct GomokuEventReceiveCallback {
   int dataLength;
   uint8_t *data;
-} GomokuEventReceiveCallback;
+};
 
-typedef struct {
+struct GomokuEvent {
   GomokuEventID id;
   uint8_t macAddress[ESP_NOW_ETH_ALEN];
   std::variant<GomokuEventSendCallback, GomokuEventReceiveCallback> info;
-} GomokuEvent;
+};
 
 enum class GomokuCommunicationType { BROADCAST, UNICAST, ERROR };
 
-typedef struct {
+struct GomokuData {
   GomokuCommunicationType type;  // Broadcast or unicast ESPNOW data.
   uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
   uint16_t sequenceNumber;  // Sequence number of ESPNOW data.
@@ -73,9 +73,9 @@ typedef struct {
   uint32_t magic;  // Magic number which is used to determine which device to
                    // send unicast ESPNOW data.
   uint8_t payload[0];  // Real payload of ESPNOW data.
-} __attribute__((packed)) GomokuData;
+} __attribute__((packed));
 
-typedef struct {
+struct GomokuParams {
   bool unicast;    // Send unicast ESPNOW data.
   bool broadcast;  // Send broadcast ESPNOW data.
   uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
@@ -87,7 +87,7 @@ typedef struct {
   uint8_t *buffer;  // Buffer pointing to ESPNOW data.
   uint8_t
       destinationMac[ESP_NOW_ETH_ALEN];  // MAC address of destination device.
-} GomokuParams;
+};
 
 }  // namespace structs
 

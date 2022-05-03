@@ -128,7 +128,7 @@ template <unsigned width_s, unsigned height_s>
 void Gomoku<width_s, height_s>::startNetworkingTask() {
   GomokuNetworking::init();
   GomokuNetworking::run();
-  xSemaphoreTake(GomokuNetworking::mutex(), portMAX_DELAY);
+  ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
 }  // namespace Gomoku

@@ -41,10 +41,10 @@ extern "C" void app_main() {
   initWifi();
   initEspNow();
   ESP_LOGI(TAG_, "Creating tasks.");
-  xTaskCreate(runGame, "MainGameTask", 4096, NULL, configMAX_PRIORITIES - 1,
+  xTaskCreate(runGame, "MainGameTask", 4096, NULL, configMAX_PRIORITIES - 2,
               &mainGameTaskHandle);
   xTaskCreate(tamagotchi::Joystick::Joystick::task, "JoystickTask", 4096, NULL,
-              tskIDLE_PRIORITY, &joystickTask);
+              configMAX_PRIORITIES - 1, &joystickTask);
 }
 
 // FUNCTIONS IMPLEMENTATION

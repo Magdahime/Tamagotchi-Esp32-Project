@@ -23,7 +23,7 @@ void MiniGameState::init() {
       EspGL::colours::GREEN);
 
   Globals::game.print(
-      "### Finding players... ###",
+      "Finding players...",
       {{0, 100},
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);

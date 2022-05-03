@@ -6,14 +6,14 @@ namespace tamagotchi {
 namespace Spi {
 
 namespace structs {
-typedef struct {
+struct spi_bus_config_t {
   int mosiNum;
   int misoNum;
   int sclkNum;
   int quadwpNum;
   int quadhdNum;
   int maxTransfer;
-} spi_bus_config_t;
+};
 
 }  // namespace structs
 
