@@ -14,7 +14,7 @@ namespace App {
 
 namespace State {
 
-enum class StateType { Start, MainMenu, MiniGame, End };
+enum class StateType { Start, MainMenu, MiniGame, GameHost, NormalPlayer, End };
 
 class State {
  public:

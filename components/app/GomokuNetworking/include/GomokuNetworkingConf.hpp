@@ -1,4 +1,7 @@
 #pragma once
+#include <stdint.h>
+
+#include <array>
 #include <variant>
 
 #include "esp_now.h"
@@ -11,6 +14,7 @@ namespace tamagotchi {
 namespace App {
 
 namespace Gomoku {
+using mac_address_t = std::array<uint8_t, ESP_NOW_ETH_ALEN>;
 
 namespace consts {
 constexpr int MAX_GOMOKU_PLAYERS = 2;
@@ -29,8 +33,8 @@ constexpr int ESPNOW_SEND_LEN = 200;
 
 constexpr int ESPNOW_MAXMSGLENGTH = 256;
 
-constexpr uint8_t EXAMPLE_BROADCAST_MAC[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF,
-                                                             0xFF, 0xFF, 0xFF};
+constexpr mac_address_t EXAMPLE_BROADCAST_MAC = {0xFF, 0xFF, 0xFF,
+                                                 0xFF, 0xFF, 0xFF};
 }  // namespace consts
 
 namespace structs {
@@ -67,7 +71,8 @@ enum class GomokuCommunicationType { BROADCAST, UNICAST, ERROR };
 
 struct GomokuData {
   GomokuCommunicationType type;  // Broadcast or unicast ESPNOW data.
-  uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
+  uint8_t
+      state;  // Indicat4e that if has received broadcast ESPNOW data or not.
   uint16_t sequenceNumber;  // Sequence number of ESPNOW data.
   uint16_t crc;             // CRC16 value of ESPNOW data.
   uint32_t magic;  // Magic number which is used to determine which device to
@@ -92,7 +97,8 @@ struct GomokuParams {
 }  // namespace structs
 
 inline bool isBroadcastAddress(const void *address) {
-  return memcmp(address, consts::EXAMPLE_BROADCAST_MAC, ESP_NOW_ETH_ALEN) == 0;
+  return memcmp(address, consts::EXAMPLE_BROADCAST_MAC.data(),
+                ESP_NOW_ETH_ALEN) == 0;
 }
 
 }  // namespace Gomoku

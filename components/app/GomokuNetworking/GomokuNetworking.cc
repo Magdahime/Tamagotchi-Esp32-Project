@@ -12,12 +12,13 @@ namespace App {
 
 namespace Gomoku {
 
+std::vector<mac_address_t> GomokuNetworking::playersMacs_ = {};
 TaskHandle_t GomokuNetworking::gomokuNetworkingTask = nullptr;
 MessageQueue::MessageQueue<structs::GomokuEvent> GomokuNetworking::gomokuQueue_(
     10);
 SemaphoreHandle_t GomokuNetworking::mutex_ = xSemaphoreCreateBinary();
-uint8_t GomokuNetworking::hostAddress_[ESP_NOW_ETH_ALEN] = {};
-uint8_t GomokuNetworking::gameHostAddress_[ESP_NOW_ETH_ALEN] = {};
+mac_address_t GomokuNetworking::hostAddress_ = {};
+mac_address_t GomokuNetworking::gameHostAddress_ = {};
 structs::GomokuParams GomokuNetworking::sendParams_ = {
     false,
     true,
@@ -30,17 +31,18 @@ structs::GomokuParams GomokuNetworking::sendParams_ = {
     {0}};
 
 void GomokuNetworking::init() {
-  esp_base_mac_addr_get(hostAddress_);
-  esp_base_mac_addr_get(gameHostAddress_);
-  memcpy(sendParams_.destinationMac, consts::EXAMPLE_BROADCAST_MAC,
+  esp_base_mac_addr_get(hostAddress_.data());
+  esp_base_mac_addr_get(gameHostAddress_.data());
+  memcpy(sendParams_.destinationMac, consts::EXAMPLE_BROADCAST_MAC.data(),
          ESP_NOW_ETH_ALEN);
   ESP_LOGI(TAG_, "Successfully initialized networking module!");
 }
 
-void GomokuNetworking::run() {
+TaskHandle_t &GomokuNetworking::run() {
   xTaskCreate(task, "GomokuNetworkingTask", 4096,
               (void *)xTaskGetCurrentTaskHandle(), configMAX_PRIORITIES - 1,
               &gomokuNetworkingTask);
+  return gomokuNetworkingTask;
 }
 
 void GomokuNetworking::deinit() {
@@ -62,39 +64,32 @@ void GomokuNetworking::task(void *pvParameters) {
 void GomokuNetworking::searchForFriends() {
   // Current number of players is 1, because it's us.
   int players = 1;
-  addPeer(consts::EXAMPLE_BROADCAST_MAC);
+  addPeerESP(consts::EXAMPLE_BROADCAST_MAC.data());
   structs::GomokuEventReceiveCallback receiveCallback;
   while (sendParams_.state != 1) {
     if (players == consts::MAX_GOMOKU_PLAYERS) break;
     sendGameInvite();
     auto msg = gomokuQueue_.getQueue(consts::MAX_DELAY);
     if (msg.id == structs::GomokuEventID::GomokuReceiveCallback) {
+      mac_address_t senderMac;
+      std::copy(std::begin(msg.macAddress), std::end(msg.macAddress),
+                senderMac.begin());
       receiveCallback = std::get<structs::GomokuEventReceiveCallback>(msg.info);
       auto summary = parseData(
           reinterpret_cast<structs::GomokuData *>(receiveCallback.data),
           receiveCallback.dataLength);
       ESP_LOGI(TAG_, "RECEIVE %dth BROADCAST DATA FROM: " MACSTR ", LEN: %d",
-               summary.receiveSeq, MAC2STR(msg.macAddress),
+               summary.receiveSeq, MAC2STR(senderMac.data()),
                receiveCallback.dataLength);
       if (summary.corrupted == true) {
         ESP_LOGE(TAG_, "DATA FROM: " MACSTR " is corrupted.",
-                 MAC2STR(msg.macAddress));
+                 MAC2STR(senderMac.data()));
         continue;
       }
-      if (players < consts::MAX_GOMOKU_PLAYERS && summary.unicast == false &&
-          esp_now_is_peer_exist(msg.macAddress) == false) {
-        addPeer(msg.macAddress);
-        players++;
-        ESP_LOGI(TAG_, "Current number of players: %d ", players);
-      }
+      if (addPeer(senderMac, summary, players)) players++;
+      ESP_LOGI(TAG_, "Current number of players: %d ", players);
 
-      if (summary.receiveMagic > sendParams_.magic) {
-        ESP_LOGI(TAG_,
-                 "Magic number from : " MACSTR
-                 " is higher: %d. Setting new game host.",
-                 MAC2STR(msg.macAddress), summary.receiveMagic);
-        memcpy(gameHostAddress_, msg.macAddress, ESP_NOW_ETH_ALEN);
-      }
+      chooseHost(senderMac, summary);
 
       if (sendParams_.state == 0 && players == consts::MAX_GOMOKU_PLAYERS) {
         ESP_LOGI(TAG_, "Stopping sending data to broadcast.");
@@ -104,7 +99,30 @@ void GomokuNetworking::searchForFriends() {
   }
 }
 
-void GomokuNetworking::addPeer(const uint8_t *macAddress) {
+void GomokuNetworking::chooseHost(mac_address_t &peer,
+                                  structs::ReceiveCallbackSummary &summary) {
+  // CHOOSING HOST OF THE GAME
+  if (summary.receiveMagic > sendParams_.magic) {
+    ESP_LOGI(TAG_,
+             "Magic number from : " MACSTR
+             " is higher: %d. My magic number is %d. Setting new game host.",
+             MAC2STR(peer.data()), summary.receiveMagic, sendParams_.magic);
+    memcpy(gameHostAddress_.data(), peer.data(), ESP_NOW_ETH_ALEN);
+  }
+  // SAME MAGIC NUMBER
+  if (summary.receiveMagic == sendParams_.magic) {
+    auto crcHost = esp_crc16_le(
+        UINT16_MAX, (uint8_t const *)hostAddress_.data(), ESP_NOW_ETH_ALEN);
+    auto recvCrc = esp_crc16_le(UINT16_MAX, (uint8_t const *)peer.data(),
+                                ESP_NOW_ETH_ALEN);
+    if (recvCrc > crcHost) {
+      ESP_LOGI(TAG_, "Setting new game host.");
+      memcpy(gameHostAddress_.data(), peer.data(), ESP_NOW_ETH_ALEN);
+    }
+  }
+}
+
+void GomokuNetworking::addPeerESP(const uint8_t *macAddress) {
   esp_now_peer_info_t peer;
   peer.channel = consts::ESPNOW_CHANNEL;
   peer.ifidx = static_cast<wifi_interface_t>(ESPNOW_WIFI_IF);
@@ -113,6 +131,19 @@ void GomokuNetworking::addPeer(const uint8_t *macAddress) {
   memcpy((&peer)->peer_addr, macAddress, ESP_NOW_ETH_ALEN);
   ESP_ERROR_CHECK(esp_now_add_peer(&peer));
   ESP_LOGI(TAG_, "ADD PEER SUCCESS: " MACSTR, MAC2STR(macAddress));
+}
+
+bool GomokuNetworking::addPeer(mac_address_t &peer,
+                               structs::ReceiveCallbackSummary &summary,
+                               int players) {
+  // ADDING NEW PLAYER TO KNOWN PEERS
+  if (players < consts::MAX_GOMOKU_PLAYERS && summary.unicast == false &&
+      esp_now_is_peer_exist(peer.data()) == false) {
+    playersMacs_.push_back(peer);
+    addPeerESP(peer.data());
+    return true;
+  }
+  return false;
 }
 
 void GomokuNetworking::sendGameInvite() {
@@ -153,7 +184,7 @@ void GomokuNetworking::receiveData(const uint8_t *macAddress,
   event.info = structs::GomokuEventReceiveCallback{};
   structs::GomokuEventReceiveCallback *receiveCallback =
       &std::get<structs::GomokuEventReceiveCallback>(event.info);
-  if (macAddress == hostAddress_) {
+  if (macAddress == hostAddress_.data()) {
     return;
   }
   if (macAddress == NULL || data == NULL || length <= 0) {

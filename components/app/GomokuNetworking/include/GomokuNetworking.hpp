@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <cstring>
+#include <vector>
 
 #include "GomokuNetworkingConf.hpp"
 #include "MessageQueue.hpp"
@@ -27,27 +28,39 @@ namespace Gomoku {
 class GomokuNetworking {
  public:
   static void init();
-  static void run();
+  static TaskHandle_t &run();
   static void sendData(const uint8_t *macAddress, esp_now_send_status_t status);
   static void receiveData(const uint8_t *macAddress, const uint8_t *data,
                           const int length);
+  
   static SemaphoreHandle_t &mutex() { return mutex_; }
+  static mac_address_t &gameHostAddress() { return gameHostAddress_; }
+  static mac_address_t &hostAddress() { return hostAddress_; }
+  static std::vector<mac_address_t> &playersMacs() { return playersMacs_; }
+
   static void deinit();
 
  private:
   static void task(void *pvParameters);
   static TaskHandle_t gomokuNetworkingTask;
   static structs::GomokuParams sendParams_;
-  static uint8_t gameHostAddress_[ESP_NOW_ETH_ALEN];
-  static uint8_t hostAddress_[ESP_NOW_ETH_ALEN];
+  static mac_address_t gameHostAddress_;
+  static mac_address_t hostAddress_;
   static constexpr char TAG_[] = "GomokuNetworking";
+  static std::vector<mac_address_t> playersMacs_;
+
   static SemaphoreHandle_t mutex_;
   static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue_;
   static void searchForFriends();
   static structs::ReceiveCallbackSummary parseData(structs::GomokuData *data,
                                                    int dataLength);
   static void sendGameInvite();
-  static void addPeer(const uint8_t *macAddress);
+
+  static void chooseHost(mac_address_t &peer,
+                         structs::ReceiveCallbackSummary &summary);
+  static bool addPeer(mac_address_t &peer,
+                      structs::ReceiveCallbackSummary &summary, int players);
+  static void addPeerESP(const uint8_t *macAddress);
   static void prepareData();
 };
 

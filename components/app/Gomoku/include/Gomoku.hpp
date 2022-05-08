@@ -32,7 +32,6 @@ class Gomoku {
   constexpr unsigned width() const { return width_s; }
   constexpr unsigned height() const { return height_s; }
   uint8_t markMove(uint8_t playerSign, const BoardCoordinate& move);
-  void startNetworkingTask();
 
  protected:
   static constexpr char TAG_[] = "Gomoku";
@@ -122,13 +121,6 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
     return playerSign;
   }
   return 0;
-}
-
-template <unsigned width_s, unsigned height_s>
-void Gomoku<width_s, height_s>::startNetworkingTask() {
-  GomokuNetworking::init();
-  GomokuNetworking::run();
-  ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 
 }  // namespace Gomoku

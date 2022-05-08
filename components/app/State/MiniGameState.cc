@@ -7,10 +7,7 @@ namespace tamagotchi {
 namespace App {
 namespace State {
 
-MiniGameState::MiniGameState()
-    : gomokuBoard_(EspGL::Vect2(0, 0),
-                   EspGL::Vect2(Globals::game.screen().width(),
-                                Globals::game.screen().height())) {}
+MiniGameState::MiniGameState() {}
 
 void MiniGameState::handleEvent(Event::Event event) {}
 
@@ -28,38 +25,38 @@ void MiniGameState::init() {
        {Globals::game.screen().width(), Globals::game.screen().height()}},
       EspGL::colours::GREEN);
   EspGL::delay(3000);
-  gomokuBoard_.startNetworkingTask();
+  startNetworkingTask();
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
-  gomokuBoard_.draw(Globals::game.screen());
 }
 
 void MiniGameState::mainLoop() {
-  auto moves = evaluateEvents();
-  updateBoard(moves);
-  EspGL::delay(4000);
-}
-
-std::vector<Gomoku::PlayerMove> MiniGameState::evaluateEvents() { return {}; }
-void MiniGameState::updateBoard(std::vector<Gomoku::PlayerMove> moves) {
-  for (const auto& move : moves) {
-    if (gomokuBoard_.update(Globals::game.screen(), move) != 0) {
-      printWinner(move.first);
-      return;
-    }
+  if (Gomoku::GomokuNetworking::gameHostAddress() ==
+      Gomoku::GomokuNetworking::hostAddress()) {
+    Globals::game.print(
+        "YOU ARE THE HOST",
+        {{0, 0},
+         {Globals::game.screen().width(), Globals::game.screen().height()}},
+        EspGL::colours::GREEN);
+    EspGL::delay(1000);
+    Globals::game.setNextState(StateType::GameHost);
+  } else {
+    Globals::game.print(
+        "YOU ARE NORMAL PLAYER",
+        {{0, 0},
+         {Globals::game.screen().width(), Globals::game.screen().height()}},
+        EspGL::colours::GREEN);
+    EspGL::delay(1000);
+    Globals::game.setNextState(StateType::NormalPlayer);
   }
-}
-void MiniGameState::printWinner(uint8_t winner) {
-  Globals::game.print(
-      "###### Player " + std::to_string(winner) +
-          " wins!\n######\nCONGRATULATIONS !",
-      {{0, 50},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
-      EspGL::colours::GREEN);
-  EspGL::delay(4000);
-  Globals::game.setNextState(StateType::MainMenu);
 }
 
 void MiniGameState::deinit() {}
+
+void MiniGameState::startNetworkingTask() {
+  Gomoku::GomokuNetworking::init();
+  Gomoku::GomokuNetworking::run();
+  ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+}
 
 }  // namespace State
 }  // namespace App

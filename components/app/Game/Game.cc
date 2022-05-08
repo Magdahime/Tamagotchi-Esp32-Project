@@ -6,11 +6,14 @@
 
 #include "EndState.hpp"
 #include "Event.hpp"
+#include "GameHostState.hpp"
 #include "Globals.hpp"
 #include "MainMenuState.hpp"
 #include "MiniGameState.hpp"
+#include "NormalPlayerState.hpp"
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
+
 
 namespace tamagotchi {
 namespace App {
@@ -40,6 +43,10 @@ void Game::createStates() {
                   std::make_unique<State::MainMenuState>());
   states_.emplace(State::StateType::MiniGame,
                   std::make_unique<State::MiniGameState>());
+  states_.emplace(State::StateType::GameHost,
+                  std::make_unique<State::GameHostState>());
+  states_.emplace(State::StateType::NormalPlayer,
+                  std::make_unique<State::NormalPlayerState>());
   states_.emplace(State::StateType::End, std::make_unique<State::EndState>());
 }
 
