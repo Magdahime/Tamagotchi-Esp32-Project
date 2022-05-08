@@ -104,7 +104,7 @@ PetGenerator<ColourRepresentation>::chooseFace() {
 template <typename ColourRepresentation>
 EspGL::Colour<ColourRepresentation>
 PetGenerator<ColourRepresentation>::chooseColour() {
-  auto colours = ColourProvider::getPossibleColours<ColourRepresentation>();
+  auto colours = ColourProvider::getPossiblePetColours<ColourRepresentation>();
   return colours[esp_random() % colours.size()];
 }
 

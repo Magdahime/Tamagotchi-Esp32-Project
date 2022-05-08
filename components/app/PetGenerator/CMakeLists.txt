@@ -1,4 +1,4 @@
-idf_component_register(SRCS "ColourProvider.cc"
+idf_component_register(
                     INCLUDE_DIRS "include"
-                    REQUIRES  BitmapLoader EspGL Pet Globals)
-                    component_compile_options(-std=gnu++17)
+                    REQUIRES  BitmapLoader EspGL Pet Globals ColourProvider)
+                    

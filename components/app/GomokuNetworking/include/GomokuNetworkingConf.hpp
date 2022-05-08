@@ -77,7 +77,7 @@ struct GomokuData {
   uint16_t crc;             // CRC16 value of ESPNOW data.
   uint32_t magic;  // Magic number which is used to determine which device to
                    // send unicast ESPNOW data.
-  uint8_t payload[0];  // Real payload of ESPNOW data.
+  uint8_t payload[consts::ESPNOW_SEND_LEN];  // Real payload of ESPNOW data.
 } __attribute__((packed));
 
 struct GomokuParams {

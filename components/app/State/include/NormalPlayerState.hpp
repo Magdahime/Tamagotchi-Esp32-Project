@@ -1,6 +1,7 @@
 #pragma once
+#include "GomokuDrawable.hpp"
 #include "State.hpp"
-
+#include "StateUtils.hpp"
 namespace tamagotchi {
 namespace App {
 namespace State {
@@ -17,6 +18,7 @@ class NormalPlayerState : public State {
   virtual std::string toString() override { return TAG_; }
 
  private:
+  
   static constexpr char TAG_[] = "NormalPlayerState";
 };
 

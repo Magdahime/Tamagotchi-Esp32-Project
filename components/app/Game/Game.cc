@@ -14,12 +14,14 @@
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
 
-
 namespace tamagotchi {
 namespace App {
 namespace Game {
 
-Game::Game() : eventQueue_(EVENT_QUEUE_SIZE) {
+Game::Game()
+    : eventQueue_(EVENT_QUEUE_SIZE),
+      gomokuBoard_(EspGL::Vect2(0, screen_.width()),
+                   EspGL::Vect2(0, screen_.height())) {
   initializeScreen();
   EspGL::FontLoader fLoader(Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::FONT_FILE_PATH));

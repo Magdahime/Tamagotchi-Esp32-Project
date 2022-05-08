@@ -16,7 +16,7 @@ std::vector<mac_address_t> GomokuNetworking::playersMacs_ = {};
 TaskHandle_t GomokuNetworking::gomokuNetworkingTask = nullptr;
 MessageQueue::MessageQueue<structs::GomokuEvent> GomokuNetworking::gomokuQueue_(
     10);
-SemaphoreHandle_t GomokuNetworking::mutex_ = xSemaphoreCreateBinary();
+
 mac_address_t GomokuNetworking::hostAddress_ = {};
 mac_address_t GomokuNetworking::gameHostAddress_ = {};
 structs::GomokuParams GomokuNetworking::sendParams_ = {
@@ -58,6 +58,7 @@ void GomokuNetworking::task(void *pvParameters) {
   ESP_LOGI(TAG_, "Found players!");
   // LET KNOW THAT PLAYERS ARE READY
   xTaskNotifyGive(taskToNotify);
+
   deinit();
 }
 
@@ -248,8 +249,6 @@ void GomokuNetworking::prepareData() {
   buf->sequenceNumber = 0;
   buf->crc = 0;
   buf->magic = sendParams_.magic;
-  /* Fill all remaining bytes after the data with random values */
-  esp_fill_random(buf->payload, sendParams_.len - sizeof(structs::GomokuData));
   buf->crc = esp_crc16_le(UINT16_MAX, (uint8_t const *)buf, sendParams_.len);
 }
 

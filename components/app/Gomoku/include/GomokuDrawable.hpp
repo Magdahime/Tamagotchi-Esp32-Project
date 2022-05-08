@@ -17,7 +17,7 @@ namespace tamagotchi {
 namespace App {
 namespace Gomoku {
 
-using PlayerMove = std::pair<uint8_t, BoardCoordinate>;
+using PlayerMove = std::pair<mac_address_t, BoardCoordinate>;
 
 namespace consts {
 constexpr int GOMOKU_PAWN_SIZE = 25;  // in pixels
@@ -52,11 +52,16 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation>,
     return rightLowerCanvas_;
   }
 
+  std::map<mac_address_t, EspGL::Colour<ColourRepresentation>>&
+  player2Colour() {
+    return player2Colour_;
+  }
+
  private:
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
   std::vector<EspGL::Hitbox> cellHitboxes_;
-  std::map<uint8_t, EspGL::Colour<ColourRepresentation>> player2Colour_;
+  std::map<mac_address_t, EspGL::Colour<ColourRepresentation>> player2Colour_;
 };
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>

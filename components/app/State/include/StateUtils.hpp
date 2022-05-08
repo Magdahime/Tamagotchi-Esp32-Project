@@ -14,8 +14,6 @@ constexpr int ICONS_SCALE = 5;
 constexpr int STEP_X = 20;  // in pixels
 constexpr int STEP_Y = 20;  // in pixels
 constexpr int THRESHOLD = 10;
-constexpr int GOMOKU_WIDTH = 3;
-constexpr int GOMOKU_HEIGHT = 3;
 }  // namespace consts
 
 namespace StateUtils {

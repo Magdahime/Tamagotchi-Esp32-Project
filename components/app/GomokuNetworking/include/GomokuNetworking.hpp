@@ -33,7 +33,6 @@ class GomokuNetworking {
   static void receiveData(const uint8_t *macAddress, const uint8_t *data,
                           const int length);
   
-  static SemaphoreHandle_t &mutex() { return mutex_; }
   static mac_address_t &gameHostAddress() { return gameHostAddress_; }
   static mac_address_t &hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> &playersMacs() { return playersMacs_; }
@@ -48,9 +47,9 @@ class GomokuNetworking {
   static mac_address_t hostAddress_;
   static constexpr char TAG_[] = "GomokuNetworking";
   static std::vector<mac_address_t> playersMacs_;
-
-  static SemaphoreHandle_t mutex_;
   static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue_;
+  static MessageQueue::MessageQueue<structs::GomokuData> sendingQueue_;
+
   static void searchForFriends();
   static structs::ReceiveCallbackSummary parseData(structs::GomokuData *data,
                                                    int dataLength);
