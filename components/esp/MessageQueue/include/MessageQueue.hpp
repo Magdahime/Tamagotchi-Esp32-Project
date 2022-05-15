@@ -16,7 +16,7 @@ class MessageQueue {
   bool putQueue(T event);
   void putQueueFromISR(T event);
   void clearQueue();
-  T getQueue(int ms);
+  T getQueue(int ms = portMAX_DELAY);
 
   xQueueHandle& messageQueue() { return messageQueue_; }
 

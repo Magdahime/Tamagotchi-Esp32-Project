@@ -2,6 +2,8 @@
 #include <stdint.h>
 
 #include <array>
+#include <cstring>
+#include <optional>
 #include <variant>
 
 #include "esp_now.h"
@@ -9,12 +11,14 @@
 #define ESPNOW_WIFI_MODE WIFI_MODE_AP
 #define ESPNOW_WIFI_IF ESP_IF_WIFI_AP
 
-namespace tamagotchi {
+namespace tamagotchi::App::Gomoku {
 
-namespace App {
-
-namespace Gomoku {
 using mac_address_t = std::array<uint8_t, ESP_NOW_ETH_ALEN>;
+
+struct BoardCoordinate {
+  int16_t x_;
+  int16_t y_;
+};
 
 namespace consts {
 constexpr int MAX_GOMOKU_PLAYERS = 2;
@@ -29,13 +33,23 @@ constexpr int SENDING_INVITE_DELAY = 2000;
 constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
 constexpr int ESPNOW_SEND_DELAY = 1000;
-constexpr int ESPNOW_SEND_LEN = 200;
+constexpr int ESPNOW_PAYLOAD_MAX = 150;
+constexpr int ESPNOW_SEND_META_LEN = 10;
+constexpr int ESPNOW_SEND_LEN = ESPNOW_SEND_META_LEN + ESPNOW_PAYLOAD_MAX;
 
 constexpr int ESPNOW_MAXMSGLENGTH = 256;
 
 constexpr mac_address_t EXAMPLE_BROADCAST_MAC = {0xFF, 0xFF, 0xFF,
                                                  0xFF, 0xFF, 0xFF};
 }  // namespace consts
+
+namespace GomokuMessageStates {
+constexpr uint8_t ERROR = 0b00000000;
+constexpr uint8_t BROADCAST = 0b00000001;
+constexpr uint8_t UNICAST = 0b00000010;
+constexpr uint8_t SENDING_MOVE = 0b00000110;
+constexpr uint8_t SENDING_ORDER = 0b00001010;
+}  // namespace GomokuMessageStates
 
 namespace structs {
 
@@ -47,51 +61,63 @@ struct ReceiveCallbackSummary {
   int receiveMagic;
 };
 
-enum class GomokuEventID {
-  GomokuSendCallback,
-  GomokuReceiveCallback,
-};
+enum class GomokuCommunicationType : uint8_t { BROADCAST, UNICAST, ERROR };
+
+struct GomokuData {
+  GomokuCommunicationType type;  // Broadcast or unicast ESPNOW data.
+  uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
+  uint16_t sequenceNumber;  // Sequence number of ESPNOW data.
+  uint16_t crc;             // CRC16 value of ESPNOW data.
+  uint32_t magic;  // Magic number which is used to determine which device to
+                   // send unicast ESPNOW data.
+  std::array<uint8_t, consts::ESPNOW_PAYLOAD_MAX> payload;
+} __attribute__((packed));
+
+static_assert(consts::ESPNOW_SEND_LEN == sizeof(GomokuData));
 
 struct GomokuEventSendCallback {
   esp_now_send_status_t status;
 };
 
 struct GomokuEventReceiveCallback {
-  int dataLength;
-  uint8_t *data;
+  GomokuData data;
 };
+
+struct GomokuWaitForAnswerFromHost {};
 
 struct GomokuEvent {
-  GomokuEventID id;
-  uint8_t macAddress[ESP_NOW_ETH_ALEN];
-  std::variant<GomokuEventSendCallback, GomokuEventReceiveCallback> info;
+  mac_address_t macAddress;
+  std::variant<GomokuEventSendCallback, GomokuEventReceiveCallback,
+               GomokuWaitForAnswerFromHost, std::monostate>
+      info;
 };
-
-enum class GomokuCommunicationType { BROADCAST, UNICAST, ERROR };
-
-struct GomokuData {
-  GomokuCommunicationType type;  // Broadcast or unicast ESPNOW data.
-  uint8_t
-      state;  // Indicat4e that if has received broadcast ESPNOW data or not.
-  uint16_t sequenceNumber;  // Sequence number of ESPNOW data.
-  uint16_t crc;             // CRC16 value of ESPNOW data.
-  uint32_t magic;  // Magic number which is used to determine which device to
-                   // send unicast ESPNOW data.
-  uint8_t payload[consts::ESPNOW_SEND_LEN];  // Real payload of ESPNOW data.
-} __attribute__((packed));
 
 struct GomokuParams {
   bool unicast;    // Send unicast ESPNOW data.
   bool broadcast;  // Send broadcast ESPNOW data.
   uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
-  uint32_t magic;   // Magic number which is used to determine which device to
-                    // send unicast ESPNOW data.
-  uint16_t count;   // Total count of unicast ESPNOW data to be sent.
-  uint16_t delay;   // Delay between sending two ESPNOW data, unit: ms.
-  int len;          // Length of ESPNOW data to be sent, unit: byte.
-  uint8_t *buffer;  // Buffer pointing to ESPNOW data.
-  uint8_t
-      destinationMac[ESP_NOW_ETH_ALEN];  // MAC address of destination device.
+  uint32_t magic;  // Magic number which is used to determine which device to
+                   // send unicast ESPNOW data.
+  uint16_t count;  // Total count of unicast ESPNOW data to be sent.
+  uint16_t delay;  // Delay between sending two ESPNOW data, unit: ms.
+  int len;         // Length of ESPNOW data to be sent, unit: byte.
+  std::array<uint8_t, sizeof(GomokuData)>
+      buffer;                    // Buffer pointing to ESPNOW data.
+  mac_address_t destinationMac;  // MAC address of destination device.
+};
+
+struct GomokuDataWithRecipient {
+  mac_address_t destinationMac;
+  GomokuData data;
+};
+
+struct GomokuNextPlayerInOrder {
+  mac_address_t nextPlayer;
+};
+
+struct GomokuMoveUpdateFromPlayer {
+  mac_address_t player;
+  BoardCoordinate move;
 };
 
 }  // namespace structs
@@ -101,6 +127,4 @@ inline bool isBroadcastAddress(const void *address) {
                 ESP_NOW_ETH_ALEN) == 0;
 }
 
-}  // namespace Gomoku
-}  // namespace App
-}  // namespace tamagotchi
+}  // namespace tamagotchi::App::Gomoku

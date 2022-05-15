@@ -8,6 +8,7 @@
 #include "Event.hpp"
 #include "GameHostState.hpp"
 #include "Globals.hpp"
+#include "GomokuMakeMoveState.hpp"
 #include "MainMenuState.hpp"
 #include "MiniGameState.hpp"
 #include "NormalPlayerState.hpp"
@@ -49,6 +50,8 @@ void Game::createStates() {
                   std::make_unique<State::GameHostState>());
   states_.emplace(State::StateType::NormalPlayer,
                   std::make_unique<State::NormalPlayerState>());
+  states_.emplace(State::StateType::GomokuMakeMove,
+                  std::make_unique<State::GomokuMakeMoveState>());
   states_.emplace(State::StateType::End, std::make_unique<State::EndState>());
 }
 

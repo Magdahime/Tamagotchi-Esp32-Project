@@ -40,7 +40,7 @@ void MiniGameState::mainLoop() {
          {Globals::game.screen().width(), Globals::game.screen().height()}},
         EspGL::colours::GREEN);
     EspGL::delay(1000);
-    Globals::game.setNextState(StateType::GameHost);
+    // Globals::game.setNextState(StateType::GameHost);
   } else {
     Globals::game.print(
         "YOU ARE NORMAL PLAYER",
@@ -48,7 +48,7 @@ void MiniGameState::mainLoop() {
          {Globals::game.screen().width(), Globals::game.screen().height()}},
         EspGL::colours::GREEN);
     EspGL::delay(1000);
-    Globals::game.setNextState(StateType::NormalPlayer);
+    // Globals::game.setNextState(StateType::NormalPlayer);
   }
 }
 
@@ -71,6 +71,7 @@ void MiniGameState::populateGomokuBoard() {
   for (auto i = 0; i < players.size(); i++) {
     gomokuBoard.player2Colour().emplace(players[i], colours[i]);
   }
+  gomokuBoard.fillPlayers(players);
 }
 
 }  // namespace State

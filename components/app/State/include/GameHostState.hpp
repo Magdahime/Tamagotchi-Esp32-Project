@@ -22,11 +22,14 @@ class GameHostState : public State {
   void makeMove();
   void sendNotificationAboutNextPlayer(Gomoku::mac_address_t player);
   void waitForPlayerMove(Gomoku::mac_address_t player);
-  void sendMoveUpdate();
+  Gomoku::structs::GomokuMoveUpdateFromPlayer sendMoveUpdate();
+  bool updateBoard(Gomoku::structs::GomokuMoveUpdateFromPlayer nextMove);
 
  private:
   static constexpr char TAG_[] = "GameHostState";
   std::vector<Gomoku::mac_address_t>& macAddresses_;
+
+  void sendAll(Gomoku::structs::GomokuData& sendData);
 };
 
 }  // namespace State

@@ -4,43 +4,44 @@
 #include <stdio.h>
 
 #include <array>
+#include <map>
 #include <stdexcept>
 #include <string>
 
-#include "GomokuNetworking.hpp"
+#include "GomokuNetworkingConf.hpp"
 
-namespace tamagotchi {
-
-namespace App {
-
-namespace Gomoku {
+namespace tamagotchi::App::Gomoku {
 
 constexpr int POINT_COUNT = 3;
 constexpr int INITIAL_VALUE = 0;
 
-struct BoardCoordinate {
-  int16_t x_;
-  int16_t y_;
-};
-
 template <unsigned width_s, unsigned height_s>
 class Gomoku {
  public:
-  Gomoku() { board_.fill(INITIAL_VALUE); }
-  uint8_t checkWinner(uint8_t playerSign, const BoardCoordinate& move) const;
+  Gomoku() : winner_(0) { board_.fill(INITIAL_VALUE); }
+  bool isWinner() { return winner_ != 0 ? true : false; }
+  uint8_t winner() { return winner_; }
+
+  inline uint8_t player2Int(mac_address_t mac) { return player2Int_.at(mac); }
   inline std::array<uint8_t, width_s * height_s>& board() { return board_; }
   constexpr unsigned width() const { return width_s; }
   constexpr unsigned height() const { return height_s; }
-  uint8_t markMove(uint8_t playerSign, const BoardCoordinate& move);
+  uint8_t markMove(uint8_t playerSign, BoardCoordinate& move);
+
+  void fillPlayers(const std::vector<mac_address_t>& macAddresses);
 
  protected:
+  uint8_t winner_;
   static constexpr char TAG_[] = "Gomoku";
   std::array<uint8_t, width_s * height_s> board_;
+
+  std::map<mac_address_t, uint8_t> player2Int_;
+  uint8_t checkWinner(uint8_t playerSign, BoardCoordinate& move);
 };
 
 template <unsigned width_s, unsigned height_s>
 uint8_t Gomoku<width_s, height_s>::markMove(uint8_t playerSign,
-                                            const BoardCoordinate& move) {
+                                            BoardCoordinate& move) {
   if (playerSign == 0) {
     throw std::runtime_error("Marking playerSign shouldn't be zero!");
   }
@@ -59,8 +60,8 @@ uint8_t Gomoku<width_s, height_s>::markMove(uint8_t playerSign,
 }
 
 template <unsigned width_s, unsigned height_s>
-uint8_t Gomoku<width_s, height_s>::checkWinner(
-    uint8_t playerSign, const BoardCoordinate& move) const {
+uint8_t Gomoku<width_s, height_s>::checkWinner(uint8_t playerSign,
+                                               BoardCoordinate& move) {
   auto calculateArrayCoord = [&](int16_t x, int16_t y) {
     return y * width_s + x;
   };
@@ -123,8 +124,14 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
   return 0;
 }
 
-}  // namespace Gomoku
+template <unsigned width_s, unsigned height_s>
+void Gomoku<width_s, height_s>::fillPlayers(
+    const std::vector<mac_address_t>& macAddresses) {
+  int sign = 1;
+  for (const auto& mac : macAddresses) {
+    player2Int_.emplace(mac, sign);
+    sign++;
+  }
+}
 
-}  // namespace App
-
-}  // namespace tamagotchi
+}  // namespace tamagotchi::App::Gomoku

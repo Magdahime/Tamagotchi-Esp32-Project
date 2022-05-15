@@ -19,11 +19,7 @@
 #include "freertos/timers.h"
 #include "nvs_flash.h"
 
-namespace tamagotchi {
-
-namespace App {
-
-namespace Gomoku {
+namespace tamagotchi::App::Gomoku {
 
 class GomokuNetworking {
  public:
@@ -32,27 +28,37 @@ class GomokuNetworking {
   static void sendData(const uint8_t *macAddress, esp_now_send_status_t status);
   static void receiveData(const uint8_t *macAddress, const uint8_t *data,
                           const int length);
-  
+
   static mac_address_t &gameHostAddress() { return gameHostAddress_; }
   static mac_address_t &hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> &playersMacs() { return playersMacs_; }
+  static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue() {
+    return gomokuQueue_;
+  }
+  static MessageQueue::MessageQueue<structs::GomokuDataWithRecipient>
+  sendingQueue() {
+    return sendingQueue_;
+  }
+  static TaskHandle_t &gomokuNetworkingTask() { return gomokuNetworkingTask_; }
 
   static void deinit();
 
  private:
   static void task(void *pvParameters);
-  static TaskHandle_t gomokuNetworkingTask;
+  static TaskHandle_t gomokuNetworkingTask_;
   static structs::GomokuParams sendParams_;
   static mac_address_t gameHostAddress_;
   static mac_address_t hostAddress_;
   static constexpr char TAG_[] = "GomokuNetworking";
   static std::vector<mac_address_t> playersMacs_;
   static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue_;
-  static MessageQueue::MessageQueue<structs::GomokuData> sendingQueue_;
+  static MessageQueue::MessageQueue<structs::GomokuDataWithRecipient>
+      sendingQueue_;
 
   static void searchForFriends();
-  static structs::ReceiveCallbackSummary parseData(structs::GomokuData *data,
-                                                   int dataLength);
+  static void handleCommunication();
+
+  static structs::ReceiveCallbackSummary parseData(structs::GomokuData data);
   static void sendGameInvite();
 
   static void chooseHost(mac_address_t &peer,
@@ -63,6 +69,4 @@ class GomokuNetworking {
   static void prepareData();
 };
 
-}  // namespace Gomoku
-}  // namespace App
-}  // namespace tamagotchi
+}  // namespace tamagotchi::App::Gomoku
