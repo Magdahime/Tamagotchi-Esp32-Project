@@ -6,12 +6,13 @@
 
 #include "EndState.hpp"
 #include "Event.hpp"
-#include "GameHostState.hpp"
 #include "Globals.hpp"
-#include "GomokuMakeMoveState.hpp"
+#include "Gomoku/EndGameState.hpp"
+#include "Gomoku/HostDutiesState.hpp"
+#include "Gomoku/MiniGameState.hpp"
+#include "Gomoku/PlayerTurnState.hpp"
+#include "Gomoku/WaitingForTurnState.hpp"
 #include "MainMenuState.hpp"
-#include "MiniGameState.hpp"
-#include "NormalPlayerState.hpp"
 #include "SPIFFSDriver.hpp"
 #include "StartState.hpp"
 
@@ -46,12 +47,15 @@ void Game::createStates() {
                   std::make_unique<State::MainMenuState>());
   states_.emplace(State::StateType::MiniGame,
                   std::make_unique<State::MiniGameState>());
-  states_.emplace(State::StateType::GameHost,
-                  std::make_unique<State::GameHostState>());
-  states_.emplace(State::StateType::NormalPlayer,
-                  std::make_unique<State::NormalPlayerState>());
-  states_.emplace(State::StateType::GomokuMakeMove,
-                  std::make_unique<State::GomokuMakeMoveState>());
+  states_.emplace(State::StateType::GameHostDuties,
+                  std::make_unique<State::HostDutiesState>());
+  states_.emplace(State::StateType::PlayerTurn,
+                  std::make_unique<State::PlayerTurnState>());
+  states_.emplace(State::StateType::WaitingForTurn,
+                  std::make_unique<State::WaitingForTurnState>());
+  states_.emplace(State::StateType::EndMiniGame,
+                  std::make_unique<State::EndGameState>());
+
   states_.emplace(State::StateType::End, std::make_unique<State::EndState>());
 }
 

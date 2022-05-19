@@ -43,12 +43,15 @@ constexpr mac_address_t EXAMPLE_BROADCAST_MAC = {0xFF, 0xFF, 0xFF,
                                                  0xFF, 0xFF, 0xFF};
 }  // namespace consts
 
+using gomoku_payload_array_t = std::array<uint8_t, consts::ESPNOW_PAYLOAD_MAX>;
+
 namespace GomokuMessageStates {
 constexpr uint8_t ERROR = 0b00000000;
 constexpr uint8_t BROADCAST = 0b00000001;
 constexpr uint8_t UNICAST = 0b00000010;
 constexpr uint8_t SENDING_MOVE = 0b00000110;
 constexpr uint8_t SENDING_ORDER = 0b00001010;
+constexpr uint8_t END_OF_GAME = 0b11111111;
 }  // namespace GomokuMessageStates
 
 namespace structs {
@@ -65,12 +68,12 @@ enum class GomokuCommunicationType : uint8_t { BROADCAST, UNICAST, ERROR };
 
 struct GomokuData {
   GomokuCommunicationType type;  // Broadcast or unicast ESPNOW data.
-  uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
-  uint16_t sequenceNumber;  // Sequence number of ESPNOW data.
-  uint16_t crc;             // CRC16 value of ESPNOW data.
+  uint8_t state;                 // Indicate which type of message is this.
+  uint16_t sequenceNumber;       // Sequence number of ESPNOW data.
+  uint16_t crc;                  // CRC16 value of ESPNOW data.
   uint32_t magic;  // Magic number which is used to determine which device to
                    // send unicast ESPNOW data.
-  std::array<uint8_t, consts::ESPNOW_PAYLOAD_MAX> payload;
+  gomoku_payload_array_t payload;
 } __attribute__((packed));
 
 static_assert(consts::ESPNOW_SEND_LEN == sizeof(GomokuData));
@@ -83,12 +86,10 @@ struct GomokuEventReceiveCallback {
   GomokuData data;
 };
 
-struct GomokuWaitForAnswerFromHost {};
-
 struct GomokuEvent {
   mac_address_t macAddress;
   std::variant<GomokuEventSendCallback, GomokuEventReceiveCallback,
-               GomokuWaitForAnswerFromHost, std::monostate>
+               std::monostate>
       info;
 };
 

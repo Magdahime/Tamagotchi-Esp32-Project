@@ -18,10 +18,11 @@ enum class StateType {
   Start,
   MainMenu,
   MiniGame,
-  GameHost,
-  NormalPlayer,
-  GomokuMakeMove,
-  End
+  GameHostDuties,
+  PlayerTurn,
+  WaitingForTurn,
+  EndMiniGame,
+  End,
 };
 
 class State {

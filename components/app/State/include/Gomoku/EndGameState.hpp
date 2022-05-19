@@ -1,13 +1,12 @@
 #pragma once
-#include "GomokuDrawable.hpp"
 #include "State.hpp"
 #include "StateUtils.hpp"
 namespace tamagotchi::App::State {
 
-class GomokuMakeMoveState : public State {
+class EndGameState : public State {
  public:
-  GomokuMakeMoveState() = default;
-  virtual ~GomokuMakeMoveState() = default;
+  EndGameState() = default;
+  virtual ~EndGameState() = default;
   virtual void handleEvent(Event::Event event) override;
   virtual void init() override;
   virtual void mainLoop() override;
@@ -16,7 +15,7 @@ class GomokuMakeMoveState : public State {
   virtual std::string toString() override { return TAG_; }
 
  private:
-  static constexpr char TAG_[] = "GomokuMakeMoveState";
+  static constexpr char TAG_[] = "EndGameState";
 };
 
 }  // namespace tamagotchi::App::State

@@ -1,4 +1,4 @@
-#include "MiniGameState.hpp"
+#include "Gomoku/MiniGameState.hpp"
 
 #include "ColourProvider.hpp"
 #include "Game.hpp"
@@ -40,7 +40,7 @@ void MiniGameState::mainLoop() {
          {Globals::game.screen().width(), Globals::game.screen().height()}},
         EspGL::colours::GREEN);
     EspGL::delay(1000);
-    // Globals::game.setNextState(StateType::GameHost);
+    Globals::game.setNextState(StateType::GameHostDuties);
   } else {
     Globals::game.print(
         "YOU ARE NORMAL PLAYER",
@@ -48,7 +48,7 @@ void MiniGameState::mainLoop() {
          {Globals::game.screen().width(), Globals::game.screen().height()}},
         EspGL::colours::GREEN);
     EspGL::delay(1000);
-    // Globals::game.setNextState(StateType::NormalPlayer);
+    Globals::game.setNextState(StateType::WaitingForTurn);
   }
 }
 

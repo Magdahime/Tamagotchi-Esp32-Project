@@ -9,11 +9,11 @@
 #include "nvs_flash.h"
 
 namespace tamagotchi::App::Gomoku {
-
+///////////////////////////////////////////////////////////////////////////
 std::vector<mac_address_t> GomokuNetworking::playersMacs_ = {};
 TaskHandle_t GomokuNetworking::gomokuNetworkingTask_ = nullptr;
-MessageQueue::MessageQueue<structs::GomokuEvent> GomokuNetworking::gomokuQueue_(
-    10);
+MessageQueue::MessageQueue<structs::GomokuEvent>
+    GomokuNetworking::receiveQueue_(10);
 MessageQueue::MessageQueue<structs::GomokuDataWithRecipient>
     GomokuNetworking::sendingQueue_(consts::MAX_GOMOKU_PLAYERS);
 
@@ -29,6 +29,9 @@ structs::GomokuParams GomokuNetworking::sendParams_ = {
     .len = consts::ESPNOW_SEND_LEN,
     {0},
     {0}};
+
+bool GomokuNetworking::ifDeinit_ = false;
+///////////////////////////////////////////////////////////////////////////
 
 void GomokuNetworking::init() {
   esp_base_mac_addr_get(hostAddress_.data());
@@ -68,7 +71,7 @@ void GomokuNetworking::searchForFriends() {
   while (sendParams_.state == GomokuMessageStates::BROADCAST) {
     if (players == consts::MAX_GOMOKU_PLAYERS) break;
     sendGameInvite();
-    auto msg = gomokuQueue_.getQueue(consts::MAX_DELAY);
+    auto msg = receiveQueue_.getQueue(consts::MAX_DELAY);
 
     if (std::holds_alternative<structs::GomokuEventReceiveCallback>(msg.info)) {
       ESP_LOGI(TAG_, "VARIANT: %d", msg.info.index());
@@ -99,14 +102,19 @@ void GomokuNetworking::searchForFriends() {
 
   ESP_LOGI(TAG_, "Found players!");
   ESP_LOGI(TAG_, "Clearing EventQueue");
-  gomokuQueue_.clearQueue();
+  receiveQueue_.clearQueue();
   ESP_LOGI(TAG_, "Leaving searchForFriends() method");
 }
 
-// DO DOKOŃCZENIA
 void GomokuNetworking::handleCommunication() {
-  while (true) {
-    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+  structs::GomokuDataWithRecipient msg;
+  while (!ifDeinit_ && sendingQueue_.getQueue(msg) == pdPASS) {
+    auto result =
+        esp_now_send(msg.destinationMac.data(),
+                     reinterpret_cast<uint8_t *>(&msg.data), sendParams_.len);
+    if (result != ESP_OK) {
+      ESP_LOGE(TAG_, "ESPNOW SEND ERROR: %d", result);
+    }
   }
 }
 
@@ -180,11 +188,11 @@ void GomokuNetworking::sendData(const uint8_t *macAddress,
     ESP_LOGE(TAG_, "SEND CALLBACK ERROR - MAC ADDRESS NULL");
     return;
   }
-  
+
   memcpy(event.macAddress.data(), macAddress, ESP_NOW_ETH_ALEN);
   sendCallback.status = status;
 
-  if (gomokuQueue_.putQueue(event) != pdTRUE) {
+  if (receiveQueue_.putQueue(event) != pdTRUE) {
     ESP_LOGE(TAG_, "SEND QUEUE FAIL");
   }
 }
@@ -205,7 +213,7 @@ void GomokuNetworking::receiveData(const uint8_t *macAddress,
 
   memcpy(event.macAddress.data(), macAddress, ESP_NOW_ETH_ALEN);
   memcpy(reinterpret_cast<uint8_t *>(&receiveCallback.data), data, length);
-  if (gomokuQueue_.putQueue(event) != pdTRUE) {
+  if (receiveQueue_.putQueue(event) != pdTRUE) {
     ESP_LOGE(TAG_, "RECEIVE QUEUE FAIL");
   }
 }
@@ -251,6 +259,23 @@ void GomokuNetworking::prepareData() {
   buf->crc =
       esp_crc16_le(UINT16_MAX, sendParams_.buffer.data(), sendParams_.len);
   ESP_LOGI(TAG_, "Prepare data CRC %d", buf->crc);
+}
+
+gomoku_payload_array_t GomokuNetworking::unpackData(
+    structs::GomokuEvent event) {
+  auto gomokuData =
+      std::get<structs::GomokuEventReceiveCallback>(event.info).data;
+  int16_t receivedCrc = gomokuData.crc;
+  gomokuData.crc = 0;
+  int16_t calculatedCrc =
+      esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const *>(&gomokuData),
+                   sizeof(structs::GomokuData));
+  if (receivedCrc != calculatedCrc) {
+    ESP_LOGE(TAG_, "Message from: " MACSTR "is corrupted. CRCs are not equal.",
+             MAC2STR(event.macAddress.data()));
+    return {};
+  }
+  return gomokuData.payload;
 }
 
 }  // namespace tamagotchi::App::Gomoku

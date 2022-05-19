@@ -29,11 +29,13 @@ class GomokuNetworking {
   static void receiveData(const uint8_t *macAddress, const uint8_t *data,
                           const int length);
 
+
+  static gomoku_payload_array_t unpackData(structs::GomokuEvent event);
   static mac_address_t &gameHostAddress() { return gameHostAddress_; }
   static mac_address_t &hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> &playersMacs() { return playersMacs_; }
-  static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue() {
-    return gomokuQueue_;
+  static MessageQueue::MessageQueue<structs::GomokuEvent> receiveQueue() {
+    return receiveQueue_;
   }
   static MessageQueue::MessageQueue<structs::GomokuDataWithRecipient>
   sendingQueue() {
@@ -41,9 +43,11 @@ class GomokuNetworking {
   }
   static TaskHandle_t &gomokuNetworkingTask() { return gomokuNetworkingTask_; }
 
+  static void setDeinit() { ifDeinit_ = true; }
   static void deinit();
 
  private:
+  static bool ifDeinit_;
   static void task(void *pvParameters);
   static TaskHandle_t gomokuNetworkingTask_;
   static structs::GomokuParams sendParams_;
@@ -51,7 +55,7 @@ class GomokuNetworking {
   static mac_address_t hostAddress_;
   static constexpr char TAG_[] = "GomokuNetworking";
   static std::vector<mac_address_t> playersMacs_;
-  static MessageQueue::MessageQueue<structs::GomokuEvent> gomokuQueue_;
+  static MessageQueue::MessageQueue<structs::GomokuEvent> receiveQueue_;
   static MessageQueue::MessageQueue<structs::GomokuDataWithRecipient>
       sendingQueue_;
 
