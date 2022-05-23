@@ -28,7 +28,6 @@ void MiniGameState::init() {
   EspGL::delay(3000);
   startNetworkingTask();
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
-  populateGomokuBoard();
 }
 
 void MiniGameState::mainLoop() {
@@ -58,20 +57,6 @@ void MiniGameState::startNetworkingTask() {
   Gomoku::GomokuNetworking::init();
   Gomoku::GomokuNetworking::run();
   ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-}
-
-void MiniGameState::populateGomokuBoard() {
-  auto& players = Gomoku::GomokuNetworking::playersMacs();
-  auto colours = ColourProvider::getPossibleGomokuColours<uint16_t>();
-  auto& gomokuBoard = Globals::game.gomokuBoard();
-  if (players.size() > colours.size()) {
-    throw std::runtime_error(
-        "Not enough colours for players. Please provide more colours!");
-  }
-  for (auto i = 0; i < players.size(); i++) {
-    gomokuBoard.player2Colour().emplace(players[i], colours[i]);
-  }
-  gomokuBoard.fillPlayers(players);
 }
 
 }  // namespace State

@@ -25,7 +25,6 @@ class MiniGameState : public State {
 
  private:
   void startNetworkingTask();
-  void populateGomokuBoard();
   static constexpr char TAG_[] = "MiniGameState";
 };
 

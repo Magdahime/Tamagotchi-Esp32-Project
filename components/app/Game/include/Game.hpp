@@ -10,6 +10,7 @@
 #include "EspGLScreen.hpp"
 #include "EspGLUtils.hpp"
 #include "GomokuDrawable.hpp"
+#include "GomokuNetworkingConf.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
 #include "Graphics/Text/EspGLText.hpp"
 #include "MessageQueue.hpp"
@@ -20,7 +21,6 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-
 
 namespace tamagotchi {
 namespace App {
@@ -54,6 +54,8 @@ class Game {
   State::StateType nextState() { return nextState_; }
 
   void setNextState(State::StateType newState) { nextState_ = newState; }
+
+  Gomoku::structs::PetParams getPetParams();
 
   Gomoku::GomokuDrawable<GOMOKU_WIDTH, GOMOKU_HEIGHT, uint16_t>& gomokuBoard() {
     return gomokuBoard_;

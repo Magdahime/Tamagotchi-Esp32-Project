@@ -34,7 +34,7 @@ constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
 constexpr int ESPNOW_SEND_DELAY = 1000;
 constexpr int ESPNOW_PAYLOAD_MAX = 150;
-constexpr int ESPNOW_SEND_META_LEN = 10;
+constexpr int ESPNOW_SEND_META_LEN = 8;
 constexpr int ESPNOW_SEND_LEN = ESPNOW_SEND_META_LEN + ESPNOW_PAYLOAD_MAX;
 
 constexpr int ESPNOW_MAXMSGLENGTH = 256;
@@ -49,19 +49,21 @@ namespace GomokuMessageStates {
 constexpr uint8_t ERROR = 0b00000000;
 constexpr uint8_t BROADCAST = 0b00000001;
 constexpr uint8_t UNICAST = 0b00000010;
-constexpr uint8_t SENDING_MOVE = 0b00000110;
-constexpr uint8_t SENDING_ORDER = 0b00001010;
+constexpr uint8_t ACK = 0b00000110;
+constexpr uint8_t SENDING_CONFIG = 0b00001110;
+constexpr uint8_t SENDING_MOVE = 0b00011110;
+constexpr uint8_t SENDING_ORDER = 0b00111110;
+constexpr uint8_t DEAD_PLAYER = 0b10000010;
 constexpr uint8_t END_OF_GAME = 0b11111111;
+
 }  // namespace GomokuMessageStates
 
 namespace structs {
 
-struct ReceiveCallbackSummary {
-  bool corrupted;
-  bool unicast;
-  uint8_t receiveState;
-  uint16_t receiveSeq;
-  int receiveMagic;
+struct PetParams {
+  uint8_t body;
+  uint8_t eyes;
+  uint8_t face;
 };
 
 enum class GomokuCommunicationType : uint8_t { BROADCAST, UNICAST, ERROR };
@@ -69,7 +71,6 @@ enum class GomokuCommunicationType : uint8_t { BROADCAST, UNICAST, ERROR };
 struct GomokuData {
   GomokuCommunicationType type;  // Broadcast or unicast ESPNOW data.
   uint8_t state;                 // Indicate which type of message is this.
-  uint16_t sequenceNumber;       // Sequence number of ESPNOW data.
   uint16_t crc;                  // CRC16 value of ESPNOW data.
   uint32_t magic;  // Magic number which is used to determine which device to
                    // send unicast ESPNOW data.

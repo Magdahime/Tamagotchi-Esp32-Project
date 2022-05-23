@@ -16,6 +16,8 @@ class WaitingForTurnState : public State {
   virtual std::string toString() override { return TAG_; }
 
  private:
+  void sendAck();
+  void updateGomokuInfo(Gomoku::gomoku_payload_array_t dataArray);
   void updateBoard(Gomoku::structs::GomokuMoveUpdateFromPlayer* nextMove);
   static constexpr char TAG_[] = "WaitingForTurnState";
 };

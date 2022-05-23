@@ -3,14 +3,18 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <utility>
 #include <variant>
 
+#include "Game.hpp"
+#include "Globals.hpp"
 #include "esp_mac.h"
 #include "nvs_flash.h"
 
 namespace tamagotchi::App::Gomoku {
 ///////////////////////////////////////////////////////////////////////////
-std::vector<mac_address_t> GomokuNetworking::playersMacs_ = {};
+std::vector<std::pair<mac_address_t, structs::PetParams>>
+    GomokuNetworking::playersParams_ = {};
 TaskHandle_t GomokuNetworking::gomokuNetworkingTask_ = nullptr;
 MessageQueue::MessageQueue<structs::GomokuEvent>
     GomokuNetworking::receiveQueue_(10);
@@ -75,22 +79,22 @@ void GomokuNetworking::searchForFriends() {
 
     if (std::holds_alternative<structs::GomokuEventReceiveCallback>(msg.info)) {
       ESP_LOGI(TAG_, "VARIANT: %d", msg.info.index());
-      auto &receiveCallback =
-          std::get<structs::GomokuEventReceiveCallback>(msg.info);
 
-      auto summary = parseData(receiveCallback.data);
-      ESP_LOGI(TAG_, "RECEIVE %dth BROADCAST DATA FROM: " MACSTR ", LEN: %d",
-               summary.receiveSeq, MAC2STR(msg.macAddress.data()),
-               sizeof(structs::GomokuData));
-      if (summary.corrupted == true) {
+      auto gomokuData =
+          std::get<structs::GomokuEventReceiveCallback>(msg.info).data;
+
+      ESP_LOGI(TAG_, "RECEIVE  BROADCAST DATA FROM: " MACSTR ", LEN: %d",
+               MAC2STR(msg.macAddress.data()), sizeof(gomokuData));
+
+      if (gomokuData.state == GomokuMessageStates::ERROR) {
         ESP_LOGE(TAG_, "DATA FROM: " MACSTR " is corrupted.",
                  MAC2STR(msg.macAddress.data()));
         continue;
       }
-      if (addPeer(msg.macAddress, summary, players)) players++;
+      if (addPeer(msg.macAddress, gomokuData, players)) players++;
       ESP_LOGI(TAG_, "Current number of players: %d ", players);
 
-      chooseHost(msg.macAddress, summary);
+      chooseHost(msg.macAddress, gomokuData);
 
       if (sendParams_.state == GomokuMessageStates::BROADCAST &&
           players == consts::MAX_GOMOKU_PLAYERS) {
@@ -119,17 +123,17 @@ void GomokuNetworking::handleCommunication() {
 }
 
 void GomokuNetworking::chooseHost(mac_address_t &peer,
-                                  structs::ReceiveCallbackSummary &summary) {
+                                  structs::GomokuData &data) {
   // CHOOSING HOST OF THE GAME
-  if (summary.receiveMagic > sendParams_.magic) {
+  if (data.magic > sendParams_.magic) {
     ESP_LOGI(TAG_,
              "Magic number from : " MACSTR
              " is higher: %d. My magic number is %d. Setting new game host.",
-             MAC2STR(peer.data()), summary.receiveMagic, sendParams_.magic);
+             MAC2STR(peer.data()), data.magic, sendParams_.magic);
     memcpy(gameHostAddress_.data(), peer.data(), ESP_NOW_ETH_ALEN);
   }
   // SAME MAGIC NUMBER
-  if (summary.receiveMagic == sendParams_.magic) {
+  if (data.magic == sendParams_.magic) {
     auto crcHost = esp_crc16_le(
         UINT16_MAX, reinterpret_cast<uint8_t const *>(hostAddress_.data()),
         ESP_NOW_ETH_ALEN);
@@ -154,13 +158,17 @@ void GomokuNetworking::addPeerESP(const uint8_t *macAddress) {
   ESP_LOGI(TAG_, "ADD PEER SUCCESS: " MACSTR, MAC2STR(macAddress));
 }
 
-bool GomokuNetworking::addPeer(mac_address_t &peer,
-                               structs::ReceiveCallbackSummary &summary,
+bool GomokuNetworking::addPeer(mac_address_t &peer, structs::GomokuData &data,
                                int players) {
   // ADDING NEW PLAYER TO KNOWN PEERS
-  if (players < consts::MAX_GOMOKU_PLAYERS && summary.unicast == false &&
+  if (players < consts::MAX_GOMOKU_PLAYERS &&
+      data.type == structs::GomokuCommunicationType::BROADCAST &&
       esp_now_is_peer_exist(peer.data()) == false) {
-    playersMacs_.push_back(peer);
+    auto playerParams =
+        reinterpret_cast<structs::PetParams *>(data.payload.data());
+    playersParams_.push_back(std::make_pair(
+        peer, structs::PetParams{playerParams->body, playerParams->eyes,
+                                 playerParams->face}));
     addPeerESP(peer.data());
     return true;
   }
@@ -218,44 +226,19 @@ void GomokuNetworking::receiveData(const uint8_t *macAddress,
   }
 }
 
-structs::ReceiveCallbackSummary GomokuNetworking::parseData(
-    structs::GomokuData data) {
-  structs::ReceiveCallbackSummary summary;
-  uint16_t receivedCrc, calculatedCrc;
-  summary.corrupted = true;
-  summary.receiveState = data.state;
-  summary.receiveSeq = data.sequenceNumber;
-  summary.receiveMagic = data.magic;
-
-  receivedCrc = data.crc;
-  data.crc = 0;
-  calculatedCrc =
-      esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const *>(&data),
-                   sizeof(structs::GomokuData));
-
-  ESP_LOGI(TAG_, "RECEIVED %d, CALCULATED %d", receivedCrc, calculatedCrc);
-
-  if (calculatedCrc == receivedCrc) {
-    summary.corrupted = false;
-    summary.unicast =
-        data.type == structs::GomokuCommunicationType::UNICAST ? true : false;
-  }
-
-  return summary;
-}
-
 void GomokuNetworking::prepareData() {
   structs::GomokuData *buf =
       reinterpret_cast<structs::GomokuData *>(sendParams_.buffer.data());
   assert(sendParams_.len >= sizeof(structs::GomokuData));
-
+  auto petParams = Globals::game.getPetParams();
   buf->type = isBroadcastAddress(sendParams_.destinationMac.data())
                   ? structs::GomokuCommunicationType::BROADCAST
                   : structs::GomokuCommunicationType::UNICAST;
   buf->state = sendParams_.state;
-  buf->sequenceNumber = 0;
   buf->crc = 0;
   buf->magic = sendParams_.magic;
+  memcpy(buf->payload.data(), reinterpret_cast<uint8_t *>(&petParams),
+         sizeof(structs::PetParams));
   buf->crc =
       esp_crc16_le(UINT16_MAX, sendParams_.buffer.data(), sendParams_.len);
   ESP_LOGI(TAG_, "Prepare data CRC %d", buf->crc);
@@ -276,6 +259,14 @@ gomoku_payload_array_t GomokuNetworking::unpackData(
     return {};
   }
   return gomokuData.payload;
+}
+
+std::vector<mac_address_t> GomokuNetworking::playersMacs() {
+  std::vector<mac_address_t> addr;
+  std::transform(playersParams_.begin(), playersParams_.end(),
+                 std::back_inserter(addr),
+                 [](auto &pair) -> mac_address_t { return pair.first; });
+  return addr;
 }
 
 }  // namespace tamagotchi::App::Gomoku

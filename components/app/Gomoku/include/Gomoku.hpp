@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "GomokuNetworking.hpp"
 #include "GomokuNetworkingConf.hpp"
 
 namespace tamagotchi::App::Gomoku {
@@ -21,6 +22,7 @@ class Gomoku {
   Gomoku() : winner_(0) { board_.fill(INITIAL_VALUE); }
   bool isWinner() { return winner_ != 0 ? true : false; }
   uint8_t winner() { return winner_; }
+  mac_address_t macWinner();
 
   inline uint8_t player2Int(mac_address_t mac) { return player2Int_.at(mac); }
   inline std::array<uint8_t, width_s * height_s>& board() { return board_; }
@@ -127,11 +129,24 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(uint8_t playerSign,
 template <unsigned width_s, unsigned height_s>
 void Gomoku<width_s, height_s>::fillPlayers(
     const std::vector<mac_address_t>& macAddresses) {
-  int sign = 1;
+  player2Int_.emplace(GomokuNetworking::hostAddress(), 1);
+  int sign = 2;
   for (const auto& mac : macAddresses) {
     player2Int_.emplace(mac, sign);
     sign++;
   }
+}
+
+template <unsigned width_s, unsigned height_s>
+mac_address_t Gomoku<width_s, height_s>::macWinner() {
+  auto findResult =
+      std::find_if(player2Int_.begin(), player2Int_.end(),
+                   [&](const auto& pair) { return pair.second == winner_; });
+
+  if (findResult == player2Int_.end()) {
+    return {};
+  }
+  return findResult->first;
 }
 
 }  // namespace tamagotchi::App::Gomoku

@@ -96,6 +96,11 @@ void Game::print(std::string message, EspGL::Hitbox position,
   tamagotchi::EspGL::delay(10);
 }
 
+Gomoku::structs::PetParams Game::getPetParams() {
+  return Gomoku::structs::PetParams{pet_.body().first, pet_.eyes().first,
+                                    pet_.face().first};
+}
+
 }  // namespace Game
 }  // namespace App
 }  // namespace tamagotchi

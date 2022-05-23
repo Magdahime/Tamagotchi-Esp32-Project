@@ -24,9 +24,9 @@ constexpr int FACE_OFFSETY = 13;
 template <typename ColourRepresentation>
 class Pet {
  public:
-  Pet(std::pair<std::string, EspGL::Bitmap> body,
-      std::pair<std::string, EspGL::Bitmap> eyes,
-      std::pair<std::string, EspGL::Bitmap> face,
+  Pet(std::pair<uint8_t, EspGL::Bitmap> body,
+      std::pair<uint8_t, EspGL::Bitmap> eyes,
+      std::pair<uint8_t, EspGL::Bitmap> face,
       EspGL::Colour<ColourRepresentation> colour)
       : name_(),
         colour_(std::move(colour)),
@@ -46,9 +46,9 @@ class Pet {
   void draw(EspGL::Screen<ColourRepresentation>& target, EspGL::Vect2 start,
             uint32_t scale = 5);
 
-  inline std::pair<std::string, EspGL::Bitmap>& body() { return body_; }
-  inline std::pair<std::string, EspGL::Bitmap>& eyes() { return eyes_; }
-  inline std::pair<std::string, EspGL::Bitmap>& face() { return face_; }
+  inline std::pair<uint8_t, EspGL::Bitmap>& body() { return body_; }
+  inline std::pair<uint8_t, EspGL::Bitmap>& eyes() { return eyes_; }
+  inline std::pair<uint8_t, EspGL::Bitmap>& face() { return face_; }
   inline std::string& name() { return name_; }
   inline std::vector<int16_t>& needs() { return needs_; }
   inline EspGL::Colour<ColourRepresentation>& colour() { return colour_; }
@@ -58,9 +58,9 @@ class Pet {
   std::vector<int16_t> needs_;
 
   EspGL::Colour<ColourRepresentation> colour_;
-  std::pair<std::string, EspGL::Bitmap> body_;
-  std::pair<std::string, EspGL::Bitmap> eyes_;
-  std::pair<std::string, EspGL::Bitmap> face_;
+  std::pair<uint8_t, EspGL::Bitmap> body_;
+  std::pair<uint8_t, EspGL::Bitmap> eyes_;
+  std::pair<uint8_t, EspGL::Bitmap> face_;
 };
 
 template <typename ColourRepresentation>
