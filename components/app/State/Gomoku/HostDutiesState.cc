@@ -18,32 +18,30 @@ void HostDutiesState::handleEvent(Event::Event event) {}
 void HostDutiesState::init() { currentPlayer_ = macAddresses_.begin(); }
 
 void HostDutiesState::mainLoop() {
-  structs::GomokuEvent msg;
-
-  // Waiting too long for answer
-  auto diff = (xTaskGetTickCount() / configTICK_RATE_HZ) - timestamp_;
-  if (diff > NOTIFICATION_PERIOD_SEC) {
-    sendNotificationAboutDeadPlayer();
-    removePlayerFromList(*currentPlayer_);
-    currentPlayer_++;
-  } else if (diff > NOTIFICATION_TIMEOUT_SEC) {
-    sendNotificationToCurrentPlayer();
-  }
-
-  // WE RECEIVED INFORMATION FROM CURRENT PLAYER
-  if (GomokuNetworking::receiveQueue().getQueue(msg) == pdPASS &&
-      msg.macAddress == *(currentPlayer_)) {
-    auto payload = Gomoku::GomokuNetworking::unpackData(msg);
-    if (payload.empty()) return;
-    sendMoveUpdate(payload);
-    auto result = updateBoard(
-        reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(payload.data()));
-    if (result) {
-      sendEndOfGameMessage();
-      Globals::game.setNextState(StateType::EndMiniGame);
+  auto hostParams = Gomoku::GomokuNetworking::hostParams();
+  // while (!hostParams.disconnectedPlayers.empty()) {
+  //   auto disconnectedMac = hostParams.disconnectedPlayers.getQueue();
+  //   sendNotificationAboutDeadPlayer();
+  //   removePlayerFromList(disconnectedMac);
+  //   currentPlayer_++;
+  // }
+  if (hostParams.newMove) {
+    structs::GomokuEvent msg;
+    GomokuNetworking::receiveQueue().getQueue(msg);
+    if (msg.macAddress == *(currentPlayer_)) {
+      auto gomokuData = Gomoku::GomokuNetworking::unpackData(msg);
+      sendMoveUpdate(gomokuData.payload);
+      auto result =
+          updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
+              gomokuData.payload.data()));
+      if (result) {
+        sendEndOfGameMessage();
+        Globals::game.setNextState(StateType::EndMiniGame);
+      }
+      currentPlayer_++;
+      sendNotificationToCurrentPlayer();
     }
-    currentPlayer_++;
-    sendNotificationToCurrentPlayer();
+    hostParams.newMove = false;
   }
   if (currentPlayer_ == macAddresses_.end()) {
     Globals::game.setNextState(StateType::PlayerTurn);
@@ -66,7 +64,7 @@ void HostDutiesState::sendNotificationToCurrentPlayer() {
 void HostDutiesState::sendMoveUpdate(gomoku_payload_array_t& payload) {
   ESP_LOGI(TAG_, "Sending update about next move.");
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
-                               GomokuMessageStates::SENDING_MOVE,
+                               GomokuMessageStates::SENDING_MOVE_TO_PLAYERS,
                                0,
                                0,
                                {}};

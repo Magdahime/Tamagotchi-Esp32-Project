@@ -79,8 +79,8 @@ void initEspNow() {
   ESP_LOGI(TAG_, "Init ESPNOW started.");
   ESP_ERROR_CHECK(esp_now_init());
   ESP_ERROR_CHECK(esp_now_register_send_cb(
-      tamagotchi::App::Gomoku::GomokuNetworking::sendData));
+      tamagotchi::App::Gomoku::GomokuNetworking::sendDataCallback));
   ESP_ERROR_CHECK(esp_now_register_recv_cb(
-      tamagotchi::App::Gomoku::GomokuNetworking::receiveData));
+      tamagotchi::App::Gomoku::GomokuNetworking::receiveDataCallback));
   ESP_LOGI(TAG_, "Init ESPNOW completed successfully.");
 }

@@ -16,11 +16,10 @@ void WaitingForTurnState::mainLoop() {
   if (GomokuNetworking::receiveQueue().getQueue(msg) == pdPASS &&
       msg.macAddress == GomokuNetworking::hostAddress()) {
     ESP_LOGI(TAG_, "Message from GameHost");
-    auto state =
-        std::get<structs::GomokuEventReceiveCallback>(msg.info).data.state;
-    auto payload = GomokuNetworking::unpackData(msg);
-    if (payload.empty()) return;
-
+    auto gomokuData = GomokuNetworking::unpackData(msg);
+    auto& state = gomokuData.state;
+    auto& payload = gomokuData.payload;
+    if (state == Gomoku::GomokuMessageStates::ERROR) return;
     switch (state) {
       case GomokuMessageStates::SENDING_ORDER:
         sendAck();
@@ -28,7 +27,7 @@ void WaitingForTurnState::mainLoop() {
         Globals::game.setNextState(StateType::PlayerTurn);
         break;
 
-      case GomokuMessageStates::SENDING_MOVE:
+      case GomokuMessageStates::SENDING_MOVE_TO_PLAYERS:
         sendAck();
         ESP_LOGI(TAG_, "UPDATE_BOARD message.");
         updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(

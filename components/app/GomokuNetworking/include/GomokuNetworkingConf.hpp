@@ -6,6 +6,7 @@
 #include <optional>
 #include <variant>
 
+#include "MessageQueue.hpp"
 #include "esp_now.h"
 
 #define ESPNOW_WIFI_MODE WIFI_MODE_AP
@@ -33,6 +34,7 @@ constexpr int SENDING_INVITE_DELAY = 2000;
 constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
 constexpr int ESPNOW_SEND_DELAY = 1000;
+constexpr int ESP_NOW_RETRANSMIT_MAX = 5;
 constexpr int ESPNOW_PAYLOAD_MAX = 150;
 constexpr int ESPNOW_SEND_META_LEN = 8;
 constexpr int ESPNOW_SEND_LEN = ESPNOW_SEND_META_LEN + ESPNOW_PAYLOAD_MAX;
@@ -51,7 +53,8 @@ constexpr uint8_t BROADCAST = 0b00000001;
 constexpr uint8_t UNICAST = 0b00000010;
 constexpr uint8_t ACK = 0b00000110;
 constexpr uint8_t SENDING_CONFIG = 0b00001110;
-constexpr uint8_t SENDING_MOVE = 0b00011110;
+constexpr uint8_t SENDING_MOVE_TO_PLAYERS = 0b00010010;
+constexpr uint8_t SENDING_MOVE_TO_HOST = 0b00011110;
 constexpr uint8_t SENDING_ORDER = 0b00111110;
 constexpr uint8_t DEAD_PLAYER = 0b10000010;
 constexpr uint8_t END_OF_GAME = 0b11111111;
@@ -95,17 +98,27 @@ struct GomokuEvent {
 };
 
 struct GomokuParams {
-  bool unicast;    // Send unicast ESPNOW data.
-  bool broadcast;  // Send broadcast ESPNOW data.
+  bool unicast;   // Send unicast ESPNOW data.
   uint8_t state;  // Indicate that if has received broadcast ESPNOW data or not.
   uint32_t magic;  // Magic number which is used to determine which device to
                    // send unicast ESPNOW data.
-  uint16_t count;  // Total count of unicast ESPNOW data to be sent.
-  uint16_t delay;  // Delay between sending two ESPNOW data, unit: ms.
   int len;         // Length of ESPNOW data to be sent, unit: byte.
   std::array<uint8_t, sizeof(GomokuData)>
       buffer;                    // Buffer pointing to ESPNOW data.
   mac_address_t destinationMac;  // MAC address of destination device.
+};
+
+struct HostParams {
+  bool newMove;
+  bool acksCollected;
+  MessageQueue::MessageQueue<mac_address_t> disconnectedPlayers;
+};
+
+struct SenderParams {
+  mac_address_t macAddress;
+  bool ack;
+  int64_t timestamp;
+  int retransmitCounter;
 };
 
 struct GomokuDataWithRecipient {
