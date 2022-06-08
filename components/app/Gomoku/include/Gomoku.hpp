@@ -8,42 +8,42 @@
 #include <stdexcept>
 #include <string>
 
+#include "GomokuBase.hpp"
+#include "GomokuCommon.hpp"
 #include "GomokuNetworking.hpp"
 #include "GomokuNetworkingConf.hpp"
+#include "GomokuTile.hpp"
 
 namespace tamagotchi::App::Gomoku {
 
-constexpr int POINT_COUNT = 3;
-constexpr int INITIAL_VALUE = 0;
-
 template <unsigned width_s, unsigned height_s>
-class Gomoku {
+class Gomoku : public GomokuBase<width_s, height_s> {
  public:
-  Gomoku() : winner_(0) { board_.fill(INITIAL_VALUE); }
-  bool isWinner() { return winner_ != 0 ? true : false; }
-  uint8_t winner() { return winner_; }
-  mac_address_t macWinner();
+  Gomoku() { board_.fill(consts::INITIAL_VALUE); }
+  GomokuNetworking::mac_address_t macWinner();
 
-  inline uint8_t player2Int(mac_address_t mac) { return player2Int_.at(mac); }
+  inline uint8_t player2Int(GomokuNetworking::mac_address_t mac) {
+    return player2Int_.at(mac);
+  }
   inline std::array<uint8_t, width_s * height_s>& board() { return board_; }
-  constexpr unsigned width() const { return width_s; }
-  constexpr unsigned height() const { return height_s; }
-  uint8_t markMove(uint8_t playerSign, BoardCoordinate& move);
 
-  void fillPlayers(const std::vector<mac_address_t>& macAddresses);
+  uint8_t markMove(uint8_t playerSign, GomokuNetworking::BoardCoordinate& move);
+  void fillPlayers(
+      const std::vector<GomokuNetworking::mac_address_t>& macAddresses);
 
  protected:
-  uint8_t winner_;
+  std::map<GomokuNetworking::mac_address_t, uint8_t> player2Int_;
+  virtual uint8_t checkWinner(uint8_t playerSign,
+                              GomokuNetworking::BoardCoordinate& move) override;
+
+ private:
   static constexpr char TAG_[] = "Gomoku";
   std::array<uint8_t, width_s * height_s> board_;
-
-  std::map<mac_address_t, uint8_t> player2Int_;
-  uint8_t checkWinner(uint8_t playerSign, BoardCoordinate& move);
 };
 
 template <unsigned width_s, unsigned height_s>
-uint8_t Gomoku<width_s, height_s>::markMove(uint8_t playerSign,
-                                            BoardCoordinate& move) {
+uint8_t Gomoku<width_s, height_s>::markMove(
+    uint8_t playerSign, GomokuNetworking::BoardCoordinate& move) {
   if (playerSign == 0) {
     throw std::runtime_error("Marking playerSign shouldn't be zero!");
   }
@@ -52,7 +52,7 @@ uint8_t Gomoku<width_s, height_s>::markMove(uint8_t playerSign,
                              std::to_string(move.x_) + ", " +
                              std::to_string(move.y_) + ")");
   }
-  if (board_[move.y_ * width_s + move.x_] != INITIAL_VALUE) {
+  if (board_[move.y_ * width_s + move.x_] != consts::INITIAL_VALUE) {
     throw std::runtime_error("This tile has been already used: (" +
                              std::to_string(move.x_) + ", " +
                              std::to_string(move.y_) + ")");
@@ -62,8 +62,8 @@ uint8_t Gomoku<width_s, height_s>::markMove(uint8_t playerSign,
 }
 
 template <unsigned width_s, unsigned height_s>
-uint8_t Gomoku<width_s, height_s>::checkWinner(uint8_t playerSign,
-                                               BoardCoordinate& move) {
+uint8_t Gomoku<width_s, height_s>::checkWinner(
+    uint8_t playerSign, GomokuNetworking::BoardCoordinate& move) {
   auto calculateArrayCoord = [&](int16_t x, int16_t y) {
     return y * width_s + x;
   };
@@ -117,10 +117,10 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(uint8_t playerSign,
     return false;
   };
 
-  if (checkLoop(move.x_, move.y_, 1, 0, POINT_COUNT) ||
-      checkLoop(move.x_, move.y_, 0, 1, POINT_COUNT) ||
-      checkLoop(move.x_, move.y_, 1, 1, POINT_COUNT) ||
-      checkLoop(move.x_, move.y_, -1, 1, POINT_COUNT)) {
+  if (checkLoop(move.x_, move.y_, 1, 0, consts::POINT_COUNT) ||
+      checkLoop(move.x_, move.y_, 0, 1, consts::POINT_COUNT) ||
+      checkLoop(move.x_, move.y_, 1, 1, consts::POINT_COUNT) ||
+      checkLoop(move.x_, move.y_, -1, 1, consts::POINT_COUNT)) {
     return playerSign;
   }
   return 0;
@@ -128,8 +128,8 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(uint8_t playerSign,
 
 template <unsigned width_s, unsigned height_s>
 void Gomoku<width_s, height_s>::fillPlayers(
-    const std::vector<mac_address_t>& macAddresses) {
-  player2Int_.emplace(GomokuNetworking::hostAddress(), 1);
+    const std::vector<GomokuNetworking::mac_address_t>& macAddresses) {
+  player2Int_.emplace(GomokuNetworking::GomokuNetworking::hostAddress(), 1);
   int sign = 2;
   for (const auto& mac : macAddresses) {
     player2Int_.emplace(mac, sign);
@@ -138,10 +138,10 @@ void Gomoku<width_s, height_s>::fillPlayers(
 }
 
 template <unsigned width_s, unsigned height_s>
-mac_address_t Gomoku<width_s, height_s>::macWinner() {
-  auto findResult =
-      std::find_if(player2Int_.begin(), player2Int_.end(),
-                   [&](const auto& pair) { return pair.second == winner_; });
+GomokuNetworking::mac_address_t Gomoku<width_s, height_s>::macWinner() {
+  auto findResult = std::find_if(
+      player2Int_.begin(), player2Int_.end(),
+      [&](const auto& pair) { return pair.second == this->winner_; });
 
   if (findResult == player2Int_.end()) {
     return {};

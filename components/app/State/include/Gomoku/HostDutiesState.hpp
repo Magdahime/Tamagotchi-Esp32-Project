@@ -16,7 +16,7 @@ constexpr int NOTIFICATION_TIMEOUT_SEC = 60;
 class HostDutiesState : public State {
  public:
   HostDutiesState()
-      : macAddresses_(Gomoku::GomokuNetworking::playersMacs()),
+      : macAddresses_(GomokuNetworking::GomokuNetworking::playersMacs()),
         currentPlayer_(macAddresses_.begin()),
         timestamp_(0) {}
   virtual ~HostDutiesState() = default;
@@ -27,22 +27,24 @@ class HostDutiesState : public State {
 
   virtual std::string toString() override { return TAG_; }
 
-  void sendNotificationAboutDeadPlayer();
+  void sendNotificationAboutDeadPlayer(GomokuNetworking::mac_address_t deadMac);
   void sendNotificationToCurrentPlayer();
   void sendMoveUpdate(
-      std::array<uint8_t, Gomoku::consts::ESPNOW_PAYLOAD_MAX>& payload);
-  bool updateBoard(Gomoku::structs::GomokuMoveUpdateFromPlayer* nextMove);
+      std::array<uint8_t, GomokuNetworking::consts::ESPNOW_PAYLOAD_MAX>&
+          payload);
+  bool updateBoard(
+      GomokuNetworking::structs::GomokuMoveUpdateFromPlayer* nextMove);
 
   void sendEndOfGameMessage();
 
  private:
   static constexpr char TAG_[] = "HostDutiesState";
-  std::vector<Gomoku::mac_address_t> macAddresses_;
-  std::vector<Gomoku::mac_address_t>::iterator currentPlayer_;
+  std::vector<GomokuNetworking::mac_address_t> macAddresses_;
+  std::vector<GomokuNetworking::mac_address_t>::iterator currentPlayer_;
   int64_t timestamp_;
 
-  void removePlayerFromList(Gomoku::mac_address_t toRemove);
-  void sendAll(Gomoku::structs::GomokuData& sendData);
+  void removePlayerFromList(GomokuNetworking::mac_address_t toRemove);
+  void sendAll(GomokuNetworking::structs::GomokuData& sendData);
 };
 
 }  // namespace State

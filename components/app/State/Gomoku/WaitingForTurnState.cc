@@ -4,7 +4,7 @@
 #include "Globals.hpp"
 #include "GomokuNetworking.hpp"
 
-using namespace tamagotchi::App::Gomoku;
+using namespace tamagotchi::App::GomokuNetworking;
 
 namespace tamagotchi::App::State {
 
@@ -13,13 +13,14 @@ void WaitingForTurnState::init() {}
 void WaitingForTurnState::mainLoop() {
   ESP_LOGI(TAG_, "Waiting for my turn");
   structs::GomokuEvent msg;
-  if (GomokuNetworking::receiveQueue().getQueue(msg) == pdPASS &&
-      msg.macAddress == GomokuNetworking::hostAddress()) {
-    ESP_LOGI(TAG_, "Message from GameHost");
-    auto gomokuData = GomokuNetworking::unpackData(msg);
+  if (GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(msg) ==
+          pdPASS &&
+      msg.macAddress == GomokuNetworking::GomokuNetworking::hostAddress()) {
+    ESP_LOGI(TAG_, "Message from Game Host");
+    auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
     auto& state = gomokuData.state;
     auto& payload = gomokuData.payload;
-    if (state == Gomoku::GomokuMessageStates::ERROR) return;
+    if (state == GomokuNetworking::GomokuMessageStates::ERROR) return;
     switch (state) {
       case GomokuMessageStates::SENDING_ORDER:
         sendAck();
@@ -51,8 +52,7 @@ void WaitingForTurnState::mainLoop() {
 
 void WaitingForTurnState::updateBoard(
     structs::GomokuMoveUpdateFromPlayer* nextMove) {
-  Globals::game.gomokuBoard().markMove(
-      Globals::game.gomokuBoard().player2Int(nextMove->player), nextMove->move);
+  Globals::game.gomokuBoard().markMove(nextMove->player, nextMove->move);
 }
 
 void WaitingForTurnState::updateGomokuInfo(gomoku_payload_array_t dataArray) {}
@@ -65,8 +65,8 @@ void WaitingForTurnState::sendAck() {
                                0,
                                {}};
   structs::GomokuDataWithRecipient finalMessage{
-      GomokuNetworking::gameHostAddress(), sendData};
-  GomokuNetworking::sendingQueue().putQueue(finalMessage);
+      GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
+  GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
 }
 
 void WaitingForTurnState::deinit() {}

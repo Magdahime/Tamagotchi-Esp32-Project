@@ -12,14 +12,14 @@
 #define ESPNOW_WIFI_MODE WIFI_MODE_AP
 #define ESPNOW_WIFI_IF ESP_IF_WIFI_AP
 
-namespace tamagotchi::App::Gomoku {
-
-using mac_address_t = std::array<uint8_t, ESP_NOW_ETH_ALEN>;
+namespace tamagotchi::App::GomokuNetworking {
 
 struct BoardCoordinate {
   int16_t x_;
   int16_t y_;
 };
+using mac_address_t = std::array<uint8_t, ESP_NOW_ETH_ALEN>;
+using PlayerMove = std::pair<mac_address_t, BoardCoordinate>;
 
 namespace consts {
 constexpr int MAX_GOMOKU_PLAYERS = 2;
@@ -142,4 +142,4 @@ inline bool isBroadcastAddress(const void *address) {
                 ESP_NOW_ETH_ALEN) == 0;
 }
 
-}  // namespace tamagotchi::App::Gomoku
+}  // namespace tamagotchi::App::GomokuNetworking

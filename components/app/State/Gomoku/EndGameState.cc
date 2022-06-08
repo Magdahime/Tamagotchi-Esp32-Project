@@ -6,15 +6,14 @@
 #include "Game.hpp"
 #include "Globals.hpp"
 #include "GomokuNetworkingConf.hpp"
-using namespace tamagotchi::App::Gomoku;
-
+using namespace tamagotchi::App::GomokuNetworking;
 namespace tamagotchi::App::State {
 
 void EndGameState::handleEvent(Event::Event event) {}
 void EndGameState::init() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
-  if (Globals::game.gomokuBoard().macWinner() ==
-      GomokuNetworking::hostAddress()) {
+  if (Globals::game.gomokuBoard().winner() ==
+      GomokuNetworking::GomokuNetworking::hostAddress()) {
     std::string message = "YOU ARE THE WINNER!\nCongratulations!";
     Globals::game.print(
         message,
@@ -25,10 +24,8 @@ void EndGameState::init() {
     constexpr int MAC_SIZE = 18;
     std::string addr(MAC_SIZE, '\0');
     std::snprintf(addr.data(), addr.size(), MACSTR,
-                  MAC2STR(Globals::game.gomokuBoard().macWinner()));
-    std::string message = "Winner is player " +
-                          std::to_string(Globals::game.gomokuBoard().winner()) +
-                          " (" + addr +
+                  MAC2STR(Globals::game.gomokuBoard().winner()));
+    std::string message = "Winner is player: (" + addr +
                           ")"
                           "!\nCongratulations!";
     Globals::game.print(

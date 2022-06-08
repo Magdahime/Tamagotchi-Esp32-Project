@@ -55,7 +55,7 @@ class Game {
 
   void setNextState(State::StateType newState) { nextState_ = newState; }
 
-  Gomoku::structs::PetParams getPetParams();
+  GomokuNetworking::structs::PetParams getPetParams();
 
   Gomoku::GomokuDrawable<GOMOKU_WIDTH, GOMOKU_HEIGHT, uint16_t>& gomokuBoard() {
     return gomokuBoard_;

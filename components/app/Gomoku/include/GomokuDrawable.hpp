@@ -9,7 +9,9 @@
 #include "Drawable.hpp"
 #include "EspGLVect2.hpp"
 #include "Globals.hpp"
-#include "Gomoku.hpp"
+#include "GomokuBase.hpp"
+#include "GomokuCommon.hpp"
+#include "GomokuTile.hpp"
 #include "Shapes/EspGLRectangles.hpp"
 #include "Shapes/EspGLSmoothEdgeShapes.hpp"
 
@@ -17,17 +19,8 @@ namespace tamagotchi {
 namespace App {
 namespace Gomoku {
 
-using PlayerMove = std::pair<mac_address_t, BoardCoordinate>;
-
-namespace consts {
-constexpr int GOMOKU_PAWN_SIZE = 25;  // in pixels
-constexpr int GOMOKU_LINE_WIDTH = 2;  // in pixels
-constexpr auto LINE_COLOUR = EspGL::colours::WHITE;
-}  // namespace consts
-
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-class GomokuDrawable : public EspGL::Drawable<ColourRepresentation>,
-                       public Gomoku<width_s, height_s> {
+class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
  public:
   GomokuDrawable(EspGL::Vect2 start, EspGL::Vect2 end)
       : leftUpperCanvas_(start), rightLowerCanvas_(end) {}
@@ -39,8 +32,8 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation>,
 
   void draw(EspGL::Screen<ColourRepresentation>& target) override;
   uint8_t update(EspGL::Screen<ColourRepresentation>& target,
-                 PlayerMove nextMove);
-  EspGL::Hitbox hitbox() override {
+                 GomokuNetworking::PlayerMove nextMove);
+  inline EspGL::Hitbox hitbox() override {
     return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
   }
 
@@ -52,16 +45,26 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation>,
     return rightLowerCanvas_;
   }
 
-  std::map<mac_address_t, EspGL::Colour<ColourRepresentation>>&
+  std::map<GomokuNetworking::mac_address_t,
+           EspGL::Colour<ColourRepresentation>>&
   player2Colour() {
     return player2Colour_;
   }
 
+  void markMove(GomokuNetworking::mac_address_t playerMac,
+                GomokuNetworking::BoardCoordinate& move);
+  bool isWinner() { return winner_.empty(); }
+  GomokuNetworking::mac_address_t winner() { return winner_; }
+
  private:
+  GomokuNetworking::mac_address_t winner_;
+  static constexpr char TAG_[] = "GomokuDrawable";
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
   std::vector<EspGL::Hitbox> cellHitboxes_;
-  std::map<mac_address_t, EspGL::Colour<ColourRepresentation>> player2Colour_;
+  std::array<GomokuTile<ColourRepresentation>, width_s * height_s> board_;
+  std::map<GomokuNetworking::mac_address_t, EspGL::Colour<ColourRepresentation>>
+      player2Colour_;
 };
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
@@ -92,19 +95,25 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
   }
 }
 
+// template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
+// uint8_t GomokuDrawable<width_s, height_s, ColourRepresentation>::update(
+//     EspGL::Screen<ColourRepresentation>& target,
+//     GomokuNetworking::PlayerMove nextMove) {
+//   auto result =
+//       Gomoku<width_s, height_s>::markMove(nextMove.first, nextMove.second);
+//   auto cellHitbox =
+//       cellHitboxes_[nextMove.second.x_ + width_s * nextMove.second.y_];
+//   EspGL::Circle<ColourRepresentation>{
+//       EspGL::Vect2(cellHitbox.second.x_ / 2, cellHitbox.second.y_ / 2),
+//       consts::GOMOKU_PAWN_SIZE, player2Colour_.at(nextMove.first)}
+//       .draw(target);
+//   return result;
+// }
+
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-uint8_t GomokuDrawable<width_s, height_s, ColourRepresentation>::update(
-    EspGL::Screen<ColourRepresentation>& target, PlayerMove nextMove) {
-  auto result =
-      Gomoku<width_s, height_s>::markMove(nextMove.first, nextMove.second);
-  auto cellHitbox =
-      cellHitboxes_[nextMove.second.x_ + width_s * nextMove.second.y_];
-  EspGL::Circle<ColourRepresentation>{
-      EspGL::Vect2(cellHitbox.second.x_ / 2, cellHitbox.second.y_ / 2),
-      consts::GOMOKU_PAWN_SIZE, player2Colour_.at(nextMove.first)}
-      .draw(target);
-  return result;
-}
+void GomokuDrawable<width_s, height_s, ColourRepresentation>::markMove(
+    GomokuNetworking::mac_address_t playerMac,
+    GomokuNetworking::BoardCoordinate& move) {}
 
 }  // namespace Gomoku
 }  // namespace App

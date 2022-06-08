@@ -8,7 +8,7 @@
 #include "Globals.hpp"
 #include "GomokuNetworkingConf.hpp"
 
-using namespace tamagotchi::App::Gomoku;
+using namespace tamagotchi::App::GomokuNetworking;
 
 namespace tamagotchi {
 namespace App {
@@ -18,18 +18,12 @@ void HostDutiesState::handleEvent(Event::Event event) {}
 void HostDutiesState::init() { currentPlayer_ = macAddresses_.begin(); }
 
 void HostDutiesState::mainLoop() {
-  auto hostParams = Gomoku::GomokuNetworking::hostParams();
-  // while (!hostParams.disconnectedPlayers.empty()) {
-  //   auto disconnectedMac = hostParams.disconnectedPlayers.getQueue();
-  //   sendNotificationAboutDeadPlayer();
-  //   removePlayerFromList(disconnectedMac);
-  //   currentPlayer_++;
-  // }
-  if (hostParams.newMove) {
+  auto hostParams = GomokuNetworking::GomokuNetworking::hostParams();
+  if (hostParams.newMove && hostParams.acksCollected) {
     structs::GomokuEvent msg;
-    GomokuNetworking::receiveQueue().getQueue(msg);
+    GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(msg);
     if (msg.macAddress == *(currentPlayer_)) {
-      auto gomokuData = Gomoku::GomokuNetworking::unpackData(msg);
+      auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
       sendMoveUpdate(gomokuData.payload);
       auto result =
           updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
@@ -42,6 +36,21 @@ void HostDutiesState::mainLoop() {
       sendNotificationToCurrentPlayer();
     }
     hostParams.newMove = false;
+  }
+
+  while (!hostParams.disconnectedPlayers.empty()) {
+    if (macAddresses_.empty()) {
+      Globals::game.setNextState(StateType::EndMiniGame);
+    }
+    auto disconnectedMac = hostParams.disconnectedPlayers.getQueue();
+    sendNotificationAboutDeadPlayer(disconnectedMac);
+    if (disconnectedMac == *currentPlayer_) {
+      currentPlayer_++;
+      sendNotificationToCurrentPlayer();
+    }
+    macAddresses_.erase(std::remove(macAddresses_.begin(), macAddresses_.end(),
+                                    disconnectedMac),
+                        macAddresses_.end());
   }
   if (currentPlayer_ == macAddresses_.end()) {
     Globals::game.setNextState(StateType::PlayerTurn);
@@ -57,7 +66,7 @@ void HostDutiesState::sendNotificationToCurrentPlayer() {
                                {}};
   memcpy(sendData.payload.data(), (*currentPlayer_).data(), ESP_NOW_ETH_ALEN);
   structs::GomokuDataWithRecipient finalMessage{*(currentPlayer_), sendData};
-  GomokuNetworking::sendingQueue().putQueue(finalMessage);
+  GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
   timestamp_ = xTaskGetTickCount() / configTICK_RATE_HZ;
 }
 
@@ -80,15 +89,14 @@ void HostDutiesState::sendAll(structs::GomokuData& sendData) {
                    consts::ESPNOW_SEND_LEN);
   for (const auto& mac : macAddresses_) {
     structs::GomokuDataWithRecipient finalMessage{mac, sendData};
-    GomokuNetworking::sendingQueue().putQueue(finalMessage);
+    GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
   }
 }
 
 bool HostDutiesState::updateBoard(
     structs::GomokuMoveUpdateFromPlayer* nextMove) {
   ESP_LOGI(TAG_, "Updating board.");
-  Globals::game.gomokuBoard().markMove(
-      Globals::game.gomokuBoard().player2Int(nextMove->player), nextMove->move);
+  Globals::game.gomokuBoard().markMove(nextMove->player, nextMove->move);
   return Globals::game.gomokuBoard().isWinner();
 }
 
@@ -104,15 +112,14 @@ void HostDutiesState::sendEndOfGameMessage() {
   sendAll(sendData);
 }
 
-void HostDutiesState::sendNotificationAboutDeadPlayer() {
+void HostDutiesState::sendNotificationAboutDeadPlayer(mac_address_t deadMac) {
   ESP_LOGI(TAG_, "Sending message about dead player");
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
                                GomokuMessageStates::DEAD_PLAYER,
                                0,
                                0,
                                {}};
-  memcpy(sendData.payload.data(), currentPlayer_->data(),
-         sizeof(currentPlayer_));
+  memcpy(sendData.payload.data(), deadMac.data(), sizeof(deadMac));
   sendAll(sendData);
 }
 

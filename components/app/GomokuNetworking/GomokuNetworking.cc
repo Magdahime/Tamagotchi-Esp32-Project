@@ -11,7 +11,7 @@
 #include "esp_mac.h"
 #include "nvs_flash.h"
 
-namespace tamagotchi::App::Gomoku {
+namespace tamagotchi::App::GomokuNetworking {
 ///////////////////////////////////////////////////////////////////////////
 std::vector<std::pair<mac_address_t, structs::PetParams>>
     GomokuNetworking::playersParams_ = {};
@@ -398,4 +398,4 @@ void GomokuNetworking::startCollectingACKs() {
   hostParams_.acksCollected = false;
 }
 
-}  // namespace tamagotchi::App::Gomoku
+}  // namespace tamagotchi::App::GomokuNetworking

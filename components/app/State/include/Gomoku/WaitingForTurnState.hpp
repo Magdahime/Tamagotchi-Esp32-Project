@@ -17,8 +17,9 @@ class WaitingForTurnState : public State {
 
  private:
   void sendAck();
-  void updateGomokuInfo(Gomoku::gomoku_payload_array_t dataArray);
-  void updateBoard(Gomoku::structs::GomokuMoveUpdateFromPlayer* nextMove);
+  void updateGomokuInfo(GomokuNetworking::gomoku_payload_array_t dataArray);
+  void updateBoard(
+      GomokuNetworking::structs::GomokuMoveUpdateFromPlayer* nextMove);
   static constexpr char TAG_[] = "WaitingForTurnState";
 };
 

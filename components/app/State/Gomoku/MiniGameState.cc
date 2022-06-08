@@ -8,6 +8,8 @@ namespace tamagotchi {
 namespace App {
 namespace State {
 
+using namespace tamagotchi::App::GomokuNetworking;
+
 MiniGameState::MiniGameState() {}
 
 void MiniGameState::handleEvent(Event::Event event) {}
@@ -31,8 +33,8 @@ void MiniGameState::init() {
 }
 
 void MiniGameState::mainLoop() {
-  if (Gomoku::GomokuNetworking::gameHostAddress() ==
-      Gomoku::GomokuNetworking::hostAddress()) {
+  if (GomokuNetworking::GomokuNetworking::gameHostAddress() ==
+      GomokuNetworking::GomokuNetworking::hostAddress()) {
     Globals::game.print(
         "YOU ARE THE HOST",
         {{0, 0},
@@ -54,8 +56,8 @@ void MiniGameState::mainLoop() {
 void MiniGameState::deinit() {}
 
 void MiniGameState::startNetworkingTask() {
-  Gomoku::GomokuNetworking::init();
-  Gomoku::GomokuNetworking::run();
+  GomokuNetworking::GomokuNetworking::init();
+  GomokuNetworking::GomokuNetworking::run();
   ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 }
 

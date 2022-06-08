@@ -19,7 +19,7 @@
 #include "freertos/timers.h"
 #include "nvs_flash.h"
 
-namespace tamagotchi::App::Gomoku {
+namespace tamagotchi::App::GomokuNetworking {
 
 class GomokuNetworking {
  public:
