@@ -5,15 +5,15 @@
 #include <algorithm>
 #include <tuple>
 #include <utility>
-#include "EspGLVect2.hpp"
+
 #include "EspGLUtils.hpp"
+#include "EspGLVect2.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+
 namespace tamagotchi {
 namespace EspGL {
-
-
 
 enum class Coordinate { X, Y };
 
@@ -33,7 +33,7 @@ template <typename ColourRepresentation>
 class Colour {
  public:
   Colour() = default;
-  Colour(ColourRepresentation colour) : value_(colour) {}
+  constexpr Colour(ColourRepresentation colour) : value_(colour) {}
   inline ColourRepresentation value() const { return value_; }
   inline void setValue(ColourRepresentation newValue) { value_ = newValue; }
   inline ColourRepresentation getNegativeColourValue() { return -value_; }

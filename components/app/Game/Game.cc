@@ -21,7 +21,7 @@ namespace App {
 namespace Game {
 
 Game::Game()
-    : eventQueue_(EVENT_QUEUE_SIZE),
+    : eventQueue_(consts::EVENT_QUEUE_SIZE),
       gomokuBoard_(EspGL::Vect2(0, screen_.width()),
                    EspGL::Vect2(0, screen_.height())) {
   initializeScreen();

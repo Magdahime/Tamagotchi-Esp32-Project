@@ -23,8 +23,8 @@ bool checkCollision(
   auto checkIfOutOfBound =
       [&](EspGL::Hitbox hitbox) -> bool {
     return hitbox.first.x_ < 0 or hitbox.first.y_ < 0 or
-           hitbox.second.x_ > Globals::game.screen().width() or
-           hitbox.second.y_ > Globals::game.screen().height();
+           hitbox.second.x_ > Game::consts::SCREEN_WIDTH or
+           hitbox.second.y_ > Game::consts::SCREEN_HEIGHT;
   };
 
   if (checkIfOutOfBound(newHitbox)) return true;
@@ -62,8 +62,8 @@ void movePet(
                    oldPetHitbox.second.y_ +
                        (Globals::game.pet().start().y_ - newCoordinate.y_)));
   if (checkCollision(newHitbox, hitboxes)) {
-    newCoordinate = {Globals::game.screen().width() / 2,
-                     Globals::game.screen().height() / 2};
+    newCoordinate = {Game::consts::SCREEN_WIDTH / 2,
+                     Game::consts::SCREEN_HEIGHT / 2};
   }
   ESP_LOGD("StateUtils", "Moved pet to: (%d, %d).", newCoordinate.x_,
            newCoordinate.y_);

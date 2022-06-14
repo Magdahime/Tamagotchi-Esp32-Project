@@ -2,35 +2,44 @@
 
 #include <stdint.h>
 
+#include <optional>
+#include <variant>
+
 #include "Drawable.hpp"
+#include "EspGLUtils.hpp"
 #include "EspGLVect2.hpp"
 #include "GomokuCommon.hpp"
 #include "GomokuNetworking.hpp"
 #include "GomokuNetworkingConf.hpp"
+#include "Shapes/EspGLRectangles.hpp"
 namespace tamagotchi::App::Gomoku {
 
 template <typename ColourRepresentation>
-class GomokuTile : public EspGL::Drawable<ColourRepresentation> {
+class GomokuTile {
  public:
   GomokuTile() = default;
   GomokuTile(EspGL::Vect2 leftUpper, EspGL::Vect2 rightLower)
-      : sign_(0),
-        playerAddress_(0),
-        leftUpperCanvas_(leftUpper),
-        rightLowerCanvas_(rightLower) {}
+      : leftUpperCanvas_(leftUpper), rightLowerCanvas_(rightLower) {}
 
   GomokuTile(EspGL::Hitbox canvas)
       : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {}
 
   ~GomokuTile() = default;
 
+  bool empty() { return std::holds_alternative<std::monostate>(playerId_); }
+
   void mark();
   void getMark();
 
   void highlight() { highlighted_ = true; }
   void dehighlight() { highlighted_ = false; }
+  bool highlighted() { return highlighted_; }
+  std::variant<std::monostate, uint8_t, GomokuNetworking::mac_address_t>&
+  playerId() {
+    return playerId_;
+  }
 
-  EspGL::Hitbox hitbox() override {
+  EspGL::Hitbox hitbox() {
     return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
   }
 
@@ -42,18 +51,12 @@ class GomokuTile : public EspGL::Drawable<ColourRepresentation> {
     return rightLowerCanvas_;
   }
 
-  void draw(EspGL::Screen<ColourRepresentation>& target) override;
-
  private:
   bool highlighted_;
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
-  uint8_t sign_;
-  GomokuNetworking::mac_address_t playerAddress_;
+  std::variant<std::monostate, uint8_t, GomokuNetworking::mac_address_t>
+      playerId_;
 };
-
-template <typename ColourRepresentation>
-void GomokuTile<ColourRepresentation>::draw(
-    EspGL::Screen<ColourRepresentation>& target) {}
 
 }  // namespace tamagotchi::App::Gomoku

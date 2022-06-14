@@ -1,5 +1,7 @@
 #include "Gomoku/PlayerTurnState.hpp"
 
+#include "Game.hpp"
+#include "Globals.hpp"
 #include "GomokuNetworkingConf.hpp"
 using namespace tamagotchi::App::GomokuNetworking;
 namespace tamagotchi::App::State {
@@ -40,38 +42,56 @@ void PlayerTurnState::deinit() {}
 
 void PlayerTurnState::handleGpioInput(int pressedButton) {
   ESP_LOGI(TAG_, "handleGpioInput.");
+  gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
+      .dehighlight();
   switch (pressedButton) {
     case static_cast<int>(Gpio::GpioInputs::GPIO_LEFT):
       ESP_LOGI(TAG_, "LEFT.");
-      rowCounter_ -= 1;
+      rowCounter_ =
+          rowCounter_ > 0 ? rowCounter_ - 1 : gomokuBoard_.width() - 1;
       break;
 
     case static_cast<int>(Gpio::GpioInputs::GPIO_RIGHT):
       ESP_LOGI(TAG_, "RIGHT.");
-      rowCounter_ += 1;
+      rowCounter_ =
+          rowCounter_ < gomokuBoard_.width() - 1 ? rowCounter_ + 1 : 0;
       break;
 
     case static_cast<int>(Gpio::GpioInputs::GPIO_MIDDLE):
       ESP_LOGI(TAG_, "MIDDLE.");
-      sendMoveUpdateToHost(BoardCoordinate{rowCounter_, columnCounter_});
+      if (gomokuBoard_
+              .board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
+              .empty())
+        sendMoveUpdateToHost(BoardCoordinate{rowCounter_, columnCounter_});
+      else
+        displayErrorMessage("THIS TILE IS ALREADY TAKEN",
+                            EspGL::Vect2(Game::consts::SCREEN_WIDTH,
+                                         Game::consts::SCREEN_HEIGHT));
       break;
 
     case static_cast<int>(Gpio::GpioInputs::GPIO_UP):
       ESP_LOGI(TAG_, "UP.");
-      columnCounter_ -= 1;
+      columnCounter_ =
+          columnCounter_ > 0 ? columnCounter_ - 1 : gomokuBoard_.height() - 1;
       break;
 
     case static_cast<int>(Gpio::GpioInputs::GPIO_DOWN):
       ESP_LOGI(TAG_, "DOWN.");
-      columnCounter_ += 1;
+      columnCounter_ =
+          columnCounter_ < gomokuBoard_.height() - 1 ? columnCounter_ + 1 : 0;
       break;
 
     default:
       break;
   }
+  gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
+      .highlight();
 }
 
-void PlayerTurnState::redrawScreen() { ESP_LOGD(TAG_, "RedrawingScreen."); }
+void PlayerTurnState::redrawScreen() {
+  ESP_LOGD(TAG_, "RedrawingScreen.");
+  gomokuBoard_.draw(Globals::game.screen());
+}
 
 void PlayerTurnState::sendMoveUpdateToHost(BoardCoordinate move) {
   ESP_LOGI(TAG_, "Sending move update to host");

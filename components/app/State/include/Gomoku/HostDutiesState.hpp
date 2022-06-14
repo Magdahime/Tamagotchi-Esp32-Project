@@ -38,6 +38,7 @@ class HostDutiesState : public State {
   void sendEndOfGameMessage();
 
  private:
+  void sendColourConfig();
   static constexpr char TAG_[] = "HostDutiesState";
   std::vector<GomokuNetworking::mac_address_t> macAddresses_;
   std::vector<GomokuNetworking::mac_address_t>::iterator currentPlayer_;

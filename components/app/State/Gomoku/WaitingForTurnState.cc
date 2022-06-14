@@ -3,17 +3,24 @@
 #include "Game.hpp"
 #include "Globals.hpp"
 #include "GomokuNetworking.hpp"
+#include "Shapes/EspGLRectangles.hpp"
 
 using namespace tamagotchi::App::GomokuNetworking;
 
 namespace tamagotchi::App::State {
 
 void WaitingForTurnState::handleEvent(Event::Event event) {}
-void WaitingForTurnState::init() {}
+void WaitingForTurnState::init() {
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
+  Globals::game.print(
+      "WAITING FOR OTHERS TO MOVE",
+      {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT / 2}},
+      EspGL::colours::GREEN);
+}
 void WaitingForTurnState::mainLoop() {
   ESP_LOGI(TAG_, "Waiting for my turn");
   structs::GomokuEvent msg;
-  if (GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(msg) ==
+  if (GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(msg, 500) ==
           pdPASS &&
       msg.macAddress == GomokuNetworking::GomokuNetworking::hostAddress()) {
     ESP_LOGI(TAG_, "Message from Game Host");
@@ -41,13 +48,14 @@ void WaitingForTurnState::mainLoop() {
         Globals::game.setNextState(StateType::EndMiniGame);
         break;
 
-      case GomokuMessageStates::SENDING_CONFIG:
+      case GomokuMessageStates::SENDING_COLOUR_CONFIG:
         sendAck();
-        updateGomokuInfo(payload);
+        updateGomokuPlayersColourInfo(payload);
       default:
         break;
     }
   }
+  displayWaitingMessage();
 }
 
 void WaitingForTurnState::updateBoard(
@@ -55,7 +63,15 @@ void WaitingForTurnState::updateBoard(
   Globals::game.gomokuBoard().markMove(nextMove->player, nextMove->move);
 }
 
-void WaitingForTurnState::updateGomokuInfo(gomoku_payload_array_t dataArray) {}
+void WaitingForTurnState::updateGomokuPlayersColourInfo(
+    gomoku_payload_array_t dataArray) {
+  auto colourConfigPtr =
+      reinterpret_cast<structs::ColourConfig*>(dataArray.data());
+  for (auto& elem : colourConfigPtr->colour2Player) {
+    Globals::game.gomokuBoard().player2Colour().emplace(
+        std::make_pair(elem.player, elem.colourValue));
+  }
+}
 
 void WaitingForTurnState::sendAck() {
   ESP_LOGI(TAG_, "Sending ACK.");
@@ -67,6 +83,25 @@ void WaitingForTurnState::sendAck() {
   structs::GomokuDataWithRecipient finalMessage{
       GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
   GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
+}
+
+void WaitingForTurnState::displayWaitingMessage() {
+  const std::string dots(counter_, '.');
+  ESP_LOGI(TAG_, "%s", dots.c_str());
+  Globals::game.print(
+      dots,
+      {{0, (Game::consts::SCREEN_HEIGHT / 2)},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      EspGL::colours::GREEN);
+  counter_++;
+  counter_ %= MAX_WAITING_DOTS;
+  if (counter_ == 0) {
+    EspGL::Rectangle<uint16_t>{{0, (Game::consts::SCREEN_HEIGHT / 2)},
+                               Game::consts::SCREEN_WIDTH - 1,
+                               (Game::consts::SCREEN_HEIGHT / 2) - 1,
+                               Globals::defaultValues::BACKGROUND_COLOUR}
+        .draw(Globals::game.screen());
+  }
 }
 
 void WaitingForTurnState::deinit() {}

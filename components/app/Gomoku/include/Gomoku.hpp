@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "EspGLUtils.hpp"
 #include "GomokuBase.hpp"
 #include "GomokuCommon.hpp"
 #include "GomokuNetworking.hpp"
@@ -17,22 +18,14 @@
 namespace tamagotchi::App::Gomoku {
 
 template <unsigned width_s, unsigned height_s>
-class Gomoku : public GomokuBase<width_s, height_s> {
+class Gomoku : public GomokuBase<width_s, height_s, uint8_t> {
  public:
   Gomoku() { board_.fill(consts::INITIAL_VALUE); }
-  GomokuNetworking::mac_address_t macWinner();
-
-  inline uint8_t player2Int(GomokuNetworking::mac_address_t mac) {
-    return player2Int_.at(mac);
-  }
   inline std::array<uint8_t, width_s * height_s>& board() { return board_; }
-
-  uint8_t markMove(uint8_t playerSign, GomokuNetworking::BoardCoordinate& move);
-  void fillPlayers(
-      const std::vector<GomokuNetworking::mac_address_t>& macAddresses);
+  virtual uint8_t markMove(uint8_t playerSign,
+                           GomokuNetworking::BoardCoordinate& move) override;
 
  protected:
-  std::map<GomokuNetworking::mac_address_t, uint8_t> player2Int_;
   virtual uint8_t checkWinner(uint8_t playerSign,
                               GomokuNetworking::BoardCoordinate& move) override;
 
@@ -47,7 +40,7 @@ uint8_t Gomoku<width_s, height_s>::markMove(
   if (playerSign == 0) {
     throw std::runtime_error("Marking playerSign shouldn't be zero!");
   }
-  if (move.x_ * move.y_ > width_s * height_s) {
+  if (move.y_ * width_s + move.x_ > width_s * height_s) {
     throw std::runtime_error("Move coordinates are out of bounds: (" +
                              std::to_string(move.x_) + ", " +
                              std::to_string(move.y_) + ")");
@@ -124,29 +117,6 @@ uint8_t Gomoku<width_s, height_s>::checkWinner(
     return playerSign;
   }
   return 0;
-}
-
-template <unsigned width_s, unsigned height_s>
-void Gomoku<width_s, height_s>::fillPlayers(
-    const std::vector<GomokuNetworking::mac_address_t>& macAddresses) {
-  player2Int_.emplace(GomokuNetworking::GomokuNetworking::hostAddress(), 1);
-  int sign = 2;
-  for (const auto& mac : macAddresses) {
-    player2Int_.emplace(mac, sign);
-    sign++;
-  }
-}
-
-template <unsigned width_s, unsigned height_s>
-GomokuNetworking::mac_address_t Gomoku<width_s, height_s>::macWinner() {
-  auto findResult = std::find_if(
-      player2Int_.begin(), player2Int_.end(),
-      [&](const auto& pair) { return pair.second == this->winner_; });
-
-  if (findResult == player2Int_.end()) {
-    return {};
-  }
-  return findResult->first;
 }
 
 }  // namespace tamagotchi::App::Gomoku

@@ -41,8 +41,7 @@ void Joystick::task(void *arg) {
     if (save != 0 && (currentState == savelastState) &&
         savegpioNum == gpioNum_) {
       App::Event::Event event{App::Event::EventTypes::gpio};
-      memcpy(event.data_, reinterpret_cast<uint8_t *>(&gpioNum_),
-             sizeof(gpioNum_));
+      memcpy(event.data_, static_cast<void *>(&gpioNum_), sizeof(gpioNum_));
       App::Globals::game.eventQueue().putQueue(event);
       numberOfButtonInterrupts_ = 0;
       gpioNum_ = static_cast<gpio_num_t>(0);

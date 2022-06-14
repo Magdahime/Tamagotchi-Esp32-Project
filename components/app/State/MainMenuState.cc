@@ -71,7 +71,7 @@ void MainMenuState::mainLoop() {
   if (!event.empty()) {
     handleEvent(event);
   }
-
+  tamagotchi::App::Globals::game.eventQueue().clearQueue();
   EspGL::delay(1000);
 }
 void MainMenuState::deinit() {}
@@ -103,7 +103,7 @@ void MainMenuState::deserializeIcons() {
                          bitmaps[i].sizeX() * consts::ICONS_SCALE +
                          consts::ICONS_SPACING,
                      nextIconStart.y_};
-    if (nextIconStart.x_ > Globals::game.screen().width()) {
+    if (nextIconStart.x_ > Game::consts::SCREEN_WIDTH) {
       ESP_LOGE(TAG_, "Too many icons!");
       break;
     }

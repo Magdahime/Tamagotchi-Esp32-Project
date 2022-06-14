@@ -4,6 +4,7 @@
 
 #include <algorithm>
 
+#include "ColourProvider.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
 #include "GomokuNetworkingConf.hpp"
@@ -15,7 +16,10 @@ namespace App {
 namespace State {
 
 void HostDutiesState::handleEvent(Event::Event event) {}
-void HostDutiesState::init() { currentPlayer_ = macAddresses_.begin(); }
+void HostDutiesState::init() {
+  currentPlayer_ = macAddresses_.begin();
+  sendColourConfig();
+}
 
 void HostDutiesState::mainLoop() {
   auto hostParams = GomokuNetworking::GomokuNetworking::hostParams();
@@ -127,6 +131,30 @@ void HostDutiesState::removePlayerFromList(mac_address_t toRemove) {
   macAddresses_.erase(
       std::remove(macAddresses_.begin(), macAddresses_.end(), toRemove),
       macAddresses_.end());
+}
+
+void HostDutiesState::sendColourConfig() {
+  ESP_LOGI(TAG_, "Sending config about colours.");
+  auto colours = ColourProvider::getPossibleGomokuColours<uint16_t>();
+  if (GomokuNetworking::consts::MAX_GOMOKU_PLAYERS - 1 > colours.size()) {
+    throw std::runtime_error(
+        "Too little colours o assign one to each player! :(");
+  }
+
+  structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
+                               GomokuMessageStates::SENDING_COLOUR_CONFIG,
+                               0,
+                               0,
+                               {}};
+
+  std::array<structs::Colour2Player, consts::MAX_GOMOKU_PLAYERS> colour2Player;
+  for (auto i = 0; i < macAddresses_.size(); i++) {
+    colour2Player[i] =
+        structs::Colour2Player{colours[i].value(), macAddresses_[i]};
+  }
+  structs::ColourConfig config{colour2Player};
+  memcpy(sendData.payload.data(), config.colour2Player.data(), sizeof(config));
+  sendAll(sendData);
 }
 
 }  // namespace State

@@ -22,7 +22,7 @@ void StartState::init() {
   Globals::game.print(
       "###########\nWelcome!\n###########",
       {{0, 0},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
      EspGL::delay(2000); 
   auto deserializePetFileHandle = Globals::spiffsDriver.getFileDescriptor(
@@ -37,8 +37,8 @@ void StartState::init() {
         Globals::defaultValues::PET_COMPONENTS_PATH);
     auto pet = petGenerator.generate();
     Pet::DrawablePet<uint16_t> drawablePet(
-        pet, EspGL::Vect2(0, Globals::game.screen().height() / 2),
-        Game::PET_SCALE);
+        pet, EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2),
+        Game::consts::PET_SCALE);
     Globals::game.setPet(drawablePet);
   }
   ESP_LOGI(TAG_, "Filling window black");
@@ -46,13 +46,13 @@ void StartState::init() {
   Globals::game.print(
       "###########\nThis is your pet:\n###########",
       {{0, 0},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
   Globals::game.pet().draw(Globals::game.screen());
   Globals::game.print(
       "Click to continue...",
       {{0, 280},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN, 1);
 }
 void StartState::mainLoop() {

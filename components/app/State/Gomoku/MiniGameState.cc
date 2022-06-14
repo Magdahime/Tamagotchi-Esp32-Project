@@ -19,13 +19,13 @@ void MiniGameState::init() {
   Globals::game.print(
       "## WELCOME TO GOMOKU ##",
       {{0, 0},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
 
   Globals::game.print(
       "Finding players...",
       {{0, 100},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
   EspGL::delay(3000);
   startNetworkingTask();
@@ -38,7 +38,7 @@ void MiniGameState::mainLoop() {
     Globals::game.print(
         "YOU ARE THE HOST",
         {{0, 0},
-         {Globals::game.screen().width(), Globals::game.screen().height()}},
+         {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
     EspGL::delay(1000);
     Globals::game.setNextState(StateType::GameHostDuties);
@@ -46,7 +46,7 @@ void MiniGameState::mainLoop() {
     Globals::game.print(
         "YOU ARE NORMAL PLAYER",
         {{0, 0},
-         {Globals::game.screen().width(), Globals::game.screen().height()}},
+         {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
     EspGL::delay(1000);
     Globals::game.setNextState(StateType::WaitingForTurn);

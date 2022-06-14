@@ -84,7 +84,6 @@ void GomokuNetworking::searchForFriends() {
     if (players == consts::MAX_GOMOKU_PLAYERS) break;
     sendGameInvite();
     auto msg = receiveQueue_.getQueue(consts::MAX_DELAY);
-
     if (std::holds_alternative<structs::GomokuEventReceiveCallback>(msg.info)) {
       ESP_LOGI(TAG_, "VARIANT: %d", msg.info.index());
 

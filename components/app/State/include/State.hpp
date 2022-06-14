@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Drawable.hpp"
+#include "EspGLUtils.hpp"
 #include "Event.hpp"
 #include "esp_log.h"
 
@@ -35,6 +36,8 @@ class State {
   virtual void deinit() = 0;
   virtual void run();
   void loop();
+
+  void displayErrorMessage(std::string message, EspGL::Vect2 placing);
 
  private:
 };

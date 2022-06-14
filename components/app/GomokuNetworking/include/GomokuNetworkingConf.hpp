@@ -5,7 +5,9 @@
 #include <cstring>
 #include <optional>
 #include <variant>
+#include <vector>
 
+#include "ColourProvider.hpp"
 #include "MessageQueue.hpp"
 #include "esp_now.h"
 
@@ -23,6 +25,7 @@ using PlayerMove = std::pair<mac_address_t, BoardCoordinate>;
 
 namespace consts {
 constexpr int MAX_GOMOKU_PLAYERS = 2;
+constexpr int MIN_GOMOKU_PLAYERS = 2;
 
 constexpr char PMK[] = "pmk1234567890123";
 constexpr char LMK[] = "lmk1234567890123";
@@ -52,7 +55,7 @@ constexpr uint8_t ERROR = 0b00000000;
 constexpr uint8_t BROADCAST = 0b00000001;
 constexpr uint8_t UNICAST = 0b00000010;
 constexpr uint8_t ACK = 0b00000110;
-constexpr uint8_t SENDING_CONFIG = 0b00001110;
+constexpr uint8_t SENDING_COLOUR_CONFIG = 0b00001110;
 constexpr uint8_t SENDING_MOVE_TO_PLAYERS = 0b00010010;
 constexpr uint8_t SENDING_MOVE_TO_HOST = 0b00011110;
 constexpr uint8_t SENDING_ORDER = 0b00111110;
@@ -133,6 +136,15 @@ struct GomokuNextPlayerInOrder {
 struct GomokuMoveUpdateFromPlayer {
   mac_address_t player;
   BoardCoordinate move;
+};
+
+struct Colour2Player {
+  uint16_t colourValue;
+  mac_address_t player;
+};
+
+struct ColourConfig {
+  std::array<Colour2Player, consts::MAX_GOMOKU_PLAYERS> colour2Player;
 };
 
 }  // namespace structs

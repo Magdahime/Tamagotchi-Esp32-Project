@@ -20,19 +20,27 @@ namespace App {
 namespace Gomoku {
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
+class GomokuDrawable
+    : public EspGL::Drawable<ColourRepresentation>,
+      public GomokuBase<width_s, height_s, GomokuNetworking::mac_address_t> {
  public:
   GomokuDrawable(EspGL::Vect2 start, EspGL::Vect2 end)
-      : leftUpperCanvas_(start), rightLowerCanvas_(end) {}
+      : leftUpperCanvas_(start), rightLowerCanvas_(end) {
+    calculateTileHitboxes();
+  }
 
   GomokuDrawable(EspGL::Hitbox canvas)
-      : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {}
+      : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {
+    calculateTileHitboxes();
+  }
 
   ~GomokuDrawable() = default;
 
   void draw(EspGL::Screen<ColourRepresentation>& target) override;
+
   uint8_t update(EspGL::Screen<ColourRepresentation>& target,
                  GomokuNetworking::PlayerMove nextMove);
+
   inline EspGL::Hitbox hitbox() override {
     return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
   }
@@ -51,21 +59,39 @@ class GomokuDrawable : public EspGL::Drawable<ColourRepresentation> {
     return player2Colour_;
   }
 
-  void markMove(GomokuNetworking::mac_address_t playerMac,
-                GomokuNetworking::BoardCoordinate& move);
-  bool isWinner() { return winner_.empty(); }
-  GomokuNetworking::mac_address_t winner() { return winner_; }
+  std::array<GomokuTile<ColourRepresentation>, width_s * height_s>& board() {
+    return board_;
+  }
+
+  virtual GomokuNetworking::mac_address_t markMove(
+      GomokuNetworking::mac_address_t playerId,
+      GomokuNetworking::BoardCoordinate& move) override;
+
+  bool isWinner() { return winner_.has_value(); }
 
  private:
-  GomokuNetworking::mac_address_t winner_;
+  std::optional<GomokuNetworking::mac_address_t> winner_;
   static constexpr char TAG_[] = "GomokuDrawable";
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
-  std::vector<EspGL::Hitbox> cellHitboxes_;
   std::array<GomokuTile<ColourRepresentation>, width_s * height_s> board_;
+
+  void drawTile(GomokuTile<ColourRepresentation>& tile,
+                EspGL::Screen<ColourRepresentation>& target);
+
   std::map<GomokuNetworking::mac_address_t, EspGL::Colour<ColourRepresentation>>
       player2Colour_;
+
+  virtual GomokuNetworking::mac_address_t checkWinner(
+      GomokuNetworking::mac_address_t playerId,
+      GomokuNetworking::BoardCoordinate& move) override;
+
+  void calculateTileHitboxes();
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
 void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
@@ -93,27 +119,147 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
                   consts::LINE_COLOUR);
     start.y_ += consts::GOMOKU_LINE_WIDTH + height / height_s;
   }
+
+  for (auto& tile : board_) {
+    drawTile(tile, target);
+  }
 }
 
-// template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-// uint8_t GomokuDrawable<width_s, height_s, ColourRepresentation>::update(
-//     EspGL::Screen<ColourRepresentation>& target,
-//     GomokuNetworking::PlayerMove nextMove) {
-//   auto result =
-//       Gomoku<width_s, height_s>::markMove(nextMove.first, nextMove.second);
-//   auto cellHitbox =
-//       cellHitboxes_[nextMove.second.x_ + width_s * nextMove.second.y_];
-//   EspGL::Circle<ColourRepresentation>{
-//       EspGL::Vect2(cellHitbox.second.x_ / 2, cellHitbox.second.y_ / 2),
-//       consts::GOMOKU_PAWN_SIZE, player2Colour_.at(nextMove.first)}
-//       .draw(target);
-//   return result;
-// }
+template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
+GomokuNetworking::mac_address_t
+GomokuDrawable<width_s, height_s, ColourRepresentation>::markMove(
+    GomokuNetworking::mac_address_t playerMac,
+    GomokuNetworking::BoardCoordinate& move) {
+  if (move.y_ * width_s + move.x_ > width_s * height_s) {
+    throw std::runtime_error("Move coordinates are out of bounds: (" +
+                             std::to_string(move.x_) + ", " +
+                             std::to_string(move.y_) + ")");
+  }
+  if (!board_[move.y_ * width_s + move.x_].empty()) {
+    throw std::runtime_error("This tile has been already used: (" +
+                             std::to_string(move.x_) + ", " +
+                             std::to_string(move.y_) + ")");
+  }
+  board_[move.y_ * width_s + move.x_].playerId() = playerMac;
+  return checkWinner(playerMac, move);
+}
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-void GomokuDrawable<width_s, height_s, ColourRepresentation>::markMove(
-    GomokuNetworking::mac_address_t playerMac,
-    GomokuNetworking::BoardCoordinate& move) {}
+GomokuNetworking::mac_address_t
+GomokuDrawable<width_s, height_s, ColourRepresentation>::checkWinner(
+    GomokuNetworking::mac_address_t playerId,
+    GomokuNetworking::BoardCoordinate& move) {
+  auto calculateArrayCoord = [&](int16_t x, int16_t y) {
+    return y * width_s + x;
+  };
+
+  auto checkLoop = [&](int16_t x, int16_t y, int16_t stepX, int16_t stepY,
+                       uint16_t lineLength) {
+    uint8_t counter = 0;
+    int range = lineLength - 1;
+    int beginX =
+        x - range * stepX >= 0
+            ? (x - range * stepX > width_s ? width_s - 1 : x - range * stepX)
+            : 0;
+    int beginY =
+        y - range * stepY >= 0
+            ? (y - range * stepY > height_s ? height_s - 1 : y - range * stepY)
+            : 0;
+    int endX = x + range * stepX >= width_s
+                   ? width_s - 1
+                   : (x + range * stepX >= 0 ? x + range * stepX : 0);
+    int endY = y + range * stepY >= height_s
+                   ? height_s - 1
+                   : (y + range * stepY >= 0 ? y + range * stepY : 0);
+    auto compare = [&](auto coords) {
+      if (beginX == endX) {
+        return coords.second <= endY;
+      }
+      if (beginY == endY) {
+        return coords.first <= endX;
+      }
+      if (beginY != endY && beginX != endX) {
+        if (stepX > 0) {
+          return (coords.first <= endX) && (coords.second <= endY);
+        } else {
+          return (coords.first >= endX) && (coords.second <= endY);
+        }
+      }
+      return false;
+    };
+
+    for (auto coords = std::make_pair(beginX, beginY); compare(coords);
+         coords.first += stepX, coords.second += stepY) {
+      if (std::get<GomokuNetworking::mac_address_t>(
+              board_[calculateArrayCoord(coords.first, coords.second)]
+                  .playerId()) == playerId) {
+        counter++;
+      } else {
+        counter = 0;
+      }
+      if (counter == lineLength) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  if (checkLoop(move.x_, move.y_, 1, 0, consts::POINT_COUNT) ||
+      checkLoop(move.x_, move.y_, 0, 1, consts::POINT_COUNT) ||
+      checkLoop(move.x_, move.y_, 1, 1, consts::POINT_COUNT) ||
+      checkLoop(move.x_, move.y_, -1, 1, consts::POINT_COUNT)) {
+    return playerId;
+  }
+  return {};
+}
+
+template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
+void GomokuDrawable<width_s, height_s, ColourRepresentation>::drawTile(
+    GomokuTile<ColourRepresentation>& tile,
+    EspGL::Screen<ColourRepresentation>& target) {
+  auto hitbox = tile.hitbox();
+  if (tile.highlighted()) {
+    EspGL::Rectangle<uint16_t>{
+        hitbox.first, static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_),
+        static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_),
+        consts::HIGHLIGHT_COLOUR}
+        .draw(target);
+  }
+
+  if (!tile.empty()) {
+    EspGL::Circle<ColourRepresentation>{
+        EspGL::Vect2(hitbox.second.x_ / 2, hitbox.second.y_ / 2),
+        consts::GOMOKU_PAWN_SIZE,
+        player2Colour_.at(
+            std::get<GomokuNetworking::mac_address_t>(tile.playerId()))}
+        .draw(target);
+  }
+}
+
+template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
+void GomokuDrawable<width_s, height_s,
+                    ColourRepresentation>::calculateTileHitboxes() {
+  const auto width = rightLowerCanvas_.x_ - leftUpperCanvas_.x_;
+  const auto height = rightLowerCanvas_.y_ - leftUpperCanvas_.y_;
+  auto diffX = width / width_s;
+  auto diffY = height / height_s;
+  auto startLeftUpper = leftUpperCanvas_;
+  auto startRightLower =
+      EspGL::Vect2(startLeftUpper.x_ + diffX, startLeftUpper.y_ + diffY);
+  auto currentTile = 0;
+  for (auto y = 0u; y < height_s; y++) {
+    for (auto x = 0u; x < width_s; x++) {
+      board_[currentTile].hitbox() =
+          EspGL::Hitbox{startLeftUpper, startRightLower};
+      currentTile++;
+      startLeftUpper.x_ += diffX;
+      startRightLower.x_ += diffX;
+    }
+    startLeftUpper = startRightLower;
+    startRightLower =
+        EspGL::Vect2(startLeftUpper.x_ + diffX, startLeftUpper.y_ + diffY);
+  }
+}
 
 }  // namespace Gomoku
 }  // namespace App

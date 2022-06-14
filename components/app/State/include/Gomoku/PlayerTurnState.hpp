@@ -21,8 +21,8 @@ class PlayerTurnState : public State {
  private:
   int16_t rowCounter_;
   int16_t columnCounter_;
-  Gomoku::GomokuDrawable<Game::GOMOKU_WIDTH, Game::GOMOKU_HEIGHT, uint16_t>&
-      gomokuBoard_;
+  Gomoku::GomokuDrawable<Game::consts::GOMOKU_WIDTH,
+                         Game::consts::GOMOKU_HEIGHT, uint16_t>& gomokuBoard_;
   void redrawScreen();
   void handleGpioInput(int pressedButton);
   void sendMoveUpdateToHost(GomokuNetworking::BoardCoordinate move);

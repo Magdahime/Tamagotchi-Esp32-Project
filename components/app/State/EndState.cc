@@ -30,7 +30,7 @@ void EndState::init() {
   Globals::game.print(
       "###########\nGAME OVER\n###########",
       {{0, 0},
-       {Globals::game.screen().width(), Globals::game.screen().height()}},
+       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
 }
 

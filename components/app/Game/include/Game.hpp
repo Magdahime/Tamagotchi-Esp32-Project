@@ -9,6 +9,7 @@
 #include "EspGLDriver.hpp"
 #include "EspGLScreen.hpp"
 #include "EspGLUtils.hpp"
+#include "GameConfig.hpp"
 #include "GomokuDrawable.hpp"
 #include "GomokuNetworkingConf.hpp"
 #include "Graphics/Font/EspGLFontLoader.hpp"
@@ -25,11 +26,6 @@
 namespace tamagotchi {
 namespace App {
 namespace Game {
-
-constexpr int EVENT_QUEUE_SIZE = 10;
-constexpr int PET_SCALE = 5;
-constexpr int GOMOKU_WIDTH = 3;
-constexpr int GOMOKU_HEIGHT = 3;
 
 class Game {
  public:
@@ -57,7 +53,8 @@ class Game {
 
   GomokuNetworking::structs::PetParams getPetParams();
 
-  Gomoku::GomokuDrawable<GOMOKU_WIDTH, GOMOKU_HEIGHT, uint16_t>& gomokuBoard() {
+  Gomoku::GomokuDrawable<consts::GOMOKU_WIDTH, consts::GOMOKU_HEIGHT, uint16_t>&
+  gomokuBoard() {
     return gomokuBoard_;
   }
 
@@ -69,7 +66,8 @@ class Game {
   std::map<State::StateType, std::unique_ptr<State::State>> states_;
   EspGL::Screen<uint16_t> screen_;
   MessageQueue::MessageQueue<Event::Event> eventQueue_;
-  Gomoku::GomokuDrawable<GOMOKU_WIDTH, GOMOKU_HEIGHT, uint16_t> gomokuBoard_;
+  Gomoku::GomokuDrawable<consts::GOMOKU_WIDTH, consts::GOMOKU_HEIGHT, uint16_t>
+      gomokuBoard_;
 
   static constexpr char TAG_[] = "Game";
   EspGL::Font font_;

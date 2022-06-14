@@ -25,7 +25,7 @@ TEST_TEAR_DOWN(StateUtilsTests) {}
 //     tamagotchi::App::State::StateUtils::movePet(
 //         tamagotchi::EspGL::Vect2(
 //             start.x_,
-//             start.y_ + tamagotchi::App::Globals::game.screen().height() / pets),
+//             start.y_ + tamagotchi::App::Game::consts::SCREEN_HEIGHT / pets),
 //         hitboxes);
 //   }
 // }

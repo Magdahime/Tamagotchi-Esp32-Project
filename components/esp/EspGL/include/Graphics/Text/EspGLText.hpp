@@ -58,9 +58,7 @@ class Text : Drawable<ColourRepresentation> {
   inline void setFont(Font font) { font_ = font; }
   inline void setStart(Vect2 start) { textBox_.first = start; }
   inline void setEnd(Vect2 end) { textBox_.second = end; }
-  inline void setTextBox(Hitbox textBox) {
-    textBox_ = textBox;
-  }
+  inline void setTextBox(Hitbox textBox) { textBox_ = textBox; }
 
   virtual inline Hitbox hitbox() override;
 
@@ -124,7 +122,6 @@ void Text<ColourRepresentation>::draw(Screen<ColourRepresentation>& target) {
 
 template <typename ColourRepresentation>
 Hitbox Text<ColourRepresentation>::hitbox() {
-  Vect2 maxPoint;
   return textBox_;
 }
 

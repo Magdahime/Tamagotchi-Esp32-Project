@@ -18,7 +18,7 @@ void EndGameState::init() {
     Globals::game.print(
         message,
         {{0, 100},
-         {Globals::game.screen().width(), Globals::game.screen().height()}},
+         {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
   } else {
     constexpr int MAC_SIZE = 18;
@@ -31,7 +31,7 @@ void EndGameState::init() {
     Globals::game.print(
         message,
         {{0, 100},
-         {Globals::game.screen().width(), Globals::game.screen().height()}},
+         {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
   }
   EspGL::delay(3000);
