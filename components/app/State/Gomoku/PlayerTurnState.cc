@@ -29,7 +29,21 @@ void PlayerTurnState::handleEvent(Event::Event event) {
       break;
   }
 }
-void PlayerTurnState::init() {}
+
+void PlayerTurnState::init() {
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
+  Globals::game.print(
+      "#########\nIt is your\nturn now!:\n#########",
+      {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      EspGL::colours::GREEN);
+  Globals::game.pet().setStart({0, Game::consts::SCREEN_HEIGHT / 2});
+  Globals::game.pet().draw(Globals::game.screen());
+  EspGL::delay(3000);
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
+  gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
+      .highlight();
+}
+
 void PlayerTurnState::mainLoop() {
   Event::Event event = tamagotchi::App::Globals::game.eventQueue().getQueue(
       consts::USER_INPUT_WAIT_TIME);
@@ -42,6 +56,8 @@ void PlayerTurnState::deinit() {}
 
 void PlayerTurnState::handleGpioInput(int pressedButton) {
   ESP_LOGI(TAG_, "handleGpioInput.");
+  ESP_LOGI(TAG_, "ROW COUNTER %d, COLUMN COUNTER %d, TILE %d ", rowCounter_,
+           columnCounter_, columnCounter_ * gomokuBoard_.width() + rowCounter_);
   gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
       .dehighlight();
   switch (pressedButton) {

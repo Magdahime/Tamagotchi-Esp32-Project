@@ -10,7 +10,7 @@
 #include "EspGLVect2.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-
+#include "rom/ets_sys.h"
 
 namespace tamagotchi {
 namespace EspGL {

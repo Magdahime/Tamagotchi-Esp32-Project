@@ -17,13 +17,18 @@ namespace State {
 
 void HostDutiesState::handleEvent(Event::Event event) {}
 void HostDutiesState::init() {
+  ESP_LOGI(TAG_, "Start HostDuties!");
+  macAddresses_ = GomokuNetworking::GomokuNetworking::playersMacs();
   currentPlayer_ = macAddresses_.begin();
   sendColourConfig();
+  EspGL::delay(GomokuNetworking::consts::ESPNOW_SEND_DELAY);
+  sendNotificationToCurrentPlayer();
 }
 
 void HostDutiesState::mainLoop() {
   auto hostParams = GomokuNetworking::GomokuNetworking::hostParams();
   if (hostParams.newMove && hostParams.acksCollected) {
+    ESP_LOGI(TAG_, "There is new move!");
     structs::GomokuEvent msg;
     GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(msg);
     if (msg.macAddress == *(currentPlayer_)) {
@@ -43,9 +48,9 @@ void HostDutiesState::mainLoop() {
   }
 
   while (!hostParams.disconnectedPlayers.empty()) {
-    if (macAddresses_.empty()) {
-      Globals::game.setNextState(StateType::EndMiniGame);
-    }
+    ESP_LOGI(
+        TAG_,
+        "There are some players to be removed, because they disconnected.");
     auto disconnectedMac = hostParams.disconnectedPlayers.getQueue();
     sendNotificationAboutDeadPlayer(disconnectedMac);
     if (disconnectedMac == *currentPlayer_) {
@@ -56,9 +61,16 @@ void HostDutiesState::mainLoop() {
                                     disconnectedMac),
                         macAddresses_.end());
   }
+
+  if (macAddresses_.empty()) {
+    Globals::game.setNextState(StateType::EndMiniGame);
+  }
+
   if (currentPlayer_ == macAddresses_.end()) {
+    ESP_LOGI(TAG_, "Host turn to make a move.");
     Globals::game.setNextState(StateType::PlayerTurn);
   }
+  EspGL::delay(GomokuNetworking::consts::ESPNOW_SEND_DELAY);
 }
 
 void HostDutiesState::sendNotificationToCurrentPlayer() {
@@ -66,12 +78,14 @@ void HostDutiesState::sendNotificationToCurrentPlayer() {
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
                                GomokuMessageStates::SENDING_ORDER,
                                0,
-                               0,
+                               esp_random(),
                                {}};
   memcpy(sendData.payload.data(), (*currentPlayer_).data(), ESP_NOW_ETH_ALEN);
+  sendData.crc =
+      esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
+                   consts::ESPNOW_SEND_LEN);
   structs::GomokuDataWithRecipient finalMessage{*(currentPlayer_), sendData};
   GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
-  timestamp_ = xTaskGetTickCount() / configTICK_RATE_HZ;
 }
 
 void HostDutiesState::sendMoveUpdate(gomoku_payload_array_t& payload) {
@@ -86,12 +100,13 @@ void HostDutiesState::sendMoveUpdate(gomoku_payload_array_t& payload) {
   sendAll(sendData);
 }
 
-void HostDutiesState::sendAll(structs::GomokuData& sendData) {
+void HostDutiesState::sendAll(structs::GomokuData sendData) {
   ESP_LOGI(TAG_, "Sending message to all known players.");
-  sendData.crc =
-      esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
-                   consts::ESPNOW_SEND_LEN);
-  for (const auto& mac : macAddresses_) {
+  for (auto mac : macAddresses_) {
+    sendData.magic = esp_random();
+    sendData.crc =
+        esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
+                     consts::ESPNOW_SEND_LEN);
     structs::GomokuDataWithRecipient finalMessage{mac, sendData};
     GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
   }

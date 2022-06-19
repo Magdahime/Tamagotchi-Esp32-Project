@@ -37,10 +37,15 @@ constexpr int SENDING_INVITE_DELAY = 2000;
 constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
 constexpr int ESPNOW_SEND_DELAY = 1000;
+
+constexpr int ESPNOW_RETRANSMIT_THRESHOLD_MS = 5000;
+
 constexpr int ESP_NOW_RETRANSMIT_MAX = 5;
 constexpr int ESPNOW_PAYLOAD_MAX = 150;
 constexpr int ESPNOW_SEND_META_LEN = 8;
 constexpr int ESPNOW_SEND_LEN = ESPNOW_SEND_META_LEN + ESPNOW_PAYLOAD_MAX;
+
+constexpr int MICRO2MILI = 1000;
 
 constexpr int ESPNOW_MAXMSGLENGTH = 256;
 

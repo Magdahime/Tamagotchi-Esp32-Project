@@ -23,8 +23,7 @@ class RectangleBase : public Shape<ColourRepresentation> {
         dimensionX_(std::move(dimensionX)),
         dimensionY_(std::move(dimensionY)) {
     if (dimensionX <= 0 || dimensionY <= 0) {
-      throw std::invalid_argument(
-          "Dimensions of Rectangle cannot be negative!");
+      ESP_LOGE("RectangleBase", "Dimensions of Rectangle cannot be negative!");
     }
   }
   virtual ~RectangleBase() = default;

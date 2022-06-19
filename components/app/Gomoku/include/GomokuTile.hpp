@@ -43,6 +43,11 @@ class GomokuTile {
     return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
   }
 
+  void setHitbox(EspGL::Hitbox newHitbox) {
+    leftUpperCanvas_ = newHitbox.first;
+    rightLowerCanvas_ = newHitbox.second;
+  }
+
   inline const EspGL::Vect2& leftUpperCanvas() const {
     return leftUpperCanvas_;
   }

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include <cstring>
-#include <vector>
+#include <list>
 
 #include "GomokuNetworkingConf.hpp"
 #include "MessageQueue.hpp"
@@ -30,7 +30,7 @@ class GomokuNetworking {
   static void receiveDataCallback(const uint8_t *macAddress,
                                   const uint8_t *data, const int length);
   static void sendMessage(structs::GomokuDataWithRecipient message);
-  static structs::GomokuData unpackData(structs::GomokuEvent event);
+  static structs::GomokuData unpackData(structs::GomokuEvent &event);
   static mac_address_t &gameHostAddress() { return gameHostAddress_; }
   static mac_address_t &hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> playersMacs();
@@ -72,17 +72,26 @@ class GomokuNetworking {
   static void handleCommunicationHost();
   static void handleCommunicationPlayer();
   static void sendGameInvite();
-  static void retransmit(std::vector<structs::SenderParams> &sendersParams,
-                              structs::GomokuDataWithRecipient &msg);
+  static void retransmit(
+      std::vector<structs::SenderParams> &sendersLiveParams,
+      std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
+          &ackMessageQueue);
   static void startCollectingACKs();
-  static void handleMessage(structs::GomokuEvent &message,
-                            std::vector<structs::SenderParams> &sendersParams);
-
+  static void handleMessage(
+      structs::GomokuEvent &message,
+      std::vector<structs::SenderParams> &sendersLiveParams,
+      std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
+          &ackMessageQueue);
   static void chooseHost(mac_address_t &peer, structs::GomokuData &data);
   static bool addPeer(mac_address_t &peer, structs::GomokuData &data,
                       int players);
   static void addPeerESP(const uint8_t *macAddress);
   static void prepareData();
+
+  static void removeFromAckMessageQueue(
+      uint32_t id,
+      std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
+          &ackMessageQueue);
 };
 
-}  // namespace tamagotchi::App::Gomoku
+}  // namespace tamagotchi::App::GomokuNetworking

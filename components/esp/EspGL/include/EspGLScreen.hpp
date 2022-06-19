@@ -15,13 +15,14 @@ class Screen {
          std::unique_ptr<Driver<ColourRepresentation>> driver)
       : width_(width), height_(height), screenDriver_(std::move(driver)) {}
   Screen() = default;
-  inline int64_t width() const { return width_; }
-  inline int64_t height() const { return height_; }
-  inline Driver<ColourRepresentation>*  screenDriver() {
+  inline int64_t width() { return width_; }
+  inline int64_t height() { return height_; }
+  inline Driver<ColourRepresentation>* screenDriver() {
     return screenDriver_.get();
   }
   inline void fill(Colour<ColourRepresentation> colour) {
-    screenDriver_->writePixelArea(0, width_-1, 0, height_-1, colour.value());
+    screenDriver_->writePixelArea(0, width_ - 1, 0, height_ - 1,
+                                  colour.value());
   }
 
  private:

@@ -17,7 +17,7 @@ class MessageQueue {
   void putQueueFromISR(T event);
   void clearQueue();
   T getQueue(int ms = portMAX_DELAY);
-  bool getQueue(T elem, int ms = portMAX_DELAY);
+  bool getQueue(T& elem, int ms = portMAX_DELAY);
   bool empty() { return uxQueueMessagesWaiting(messageQueue_) == 0; }
   xQueueHandle& messageQueue() { return messageQueue_; }
 
@@ -60,15 +60,15 @@ void MessageQueue<T>::putQueueFromISR(T event) {
 template <typename T>
 T MessageQueue<T>::getQueue(int ms) {
   T message;
-  if (xSemaphoreTake(mutex_, ms) == pdPASS) {
+  if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(ms)) == pdPASS) {
     xQueueReceive(messageQueue_, &(message), (TickType_t)ms);
   }
   return message;
 }
 
 template <typename T>
-bool MessageQueue<T>::getQueue(T elem, int ms) {
-  if (xSemaphoreTake(mutex_, ms) == pdPASS) {
+bool MessageQueue<T>::getQueue(T& elem, int ms) {
+  if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(ms)) == pdPASS) {
     return xQueueReceive(messageQueue_, &(elem), (TickType_t)ms);
   }
   return false;

@@ -15,10 +15,7 @@ constexpr int NOTIFICATION_TIMEOUT_SEC = 60;
 
 class HostDutiesState : public State {
  public:
-  HostDutiesState()
-      : macAddresses_(GomokuNetworking::GomokuNetworking::playersMacs()),
-        currentPlayer_(macAddresses_.begin()),
-        timestamp_(0) {}
+  HostDutiesState() : macAddresses_(), currentPlayer_(macAddresses_.begin()) {}
   virtual ~HostDutiesState() = default;
   virtual void handleEvent(Event::Event event) override;
   virtual void init() override;
@@ -42,10 +39,9 @@ class HostDutiesState : public State {
   static constexpr char TAG_[] = "HostDutiesState";
   std::vector<GomokuNetworking::mac_address_t> macAddresses_;
   std::vector<GomokuNetworking::mac_address_t>::iterator currentPlayer_;
-  int64_t timestamp_;
 
   void removePlayerFromList(GomokuNetworking::mac_address_t toRemove);
-  void sendAll(GomokuNetworking::structs::GomokuData& sendData);
+  void sendAll(GomokuNetworking::structs::GomokuData sendData);
 };
 
 }  // namespace State

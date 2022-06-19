@@ -218,10 +218,13 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::drawTile(
     GomokuTile<ColourRepresentation>& tile,
     EspGL::Screen<ColourRepresentation>& target) {
   auto hitbox = tile.hitbox();
+  ESP_LOGI("GomokuDrawable", "TILE HITBOX: (%d, %d) (%d, %d)", hitbox.first.x_,
+           hitbox.first.y_, hitbox.second.x_, hitbox.second.y_);
   if (tile.highlighted()) {
-    EspGL::Rectangle<uint16_t>{
-        hitbox.first, static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_),
-        static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_),
+    EspGL::RectangleOutline<uint16_t>{
+        hitbox.first,
+        static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_ - 2),
+        static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_ - 2),
         consts::HIGHLIGHT_COLOUR}
         .draw(target);
   }
@@ -243,19 +246,20 @@ void GomokuDrawable<width_s, height_s,
   const auto height = rightLowerCanvas_.y_ - leftUpperCanvas_.y_;
   auto diffX = width / width_s;
   auto diffY = height / height_s;
-  auto startLeftUpper = leftUpperCanvas_;
-  auto startRightLower =
-      EspGL::Vect2(startLeftUpper.x_ + diffX, startLeftUpper.y_ + diffY);
+  auto startLeftUpper =
+      EspGL::Vect2(leftUpperCanvas_.x_ - 1, leftUpperCanvas_.y_ - 1);
+  auto startRightLower = EspGL::Vect2(startLeftUpper.x_ + diffX - 1,
+                                      startLeftUpper.y_ + diffY - 1);
   auto currentTile = 0;
   for (auto y = 0u; y < height_s; y++) {
     for (auto x = 0u; x < width_s; x++) {
-      board_[currentTile].hitbox() =
-          EspGL::Hitbox{startLeftUpper, startRightLower};
+      board_[currentTile].setHitbox(
+          EspGL::Hitbox{startLeftUpper, startRightLower});
       currentTile++;
       startLeftUpper.x_ += diffX;
       startRightLower.x_ += diffX;
     }
-    startLeftUpper = startRightLower;
+    startLeftUpper = EspGL::Vect2(0, startRightLower.y_);
     startRightLower =
         EspGL::Vect2(startLeftUpper.x_ + diffX, startLeftUpper.y_ + diffY);
   }

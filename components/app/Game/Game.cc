@@ -22,8 +22,8 @@ namespace Game {
 
 Game::Game()
     : eventQueue_(consts::EVENT_QUEUE_SIZE),
-      gomokuBoard_(EspGL::Vect2(0, screen_.width()),
-                   EspGL::Vect2(0, screen_.height())) {
+      gomokuBoard_(EspGL::Vect2(0, 0),
+                   EspGL::Vect2(consts::SCREEN_WIDTH, consts::SCREEN_HEIGHT)) {
   initializeScreen();
   EspGL::FontLoader fLoader(Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::FONT_FILE_PATH));

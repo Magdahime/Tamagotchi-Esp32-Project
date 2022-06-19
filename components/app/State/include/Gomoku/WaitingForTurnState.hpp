@@ -21,7 +21,7 @@ class WaitingForTurnState : public State {
 
  private:
   int8_t counter_;
-  void sendAck();
+  void sendAck(uint32_t magic);
   void updateGomokuPlayersColourInfo(
       GomokuNetworking::gomoku_payload_array_t dataArray);
   void displayWaitingMessage();
