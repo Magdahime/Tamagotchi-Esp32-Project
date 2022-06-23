@@ -25,14 +25,10 @@ class GomokuDrawable
       public GomokuBase<width_s, height_s, GomokuNetworking::mac_address_t> {
  public:
   GomokuDrawable(EspGL::Vect2 start, EspGL::Vect2 end)
-      : leftUpperCanvas_(start), rightLowerCanvas_(end) {
-    calculateTileHitboxes();
-  }
+      : leftUpperCanvas_(start), rightLowerCanvas_(end) {}
 
   GomokuDrawable(EspGL::Hitbox canvas)
-      : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {
-    calculateTileHitboxes();
-  }
+      : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {}
 
   ~GomokuDrawable() = default;
 
@@ -76,8 +72,7 @@ class GomokuDrawable
   EspGL::Vect2 rightLowerCanvas_;
   std::array<GomokuTile<ColourRepresentation>, width_s * height_s> board_;
 
-  void drawTile(GomokuTile<ColourRepresentation>& tile,
-                EspGL::Screen<ColourRepresentation>& target);
+  void drawTile(int tileIndex, EspGL::Screen<ColourRepresentation>& target);
 
   std::map<GomokuNetworking::mac_address_t, EspGL::Colour<ColourRepresentation>>
       player2Colour_;
@@ -86,7 +81,7 @@ class GomokuDrawable
       GomokuNetworking::mac_address_t playerId,
       GomokuNetworking::BoardCoordinate& move) override;
 
-  void calculateTileHitboxes();
+  EspGL::Hitbox calculateTileHitbox(int tileIndex);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,22 +101,28 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::draw(
         target);
   };
 
-  EspGL::Vect2 start{width / width_s, leftUpperCanvas_.y_};
+  const auto diffX = width / width_s;
+  const auto diffY = height / height_s;
+
+  EspGL::Vect2 gridLineStart{
+      leftUpperCanvas_.x_ + diffX - consts::GOMOKU_LINE_WIDTH / 2,
+      leftUpperCanvas_.y_};
 
   for (auto i = 0; i < width_s - 1; i++) {
-    drawRectangle(start, consts::GOMOKU_LINE_WIDTH, height - 1,
+    drawRectangle(gridLineStart, consts::GOMOKU_LINE_WIDTH, height,
                   consts::LINE_COLOUR);
-    start.x_ += consts::GOMOKU_LINE_WIDTH + width / width_s;
+    gridLineStart.x_ += diffX;
   }
-  start = {leftUpperCanvas_.x_, height / height_s};
+  gridLineStart = {leftUpperCanvas_.x_,
+                   leftUpperCanvas_.y_ + diffY - consts::GOMOKU_LINE_WIDTH / 2};
   for (auto i = 0; i < height_s - 1; i++) {
-    drawRectangle(start, width - 1, consts::GOMOKU_LINE_WIDTH,
+    drawRectangle(gridLineStart, width, consts::GOMOKU_LINE_WIDTH,
                   consts::LINE_COLOUR);
-    start.y_ += consts::GOMOKU_LINE_WIDTH + height / height_s;
+    gridLineStart.y_ += diffY;
   }
 
-  for (auto& tile : board_) {
-    drawTile(tile, target);
+  for (auto tileIndex = 0; tileIndex < board_.size(); tileIndex++) {
+    drawTile(tileIndex, target);
   }
 }
 
@@ -215,18 +216,24 @@ GomokuDrawable<width_s, height_s, ColourRepresentation>::checkWinner(
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
 void GomokuDrawable<width_s, height_s, ColourRepresentation>::drawTile(
-    GomokuTile<ColourRepresentation>& tile,
-    EspGL::Screen<ColourRepresentation>& target) {
-  auto hitbox = tile.hitbox();
-  ESP_LOGI("GomokuDrawable", "TILE HITBOX: (%d, %d) (%d, %d)", hitbox.first.x_,
-           hitbox.first.y_, hitbox.second.x_, hitbox.second.y_);
+    int tileIndex, EspGL::Screen<ColourRepresentation>& target) {
+  auto& tile = board_[tileIndex];
+  auto hitbox = calculateTileHitbox(tileIndex);
   if (tile.highlighted()) {
-    EspGL::RectangleOutline<uint16_t>{
-        hitbox.first,
-        static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_ - 2),
-        static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_ - 2),
+    EspGL::Rectangle<uint16_t>{
+        hitbox.first, static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_),
+        static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_),
         consts::HIGHLIGHT_COLOUR}
         .draw(target);
+  }
+
+  if (tile.previouslyHighlighted()) {
+    EspGL::Rectangle<uint16_t>(
+        hitbox.first, static_cast<int16_t>(hitbox.second.x_ - hitbox.first.x_),
+        static_cast<int16_t>(hitbox.second.y_ - hitbox.first.y_),
+        Globals::defaultValues::BACKGROUND_COLOUR)
+        .draw(target);
+    tile.setPreviouslyHighlighted(false);
   }
 
   if (!tile.empty()) {
@@ -240,29 +247,22 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::drawTile(
 }
 
 template <unsigned width_s, unsigned height_s, typename ColourRepresentation>
-void GomokuDrawable<width_s, height_s,
-                    ColourRepresentation>::calculateTileHitboxes() {
+EspGL::Hitbox
+GomokuDrawable<width_s, height_s, ColourRepresentation>::calculateTileHitbox(
+    int tileIndex) {
   const auto width = rightLowerCanvas_.x_ - leftUpperCanvas_.x_;
   const auto height = rightLowerCanvas_.y_ - leftUpperCanvas_.y_;
-  auto diffX = width / width_s;
-  auto diffY = height / height_s;
-  auto startLeftUpper =
-      EspGL::Vect2(leftUpperCanvas_.x_ - 1, leftUpperCanvas_.y_ - 1);
-  auto startRightLower = EspGL::Vect2(startLeftUpper.x_ + diffX - 1,
-                                      startLeftUpper.y_ + diffY - 1);
-  auto currentTile = 0;
-  for (auto y = 0u; y < height_s; y++) {
-    for (auto x = 0u; x < width_s; x++) {
-      board_[currentTile].setHitbox(
-          EspGL::Hitbox{startLeftUpper, startRightLower});
-      currentTile++;
-      startLeftUpper.x_ += diffX;
-      startRightLower.x_ += diffX;
-    }
-    startLeftUpper = EspGL::Vect2(0, startRightLower.y_);
-    startRightLower =
-        EspGL::Vect2(startLeftUpper.x_ + diffX, startLeftUpper.y_ + diffY);
-  }
+  const auto diffX = width / width_s;
+  const auto diffY = height / height_s;
+  const auto row = tileIndex / width_s;
+  const auto column = tileIndex % width_s;
+  const auto leftUpper = EspGL::Vect2(
+      leftUpperCanvas_.x_ + diffX * column + consts::GOMOKU_LINE_WIDTH,
+      leftUpperCanvas_.y_ + diffY * row + consts::GOMOKU_LINE_WIDTH);
+  const auto rightLower =
+      EspGL::Vect2(leftUpper.x_ + diffX - 2 * consts::GOMOKU_LINE_WIDTH,
+                   leftUpper.y_ + diffY - 2 * consts::GOMOKU_LINE_WIDTH);
+  return EspGL::Hitbox(std::move(leftUpper), std::move(rightLower));
 }
 
 }  // namespace Gomoku

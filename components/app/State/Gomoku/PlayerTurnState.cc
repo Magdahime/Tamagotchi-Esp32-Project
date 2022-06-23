@@ -102,6 +102,8 @@ void PlayerTurnState::handleGpioInput(int pressedButton) {
   }
   gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
       .highlight();
+  ESP_LOGI(TAG_, "ROW COUNTER %d, COLUMN COUNTER %d, TILE %d ", rowCounter_,
+           columnCounter_, columnCounter_ * gomokuBoard_.width() + rowCounter_);
 }
 
 void PlayerTurnState::redrawScreen() {

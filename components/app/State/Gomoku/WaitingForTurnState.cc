@@ -11,6 +11,7 @@ namespace tamagotchi::App::State {
 
 void WaitingForTurnState::handleEvent(Event::Event event) {}
 void WaitingForTurnState::init() {
+  myTurn_ = false;
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "WAITING FOR OTHERS TO MOVE",
@@ -19,7 +20,7 @@ void WaitingForTurnState::init() {
 }
 void WaitingForTurnState::mainLoop() {
   ESP_LOGI(TAG_, "Waiting for my turn");
-  bool myTurn = false;
+
   structs::GomokuEvent msg;
   if (GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(
           msg, GomokuNetworking::consts::ESPNOW_SEND_DELAY) == pdPASS &&
@@ -33,7 +34,7 @@ void WaitingForTurnState::mainLoop() {
       case GomokuMessageStates::SENDING_ORDER:
         sendAck(gomokuData.magic);
         ESP_LOGI(TAG_, "MY_TURN message");
-        myTurn = true;
+        myTurn_ = true;
         break;
 
       case GomokuMessageStates::SENDING_MOVE_TO_PLAYERS:
@@ -57,9 +58,14 @@ void WaitingForTurnState::mainLoop() {
     }
   }
 
-  if (myTurn && GomokuNetworking::GomokuNetworking::receiveQueue().empty()) {
+  if (myTurn_ && GomokuNetworking::GomokuNetworking::receiveQueue().empty()) {
     Globals::game.setNextState(StateType::PlayerTurn);
   }
+
+  ESP_LOGI(TAG_, "MY TURN %d", myTurn_);
+  ESP_LOGI(TAG_,
+           "GomokuNetworking::GomokuNetworking::receiveQueue().empty() %d",
+           GomokuNetworking::GomokuNetworking::receiveQueue().empty());
   displayWaitingMessage();
 }
 

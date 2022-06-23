@@ -18,11 +18,6 @@ template <typename ColourRepresentation>
 class GomokuTile {
  public:
   GomokuTile() = default;
-  GomokuTile(EspGL::Vect2 leftUpper, EspGL::Vect2 rightLower)
-      : leftUpperCanvas_(leftUpper), rightLowerCanvas_(rightLower) {}
-
-  GomokuTile(EspGL::Hitbox canvas)
-      : leftUpperCanvas_(canvas.first), rightLowerCanvas_(canvas.second) {}
 
   ~GomokuTile() = default;
 
@@ -31,35 +26,29 @@ class GomokuTile {
   void mark();
   void getMark();
 
-  void highlight() { highlighted_ = true; }
-  void dehighlight() { highlighted_ = false; }
-  bool highlighted() { return highlighted_; }
+  void highlight() {
+    if (previouslyHighlighted_) previouslyHighlighted_ = false;
+    highlighted_ = true;
+  }
+  void dehighlight() {
+    if (highlighted_) previouslyHighlighted_ = true;
+    highlighted_ = false;
+  }
+  bool highlighted() const { return highlighted_; }
+  bool previouslyHighlighted() const { return previouslyHighlighted_; }
+
+  void setPreviouslyHighlighted(bool newValue) {
+    previouslyHighlighted_ = newValue;
+  }
+
   std::variant<std::monostate, uint8_t, GomokuNetworking::mac_address_t>&
   playerId() {
     return playerId_;
   }
 
-  EspGL::Hitbox hitbox() {
-    return EspGL::Hitbox(leftUpperCanvas_, rightLowerCanvas_);
-  }
-
-  void setHitbox(EspGL::Hitbox newHitbox) {
-    leftUpperCanvas_ = newHitbox.first;
-    rightLowerCanvas_ = newHitbox.second;
-  }
-
-  inline const EspGL::Vect2& leftUpperCanvas() const {
-    return leftUpperCanvas_;
-  }
-
-  inline const EspGL::Vect2& rightLowerCanvas() const {
-    return rightLowerCanvas_;
-  }
-
  private:
   bool highlighted_;
-  EspGL::Vect2 leftUpperCanvas_;
-  EspGL::Vect2 rightLowerCanvas_;
+  bool previouslyHighlighted_;
   std::variant<std::monostate, uint8_t, GomokuNetworking::mac_address_t>
       playerId_;
 };

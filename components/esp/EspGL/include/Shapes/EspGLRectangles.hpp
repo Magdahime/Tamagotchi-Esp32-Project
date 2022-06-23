@@ -18,8 +18,8 @@ class RectangleBase : public Shape<ColourRepresentation> {
  public:
   RectangleBase(Vect2 leftUpperPoint, int16_t dimensionX, int16_t dimensionY)
       : leftUpperPoint_(std::move(leftUpperPoint)),
-        rightLowerPoint_(
-            {leftUpperPoint.x_ + dimensionX, leftUpperPoint.y_ + dimensionY}),
+        rightLowerPoint_({leftUpperPoint.x_ + dimensionX - 1,
+                          leftUpperPoint.y_ + dimensionY - 1}),
         dimensionX_(std::move(dimensionX)),
         dimensionY_(std::move(dimensionY)) {
     if (dimensionX <= 0 || dimensionY <= 0) {

@@ -18,10 +18,12 @@ class MessageQueue {
   void clearQueue();
   T getQueue(int ms = portMAX_DELAY);
   bool getQueue(T& elem, int ms = portMAX_DELAY);
-  bool empty() { return uxQueueMessagesWaiting(messageQueue_) == 0; }
+  bool empty() { return size_ == uxQueueSpacesAvailable(messageQueue_); }
   xQueueHandle& messageQueue() { return messageQueue_; }
+  int32_t size() { return size_; }
 
  private:
+  int32_t size_;
   SemaphoreHandle_t mutex_;
   static constexpr char TAG_[] = "MessageQueue";
   xQueueHandle messageQueue_;
@@ -29,6 +31,7 @@ class MessageQueue {
 
 template <typename T>
 MessageQueue<T>::MessageQueue(int queueSize) {
+  size_ = queueSize;
   messageQueue_ = xQueueCreate(queueSize, sizeof(T));
   mutex_ = xSemaphoreCreateBinary();
 }

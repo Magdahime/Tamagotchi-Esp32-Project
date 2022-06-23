@@ -20,6 +20,7 @@ class WaitingForTurnState : public State {
   virtual std::string toString() override { return TAG_; }
 
  private:
+  bool myTurn_;
   int8_t counter_;
   void sendAck(uint32_t magic);
   void updateGomokuPlayersColourInfo(
