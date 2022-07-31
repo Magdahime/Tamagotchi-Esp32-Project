@@ -23,6 +23,7 @@ class WaitingForTurnState : public State {
   bool myTurn_;
   int8_t counter_;
   void sendAck(uint32_t magic);
+  void displayOrderMessage(GomokuNetworking::mac_address_t nextPlayer);
   void updateGomokuPlayersColourInfo(
       GomokuNetworking::gomoku_payload_array_t dataArray);
   void displayWaitingMessage();

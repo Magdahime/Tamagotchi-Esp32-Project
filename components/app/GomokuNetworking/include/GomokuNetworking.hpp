@@ -5,8 +5,10 @@
 #include <cstring>
 #include <list>
 
+#include "BitmapPet.hpp"
 #include "GomokuNetworkingConf.hpp"
 #include "MessageQueue.hpp"
+#include "PetGenerator.hpp"
 #include "esp_crc.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -31,8 +33,8 @@ class GomokuNetworking {
                                   const uint8_t *data, const int length);
   static void sendMessage(structs::GomokuDataWithRecipient message);
   static structs::GomokuData unpackData(structs::GomokuEvent &event);
-  static mac_address_t &gameHostAddress() { return gameHostAddress_; }
-  static mac_address_t &hostAddress() { return hostAddress_; }
+  static mac_address_t gameHostAddress() { return gameHostAddress_; }
+  static mac_address_t hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> playersMacs();
   static structs::HostParams hostParams() { return hostParams_; }
   static MessageQueue::MessageQueue<structs::GomokuEvent> receiveQueue() {
@@ -47,6 +49,10 @@ class GomokuNetworking {
   }
 
   static TaskHandle_t &gomokuNetworkingTask() { return gomokuNetworkingTask_; }
+  static std::vector<std::pair<mac_address_t, Pet::BitmapPet<uint16_t>>>
+      &playersParams() {
+    return playersParams_;
+  }
 
   static void setDeinit() { ifDeinit_ = true; }
   static void deinit();
@@ -59,7 +65,7 @@ class GomokuNetworking {
   static mac_address_t gameHostAddress_;
   static mac_address_t hostAddress_;
   static constexpr char TAG_[] = "GomokuNetworking";
-  static std::vector<std::pair<mac_address_t, structs::PetParams>>
+  static std::vector<std::pair<mac_address_t, Pet::BitmapPet<uint16_t>>>
       playersParams_;
 
   static MessageQueue::MessageQueue<structs::GomokuEvent> receiveQueue_;
@@ -83,7 +89,8 @@ class GomokuNetworking {
       std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
           &ackMessageQueue);
   static void chooseHost(mac_address_t &peer, structs::GomokuData &data);
-  static bool addPeer(mac_address_t &peer, structs::GomokuData &data,
+  static bool addPeer(Pet::PetGenerator<uint16_t> &petGenerator,
+                      mac_address_t &peer, structs::GomokuData &data,
                       int players);
   static void addPeerESP(const uint8_t *macAddress);
   static void prepareData();

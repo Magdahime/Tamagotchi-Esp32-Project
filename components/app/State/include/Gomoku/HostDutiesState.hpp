@@ -25,7 +25,7 @@ class HostDutiesState : public State {
   virtual std::string toString() override { return TAG_; }
 
   void sendNotificationAboutDeadPlayer(GomokuNetworking::mac_address_t deadMac);
-  void sendNotificationToCurrentPlayer();
+  void sendNotificationAboutCurrentPlayer();
   void sendMoveUpdate(
       std::array<uint8_t, GomokuNetworking::consts::ESPNOW_PAYLOAD_MAX>&
           payload);
@@ -35,7 +35,11 @@ class HostDutiesState : public State {
   void sendEndOfGameMessage();
 
  private:
+  void updateColourConfig(
+      std::array<GomokuNetworking::structs::Colour2Player,
+                 GomokuNetworking::consts::MAX_GOMOKU_PLAYERS>& colour2Player);
   void sendColourConfig();
+  void displayOrderMessage(GomokuNetworking::mac_address_t nextPlayer);
   static constexpr char TAG_[] = "HostDutiesState";
   std::vector<GomokuNetworking::mac_address_t> macAddresses_;
   std::vector<GomokuNetworking::mac_address_t>::iterator currentPlayer_;

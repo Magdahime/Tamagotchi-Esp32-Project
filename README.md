@@ -1,1 +1,0 @@
-#Tamagotchi clone project

@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "BitmapLoader.hpp"
+#include "BitmapPet.hpp"
 #include "ColourProvider.hpp"
 #include "EspGLUtils.hpp"
 #include "Globals.hpp"
 #include "Graphics/EspGLBitmap.hpp"
-#include "Pet.hpp"
 #include "SPIFFSDriver.hpp"
 #include "esp_random.h"
 
@@ -25,16 +25,14 @@ class PetGenerator {
             filename)) {
     loadData();
   }
-  Pet<ColourRepresentation> generate();
+  BitmapPet<ColourRepresentation> generate();
 
   inline std::vector<EspGL::Bitmap>& bodies() { return bodies_; }
   inline std::vector<EspGL::Bitmap>& eyes() { return eyes_; }
   inline std::vector<EspGL::Bitmap>& faces() { return faces_; }
-  inline EspGL::Bitmap& petBitmap() { return petBitmap_; }
 
  private:
   BitmapLoader::BitmapLoader bitmapLoader_;
-  EspGL::Bitmap petBitmap_;
   std::vector<EspGL::Bitmap> eyes_;
   std::vector<EspGL::Bitmap> faces_;
   std::vector<EspGL::Bitmap> bodies_;
@@ -102,11 +100,11 @@ PetGenerator<ColourRepresentation>::chooseColour() {
 }
 
 template <typename ColourRepresentation>
-Pet<ColourRepresentation> PetGenerator<ColourRepresentation>::generate() {
+BitmapPet<ColourRepresentation> PetGenerator<ColourRepresentation>::generate() {
   auto petBitmap = chooseBody();
   auto eyes = chooseEyes();
   auto face = chooseFace();
-  return Pet<ColourRepresentation>(petBitmap, eyes, face, chooseColour());
+  return BitmapPet<ColourRepresentation>(petBitmap, eyes, face, chooseColour());
 }
 
 }  // namespace Pet

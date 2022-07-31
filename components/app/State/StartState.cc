@@ -1,12 +1,12 @@
 #include "StartState.hpp"
 
 #include "DrawablePet.hpp"
-#include "StateUtils.hpp"
 #include "EspGLUtils.hpp"
 #include "Event.hpp"
 #include "Game.hpp"
 #include "Globals.hpp"
 #include "State.hpp"
+#include "StateUtils.hpp"
 
 namespace tamagotchi {
 
@@ -21,10 +21,9 @@ void StartState::init() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "###########\nWelcome!\n###########",
-      {{0, 0},
-       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
-     EspGL::delay(2000); 
+  EspGL::delay(2000);
   auto deserializePetFileHandle = Globals::spiffsDriver.getFileDescriptor(
       Globals::defaultValues::SERIALIZED_PET_PATH);
   if (deserializePetFileHandle.is_open()) {
@@ -35,30 +34,27 @@ void StartState::init() {
     ESP_LOGI(TAG_, "Generating pet");
     App::Pet::PetGenerator<uint16_t> petGenerator(
         Globals::defaultValues::PET_COMPONENTS_PATH);
-    auto pet = petGenerator.generate();
-    Pet::DrawablePet<uint16_t> drawablePet(
-        pet, EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2),
-        Game::consts::PET_SCALE);
+    auto bitmapPet = petGenerator.generate();
+    Pet::DrawablePet<uint16_t> drawablePet(bitmapPet);
+    drawablePet.setStart(EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2));
     Globals::game.setPet(drawablePet);
   }
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "###########\nThis is your pet:\n###########",
-      {{0, 0},
-       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
   Globals::game.pet().draw(Globals::game.screen());
   Globals::game.print(
       "Click to continue...",
-      {{0, 280},
-       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      {{0, 280}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN, 1);
 }
 void StartState::mainLoop() {
-  
-  while (tamagotchi::App::Globals::game.eventQueue().getQueue(consts::USER_INPUT_WAIT_TIME).type_ ==
-         Event::EventTypes::gpio) {
+  while (tamagotchi::App::Globals::game.eventQueue()
+             .getQueue(consts::USER_INPUT_WAIT_TIME)
+             .type_ == Event::EventTypes::gpio) {
     Globals::game.setNextState(StateType::MainMenu);
     break;
   }

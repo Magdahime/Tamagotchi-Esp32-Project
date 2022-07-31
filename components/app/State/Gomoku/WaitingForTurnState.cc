@@ -14,13 +14,12 @@ void WaitingForTurnState::init() {
   myTurn_ = false;
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
-      "WAITING FOR OTHERS TO MOVE",
+      "WAITING FOR OTHERS\nTO MOVE",
       {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT / 2}},
       EspGL::colours::GREEN);
 }
 void WaitingForTurnState::mainLoop() {
   ESP_LOGI(TAG_, "Waiting for my turn");
-
   structs::GomokuEvent msg;
   if (GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(
           msg, GomokuNetworking::consts::ESPNOW_SEND_DELAY) == pdPASS &&
@@ -29,14 +28,20 @@ void WaitingForTurnState::mainLoop() {
     auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
     auto& state = gomokuData.state;
     auto& payload = gomokuData.payload;
+
     if (state == GomokuNetworking::GomokuMessageStates::ERROR) return;
     switch (state) {
       case GomokuMessageStates::SENDING_ORDER:
+        ESP_LOGI(TAG_, "SEND ORDER message");
         sendAck(gomokuData.magic);
-        ESP_LOGI(TAG_, "MY_TURN message");
-        myTurn_ = true;
+        mac_address_t receiverAddress;
+        memcpy(receiverAddress.data(), payload.data(), ESP_NOW_ETH_ALEN);
+        if (receiverAddress ==
+            GomokuNetworking::GomokuNetworking::hostAddress()) {
+          ESP_LOGI(TAG_, "MY_TURN message");
+          myTurn_ = true;
+        }
         break;
-
       case GomokuMessageStates::SENDING_MOVE_TO_PLAYERS:
         sendAck(gomokuData.magic);
         ESP_LOGI(TAG_, "UPDATE_BOARD message.");
@@ -57,15 +62,11 @@ void WaitingForTurnState::mainLoop() {
         break;
     }
   }
-
+  ESP_LOGI(TAG_, "MY TURN: %d", myTurn_);
+  ESP_LOGI(TAG_, "QUEUE_EMPTY : %d", GomokuNetworking::GomokuNetworking::receiveQueue().empty());
   if (myTurn_ && GomokuNetworking::GomokuNetworking::receiveQueue().empty()) {
     Globals::game.setNextState(StateType::PlayerTurn);
   }
-
-  ESP_LOGI(TAG_, "MY TURN %d", myTurn_);
-  ESP_LOGI(TAG_,
-           "GomokuNetworking::GomokuNetworking::receiveQueue().empty() %d",
-           GomokuNetworking::GomokuNetworking::receiveQueue().empty());
   displayWaitingMessage();
 }
 
@@ -78,9 +79,14 @@ void WaitingForTurnState::updateGomokuPlayersColourInfo(
     gomoku_payload_array_t dataArray) {
   auto colourConfigPtr =
       reinterpret_cast<structs::ColourConfig*>(dataArray.data());
+  auto& params = GomokuNetworking::GomokuNetworking::playersParams();
+  auto& player2Colour = Globals::game.gomokuBoard().player2Colour();
   for (auto& elem : colourConfigPtr->colour2Player) {
-    Globals::game.gomokuBoard().player2Colour().emplace(
-        std::make_pair(elem.player, elem.colourValue));
+    player2Colour.emplace(std::make_pair(elem.player, elem.colourValue));
+    auto it = std::find_if(params.begin(), params.end(), [&](auto& pair) {
+      return pair.first == elem.player;
+    });
+    (*it).second.setColour(EspGL::Colour16(elem.colourValue));
   }
 }
 
@@ -116,6 +122,20 @@ void WaitingForTurnState::displayWaitingMessage() {
                                Globals::defaultValues::BACKGROUND_COLOUR}
         .draw(Globals::game.screen());
   }
+}
+
+void WaitingForTurnState::displayOrderMessage(mac_address_t nextPlayer) {
+  ESP_LOGI(TAG_, "Display Order Message");
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
+  Globals::game.print(
+      "#########\nIt is another\nplayer turn!\n#########",
+      {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      EspGL::colours::GREEN);
+  auto& params = GomokuNetworking::GomokuNetworking::playersParams();
+  auto it = std::find_if(params.begin(), params.end(),
+                         [&](auto pair) { return pair.first == nextPlayer; });
+  (*it).second.setStart(EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2));
+  (*it).second.draw(Globals::game.screen());
 }
 
 void WaitingForTurnState::deinit() {}

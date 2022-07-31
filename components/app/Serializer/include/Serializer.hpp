@@ -12,18 +12,29 @@ namespace App {
 namespace Pet {
 template <typename ColourRepresentation>
 class Pet;
+
 template <typename ColourRepresentation>
 class DrawablePet;
+
+template <typename ColourRepresentation>
+class BitmapPet;
 }  // namespace Pet
 namespace Serializer {
 
 class Serializer {
  public:
   Serializer() = default;
+
   void serialize(Pet::Pet<uint16_t>* pet, std::string filename = "pet.ser");
   void serialize(Pet::Pet<uint16_t>* pet, std::fstream& fileHandle);
+
   void deserialize(std::fstream& fileHandle, Pet::Pet<uint16_t>& pet);
 
+  void serialize(Pet::BitmapPet<uint16_t>* pet,
+                 std::string filename = "DrawablePet.ser");
+  void serialize(Pet::BitmapPet<uint16_t>* pet, std::fstream& fileHandle);
+
+  void deserialize(std::fstream& fileHandle, Pet::BitmapPet<uint16_t>& pet);
 
   void serialize(Pet::DrawablePet<uint16_t>* pet,
                  std::string filename = "DrawablePet.ser");

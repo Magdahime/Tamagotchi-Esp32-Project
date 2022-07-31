@@ -115,25 +115,29 @@ void PlayerTurnState::sendMoveUpdateToHost(BoardCoordinate move) {
   ESP_LOGI(TAG_, "Sending move update to host");
   auto myMac = GomokuNetworking::GomokuNetworking::hostAddress();
   structs::GomokuMoveUpdateFromPlayer updateMove{myMac, move};
+  ESP_LOGI(TAG_, "Create update move");
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
                                GomokuMessageStates::SENDING_MOVE_TO_HOST,
                                0,
                                0,
                                {}};
+  ESP_LOGI(TAG_, "Create GomokuData");
   memcpy(sendData.payload.data(), reinterpret_cast<uint8_t*>(&updateMove),
          sizeof(structs::GomokuMoveUpdateFromPlayer));
   sendData.crc =
       esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
                    GomokuNetworking::consts::ESPNOW_SEND_LEN);
-
-  structs::GomokuDataWithRecipient finalMessage{myMac, sendData};
+  ESP_LOGI(TAG_, "Calculate CRC");
+  structs::GomokuDataWithRecipient finalMessage{GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
+  ESP_LOGI(TAG_, "Create final message");
   GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
-
+  ESP_LOGI(TAG_, "Send message");
   if (myMac != GomokuNetworking::GomokuNetworking::gameHostAddress()) {
     Globals::game.setNextState(StateType::WaitingForTurn);
   } else {
     Globals::game.setNextState(StateType::GameHostDuties);
   }
+  ESP_LOGI(TAG_, "END");
 }
 
 }  // namespace tamagotchi::App::State

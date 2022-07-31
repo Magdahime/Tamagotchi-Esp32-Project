@@ -3,6 +3,7 @@
 #include <exception>
 #include <iostream>
 
+#include "BitmapPet.hpp"
 #include "DrawablePet.hpp"
 #include "EspGLUtils.hpp"
 #include "Globals.hpp"
@@ -64,30 +65,10 @@ void Serializer::serialize(Pet::Pet<uint16_t>* pet, std::fstream& fileHandle) {
     serialize(fileHandle, pet->name());
     // NEEDS
     auto needs = pet->needs();
-    serialize(fileHandle, Pet::PET_NEEDS);
-    for (int i = 0; i < Pet::PET_NEEDS; i++) {
+    serialize(fileHandle, Pet::consts::PET_NEEDS);
+    for (int i = 0; i < Pet::consts::PET_NEEDS; i++) {
       serialize(fileHandle, needs[i]);
     }
-    // COLOUR
-    serialize(fileHandle, pet->colour().value());
-    // BODY
-    auto body = pet->body();
-    serialize(fileHandle, body.first);
-    serialize(fileHandle, body.second.sizeX());
-    serialize(fileHandle, body.second.sizeY());
-    serialize(fileHandle, body.second.bitmap());
-    // EYES
-    auto eyes = pet->eyes();
-    serialize(fileHandle, eyes.first);
-    serialize(fileHandle, eyes.second.sizeX());
-    serialize(fileHandle, eyes.second.sizeY());
-    serialize(fileHandle, eyes.second.bitmap());
-    // FACE
-    auto face = pet->face();
-    serialize(fileHandle, face.first);
-    serialize(fileHandle, face.second.sizeX());
-    serialize(fileHandle, face.second.sizeY());
-    serialize(fileHandle, face.second.bitmap());
   }
 }
 
@@ -103,44 +84,83 @@ void Serializer::deserialize(std::fstream& fileHandle,
   if (fileHandle.is_open()) {
     deserialize(fileHandle, pet.name());
     deserialize(fileHandle, pet.needs());
-    uint16_t colourValue;
-    deserialize(fileHandle, colourValue);
-    pet.colour().setValue(colourValue);
-    deserialize(fileHandle, pet.body().first);
-    deserialize(fileHandle, pet.body().second.sizeX());
-    deserialize(fileHandle, pet.body().second.sizeY());
-    deserialize(fileHandle, pet.body().second.bitmap());
-    deserialize(fileHandle, pet.eyes().first);
-    deserialize(fileHandle, pet.eyes().second.sizeX());
-    deserialize(fileHandle, pet.eyes().second.sizeY());
-    deserialize(fileHandle, pet.eyes().second.bitmap());
-    deserialize(fileHandle, pet.face().first);
-    deserialize(fileHandle, pet.face().second.sizeX());
-    deserialize(fileHandle, pet.face().second.sizeY());
-    deserialize(fileHandle, pet.face().second.bitmap());
   }
 }
 
 void Serializer::serialize(Pet::DrawablePet<uint16_t>* pet,
                            std::string filename) {
   auto fileHandle = Globals::spiffsDriver.createNewFile(filename);
-  serialize(dynamic_cast<Pet::Pet<uint16_t>*>(pet), fileHandle);
-  serialize(fileHandle, pet->scale());
-  serialize(fileHandle, pet->start().x_);
-  serialize(fileHandle, pet->start().y_);
+  if (fileHandle.is_open()) {
+    serialize(dynamic_cast<Pet::Pet<uint16_t>*>(pet), fileHandle);
+    serialize(dynamic_cast<Pet::BitmapPet<uint16_t>*>(pet), fileHandle);
+  }
 }
 void Serializer::deserialize(std::fstream& fileHandle,
                              Pet::DrawablePet<uint16_t>& pet) {
   if (fileHandle.is_open()) {
     Pet::Pet<uint16_t> deserializedPet;
-    int scale, startX, startY;
+    Pet::BitmapPet<uint16_t> deserializedBitmapPet;
     deserialize(fileHandle, deserializedPet);
-    deserialize(fileHandle, scale);
-    deserialize(fileHandle, startX);
-    deserialize(fileHandle, startY);
+    deserialize(fileHandle, deserializedBitmapPet);
     pet = Pet::DrawablePet(std::move(deserializedPet),
-                           EspGL::Vect2(startX, startY), scale);
+                           std::move(deserializedBitmapPet));
   }
+}
+
+void Serializer::serialize(Pet::BitmapPet<uint16_t>* pet,
+                           std::fstream& fileHandle) {
+  serialize(fileHandle, pet->scale());
+  serialize(fileHandle, pet->start().x_);
+  serialize(fileHandle, pet->start().y_);
+  // COLOUR
+  serialize(fileHandle, pet->colour().value());
+  // BODY
+  auto body = pet->body();
+  serialize(fileHandle, body.first);
+  serialize(fileHandle, body.second.sizeX());
+  serialize(fileHandle, body.second.sizeY());
+  serialize(fileHandle, body.second.bitmap());
+  // EYES
+  auto eyes = pet->eyes();
+  serialize(fileHandle, eyes.first);
+  serialize(fileHandle, eyes.second.sizeX());
+  serialize(fileHandle, eyes.second.sizeY());
+  serialize(fileHandle, eyes.second.bitmap());
+  // FACE
+  auto face = pet->face();
+  serialize(fileHandle, face.first);
+  serialize(fileHandle, face.second.sizeX());
+  serialize(fileHandle, face.second.sizeY());
+  serialize(fileHandle, face.second.bitmap());
+}
+
+void Serializer::serialize(Pet::BitmapPet<uint16_t>* pet,
+                           std::string filename) {
+  auto fileHandle = Globals::spiffsDriver.createNewFile(filename);
+  if (fileHandle.is_open()) {
+    serialize(pet, fileHandle);
+  }
+}
+void Serializer::deserialize(std::fstream& fileHandle,
+                             Pet::BitmapPet<uint16_t>& pet) {
+  deserialize(fileHandle, pet.scale());
+  deserialize(fileHandle, pet.start().x_);
+  deserialize(fileHandle, pet.start().y_);
+  uint16_t colourValue;
+  deserialize(fileHandle, colourValue);
+  pet.colour().setValue(colourValue);
+  deserialize(fileHandle, pet.body().first);
+  deserialize(fileHandle, pet.body().second.sizeX());
+  deserialize(fileHandle, pet.body().second.sizeY());
+  deserialize(fileHandle, pet.body().second.bitmap());
+  deserialize(fileHandle, pet.eyes().first);
+  deserialize(fileHandle, pet.eyes().second.sizeX());
+  deserialize(fileHandle, pet.eyes().second.sizeY());
+  deserialize(fileHandle, pet.eyes().second.bitmap());
+  deserialize(fileHandle, pet.face().first);
+  deserialize(fileHandle, pet.face().second.sizeX());
+  deserialize(fileHandle, pet.face().second.sizeY());
+  deserialize(fileHandle, pet.face().second.bitmap());
 }
 
 }  // namespace Serializer

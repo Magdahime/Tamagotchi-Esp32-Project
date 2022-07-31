@@ -9,13 +9,14 @@
 
 #include "Game.hpp"
 #include "Globals.hpp"
+#include "PetGenerator.hpp"
 #include "esp_mac.h"
 #include "esp_timer.h"
 #include "nvs_flash.h"
 
 namespace tamagotchi::App::GomokuNetworking {
 ///////////////////////////////////////////////////////////////////////////
-std::vector<std::pair<mac_address_t, structs::PetParams>>
+std::vector<std::pair<mac_address_t, Pet::BitmapPet<uint16_t>>>
     GomokuNetworking::playersParams_ = {};
 TaskHandle_t GomokuNetworking::gomokuNetworkingTask_ = nullptr;
 MessageQueue::MessageQueue<structs::GomokuEvent>
@@ -44,8 +45,12 @@ bool GomokuNetworking::ifDeinit_ = false;
 ///////////////////////////////////////////////////////////////////////////
 
 void GomokuNetworking::init() {
-  esp_base_mac_addr_get(hostAddress_.data());
-  esp_base_mac_addr_get(gameHostAddress_.data());
+  esp_read_mac(hostAddress_.data(), ESP_MAC_WIFI_SOFTAP);
+  esp_read_mac(gameHostAddress_.data(), ESP_MAC_WIFI_SOFTAP);
+  ESP_LOGI(TAG_,
+           "INITIAL HOST ADDR:" MACSTR, MAC2STR(hostAddress_.data()));
+  ESP_LOGI(TAG_,
+           "INITIAL GAME HOST ADDR:" MACSTR, MAC2STR(gameHostAddress_.data()));
   sendParams_.destinationMac = consts::EXAMPLE_BROADCAST_MAC;
   ESP_LOGI(TAG_, "Successfully initialized networking module!");
 }
@@ -81,6 +86,10 @@ void GomokuNetworking::searchForFriends() {
   // Current number of players is 1, because it's us.
   int players = 1;
   addPeerESP(consts::EXAMPLE_BROADCAST_MAC.data());
+  ESP_LOGI(TAG_, "Creating PetGenerator");
+  App::Pet::PetGenerator<uint16_t> petGenerator(
+      Globals::defaultValues::PET_COMPONENTS_PATH);
+  ESP_LOGI(TAG_, "Created PetGenerator");
 
   while (sendParams_.state == GomokuMessageStates::BROADCAST) {
     if (players == consts::MAX_GOMOKU_PLAYERS) break;
@@ -88,7 +97,6 @@ void GomokuNetworking::searchForFriends() {
     auto msg = receiveQueue_.getQueue(consts::MAX_DELAY);
     if (std::holds_alternative<structs::GomokuEventReceiveCallback>(msg.info)) {
       auto gomokuData = unpackData(msg);
-
       ESP_LOGI(TAG_, "RECEIVE  BROADCAST DATA FROM: " MACSTR ", LEN: %d",
                MAC2STR(msg.macAddress.data()), sizeof(gomokuData));
 
@@ -97,11 +105,9 @@ void GomokuNetworking::searchForFriends() {
                  MAC2STR(msg.macAddress.data()));
         continue;
       }
-      if (addPeer(msg.macAddress, gomokuData, players)) players++;
+      if (addPeer(petGenerator, msg.macAddress, gomokuData, players)) players++;
       ESP_LOGI(TAG_, "Current number of players: %d ", players);
-
       chooseHost(msg.macAddress, gomokuData);
-
       if (sendParams_.state == GomokuMessageStates::BROADCAST &&
           players == consts::MAX_GOMOKU_PLAYERS) {
         ESP_LOGI(TAG_, "Stopping sending data to broadcast.");
@@ -185,9 +191,6 @@ void GomokuNetworking::retransmit(
     return;
   }
   for (auto &senderParams : sendersLiveParams) {
-    ESP_LOGI(
-        TAG_, "TIMESTAMP: %lld",
-        ((esp_timer_get_time() - senderParams.timestamp) / consts::MICRO2MILI));
     if (senderParams.ack != true) {
       if (senderParams.timestamp != 0 &&
           (esp_timer_get_time() - senderParams.timestamp) / consts::MICRO2MILI >
@@ -273,7 +276,8 @@ void GomokuNetworking::addPeerESP(const uint8_t *macAddress) {
   ESP_LOGI(TAG_, "ADD PEER SUCCESS: " MACSTR, MAC2STR(macAddress));
 }
 
-bool GomokuNetworking::addPeer(mac_address_t &peer, structs::GomokuData &data,
+bool GomokuNetworking::addPeer(App::Pet::PetGenerator<uint16_t> &petGenerator,
+                               mac_address_t &peer, structs::GomokuData &data,
                                int players) {
   // ADDING NEW PLAYER TO KNOWN PEERS
   if (players < consts::MAX_GOMOKU_PLAYERS &&
@@ -282,8 +286,12 @@ bool GomokuNetworking::addPeer(mac_address_t &peer, structs::GomokuData &data,
     auto playerParams =
         reinterpret_cast<structs::PetParams *>(data.payload.data());
     playersParams_.push_back(std::make_pair(
-        peer, structs::PetParams{playerParams->body, playerParams->eyes,
-                                 playerParams->face}));
+        peer,
+        Pet::BitmapPet<uint16_t>(
+            {playerParams->body, petGenerator.bodies()[playerParams->body]},
+            {playerParams->eyes, petGenerator.eyes()[playerParams->eyes]},
+            {playerParams->face, petGenerator.faces()[playerParams->face]},
+            EspGL::Colour<uint16_t>(0), EspGL::Vect2(0, 0))));
     addPeerESP(peer.data());
     return true;
   }
@@ -304,17 +312,10 @@ void GomokuNetworking::sendGameInvite() {
 
 void GomokuNetworking::sendDataCallback(const uint8_t *macAddress,
                                         esp_now_send_status_t status) {
-  // structs::GomokuEvent event;
-  // event.info = structs::GomokuEventSendCallback();
-  // auto &sendCallback =
-  // std::get<structs::GomokuEventSendCallback>(event.info);
   if (macAddress == NULL) {
     ESP_LOGE(TAG_, "SEND CALLBACK ERROR - MAC ADDRESS NULL");
     return;
   }
-
-  // memcpy(event.macAddress.data(), macAddress, ESP_NOW_ETH_ALEN);
-  // sendCallback.status = status;
   ESP_LOGI("GomokuNetworking::sendDataCallback",
            "Sending message to " MACSTR " status: %d", MAC2STR(macAddress),
            status);
