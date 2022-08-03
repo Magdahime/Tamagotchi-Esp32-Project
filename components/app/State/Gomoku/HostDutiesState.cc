@@ -28,12 +28,15 @@ void HostDutiesState::init() {
 
 void HostDutiesState::mainLoop() {
   auto hostParams = GomokuNetworking::GomokuNetworking::hostParams();
+  ESP_LOGI(TAG_, "hostParams.acksCollected %d ",hostParams.acksCollected);
+  ESP_LOGI(TAG_, "hostParams.newMove  %d ", hostParams.newMove );
   if (hostParams.newMove && hostParams.acksCollected) {
     ESP_LOGI(TAG_, "There is new move!");
     structs::GomokuEvent msg;
-    GomokuNetworking::GomokuNetworking::receiveQueue().getQueue(msg);
-    if (msg.macAddress == *(currentPlayer_)) {
-      auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
+    GomokuNetworking::GomokuNetworking::hostQueue().getQueue(msg);
+    auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
+    if (msg.macAddress == *(currentPlayer_) && gomokuData.state != GomokuMessageStates::ERROR) {
+      ESP_LOGI(TAG_, "msg.macAddress == *(currentPlayer_)");
       sendMoveUpdate(gomokuData.payload);
       auto result =
           updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
@@ -46,6 +49,7 @@ void HostDutiesState::mainLoop() {
       sendNotificationAboutCurrentPlayer();
       displayOrderMessage(*currentPlayer_);
     }
+    ESP_LOGI(TAG_, "hostParams.newMove = false;");
     hostParams.newMove = false;
   }
 
@@ -165,14 +169,10 @@ void HostDutiesState::sendColourConfig() {
     colour2Player[i] =
         structs::Colour2Player{colours[i].value(), macAddresses_[i]};
   }
-  ESP_LOGI(TAG_, "%d MAC ADDRESSES SIZE:",macAddresses_.size());
   colour2Player[colour2Player.size() - 1] = structs::Colour2Player{
       colours[colour2Player.size() - 1].value(),
       GomokuNetworking::GomokuNetworking::hostAddress()};
-  for (auto i = 0; i < colour2Player.size(); i++) {
-    ESP_LOGI(TAG_, "%d player:" MACSTR ", Colour: %d",i, MAC2STR(colour2Player[i].player), colour2Player[i].colourValue);
-  }
-  
+
   structs::ColourConfig config{colour2Player};
   memcpy(sendData.payload.data(), config.colour2Player.data(), sizeof(config));
   sendAll(sendData);
@@ -186,15 +186,10 @@ void HostDutiesState::updateColourConfig(
   auto& params = GomokuNetworking::GomokuNetworking::playersParams();
   auto& player2Colour = Globals::game.gomokuBoard().player2Colour();
   for (auto& elem : colour2Player) {
-    ESP_LOGI(TAG_, "Setting colours host.");
-    ESP_LOGI(TAG_, "elem.player " MACSTR, MAC2STR(elem.player));
     player2Colour.emplace(std::make_pair(elem.player, elem.colourValue));
     auto it = std::find_if(params.begin(), params.end(), [&](auto pair) {
-      ESP_LOGI(TAG_, "pair.first " MACSTR, MAC2STR(pair.first));
       return pair.first == elem.player;
     });
-    ESP_LOGI(TAG_, "it != params.end(): %d", it != params.end());
-    ESP_LOGI(TAG_, "elem.ColourValue %d", elem.colourValue);
     (*it).second.setColour(EspGL::Colour16(elem.colourValue));
   }
 }

@@ -32,7 +32,7 @@ class GomokuNetworking {
   static void receiveDataCallback(const uint8_t *macAddress,
                                   const uint8_t *data, const int length);
   static void sendMessage(structs::GomokuDataWithRecipient message);
-  static structs::GomokuData unpackData(structs::GomokuEvent &event);
+  static structs::GomokuData unpackData(structs::GomokuEvent event);
   static mac_address_t gameHostAddress() { return gameHostAddress_; }
   static mac_address_t hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> playersMacs();
