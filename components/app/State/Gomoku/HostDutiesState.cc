@@ -15,12 +15,18 @@ namespace tamagotchi {
 namespace App {
 namespace State {
 
+bool HostDutiesState::coloursSent_ = false;
+
 void HostDutiesState::handleEvent(Event::Event event) {}
 void HostDutiesState::init() {
   ESP_LOGI(TAG_, "Start HostDuties!");
   macAddresses_ = GomokuNetworking::GomokuNetworking::playersMacs();
   currentPlayer_ = macAddresses_.begin();
-  sendColourConfig();
+  handleHostMove();
+  if (!coloursSent_) {
+    sendColourConfig();
+    coloursSent_ = true;
+  }
   EspGL::delay(GomokuNetworking::consts::ESPNOW_SEND_DELAY);
   sendNotificationAboutCurrentPlayer();
   displayOrderMessage(*currentPlayer_);
@@ -28,26 +34,29 @@ void HostDutiesState::init() {
 
 void HostDutiesState::mainLoop() {
   auto hostParams = GomokuNetworking::GomokuNetworking::hostParams();
-  ESP_LOGI(TAG_, "hostParams.acksCollected %d ",hostParams.acksCollected);
-  ESP_LOGI(TAG_, "hostParams.newMove  %d ", hostParams.newMove );
+  ESP_LOGI(TAG_, "hostParams.acksCollected %d ", hostParams.acksCollected);
+  ESP_LOGI(TAG_, "hostParams.newMove  %d ", hostParams.newMove);
   if (hostParams.newMove && hostParams.acksCollected) {
     ESP_LOGI(TAG_, "There is new move!");
     structs::GomokuEvent msg;
     GomokuNetworking::GomokuNetworking::hostQueue().getQueue(msg);
     auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
-    if (msg.macAddress == *(currentPlayer_) && gomokuData.state != GomokuMessageStates::ERROR) {
-      ESP_LOGI(TAG_, "msg.macAddress == *(currentPlayer_)");
+    if (msg.macAddress == *(currentPlayer_) &&
+        gomokuData.state != GomokuMessageStates::ERROR) {
       sendMoveUpdate(gomokuData.payload);
       auto result =
           updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
               gomokuData.payload.data()));
-      if (result) {
+      if (result || Globals::game.gomokuBoard().full()) {
         sendEndOfGameMessage();
         Globals::game.setNextState(StateType::EndMiniGame);
+        return;
       }
       currentPlayer_++;
-      sendNotificationAboutCurrentPlayer();
-      displayOrderMessage(*currentPlayer_);
+      if (currentPlayer_ != macAddresses_.end()) {
+        sendNotificationAboutCurrentPlayer();
+        displayOrderMessage(*currentPlayer_);
+      }
     }
     ESP_LOGI(TAG_, "hostParams.newMove = false;");
     hostParams.newMove = false;
@@ -117,6 +126,7 @@ void HostDutiesState::sendAll(structs::GomokuData sendData) {
 bool HostDutiesState::updateBoard(
     structs::GomokuMoveUpdateFromPlayer* nextMove) {
   ESP_LOGI(TAG_, "Updating board.");
+  ESP_LOGI(TAG_, "nextMove->player: " MACSTR, MAC2STR(nextMove->player));
   Globals::game.gomokuBoard().markMove(nextMove->player, nextMove->move);
   return Globals::game.gomokuBoard().isWinner();
 }
@@ -169,9 +179,9 @@ void HostDutiesState::sendColourConfig() {
     colour2Player[i] =
         structs::Colour2Player{colours[i].value(), macAddresses_[i]};
   }
-  colour2Player[colour2Player.size() - 1] = structs::Colour2Player{
-      colours[colour2Player.size() - 1].value(),
-      GomokuNetworking::GomokuNetworking::hostAddress()};
+  colour2Player[colour2Player.size() - 1] =
+      structs::Colour2Player{colours[colour2Player.size() - 1].value(),
+                             GomokuNetworking::GomokuNetworking::hostAddress()};
 
   structs::ColourConfig config{colour2Player};
   memcpy(sendData.payload.data(), config.colour2Player.data(), sizeof(config));
@@ -206,6 +216,14 @@ void HostDutiesState::displayOrderMessage(mac_address_t nextPlayer) {
                          [&](auto pair) { return pair.first == nextPlayer; });
   (*it).second.setStart(EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2));
   (*it).second.draw(Globals::game.screen());
+}
+
+void HostDutiesState::handleHostMove() {
+  structs::GomokuEvent msg;
+  if (GomokuNetworking::GomokuNetworking::hostQueue().getQueue(msg, 1000) ==
+      pdPASS) {
+    sendAll(GomokuNetworking::GomokuNetworking::unpackData(msg));
+  }
 }
 
 }  // namespace State

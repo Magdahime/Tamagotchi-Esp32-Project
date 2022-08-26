@@ -12,32 +12,42 @@ namespace tamagotchi::App::State {
 void EndGameState::handleEvent(Event::Event event) {}
 void EndGameState::init() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
-  if (Globals::game.gomokuBoard().winner() ==
-      GomokuNetworking::GomokuNetworking::hostAddress()) {
+  auto winner = Globals::game.gomokuBoard().winner();
+  ESP_LOGI(TAG_, "Globals::game.gomokuBoard().winner(): " MACSTR,
+           MAC2STR(winner));
+  ESP_LOGI(TAG_, "GomokuNetworking::GomokuNetworking::hostAddress(): " MACSTR,
+           MAC2STR(GomokuNetworking::GomokuNetworking::hostAddress()));
+  if (winner == GomokuNetworking::GomokuNetworking::hostAddress()) {
     std::string message = "YOU ARE THE WINNER!\nCongratulations!";
     Globals::game.print(
         message,
-        {{0, 100},
-         {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+        {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
-  } else {
-    constexpr int MAC_SIZE = 18;
-    std::string addr(MAC_SIZE, '\0');
-    std::snprintf(addr.data(), addr.size(), MACSTR,
-                  MAC2STR(Globals::game.gomokuBoard().winner()));
-    std::string message = "Winner is player: (" + addr +
-                          ")"
-                          "!\nCongratulations!";
+  } else if (!Globals::game.gomokuBoard().full()) {
+    std::string message = "Winner is player:";
     Globals::game.print(
         message,
-        {{0, 100},
-         {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+        {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+        EspGL::colours::GREEN);
+    auto& params = GomokuNetworking::GomokuNetworking::playersParams();
+    auto it = std::find_if(params.begin(), params.end(),
+                           [&](auto pair) { return pair.first == winner; });
+    (*it).second.setStart(EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2));
+    (*it).second.draw(Globals::game.screen());
+
+  } else {
+    std::string message = "Draw!\nBetter luck next\ntime!";
+    Globals::game.print(
+        message,
+        {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
   }
   EspGL::delay(3000);
-  Globals::game.setNextState(StateType::MiniGame);
+  Globals::game.setNextState(StateType::MainMenu);
 }
 void EndGameState::mainLoop() {}
-void EndGameState::deinit() {}
+void EndGameState::deinit() {
+  vTaskDelete(GomokuNetworking::GomokuNetworking::gomokuNetworkingTask());
+}
 
 }  // namespace tamagotchi::App::State

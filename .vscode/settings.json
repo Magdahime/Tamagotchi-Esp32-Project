@@ -44,5 +44,10 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "clang-format.executable": "C:/Program Files/LLVM/bin/clang-format.exe",
+    "editor.codeActionsOnSave" : { "source.fixAll" : true },
+    "editor.formatOnSave" : true,
+    "clang-format.style" : "google"
+
 }

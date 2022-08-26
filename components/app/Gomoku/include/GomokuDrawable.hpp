@@ -63,10 +63,14 @@ class GomokuDrawable
       GomokuNetworking::mac_address_t playerId,
       GomokuNetworking::BoardCoordinate& move) override;
 
-  bool isWinner() { return winner_.has_value(); }
+  bool full() {
+    return std::all_of(board_.begin(), board_.end(),
+                       [](GomokuTile<ColourRepresentation> tile) {
+                         return tile.empty() == false;
+                       });
+  }
 
  private:
-  std::optional<GomokuNetworking::mac_address_t> winner_;
   static constexpr char TAG_[] = "GomokuDrawable";
   EspGL::Vect2 leftUpperCanvas_;
   EspGL::Vect2 rightLowerCanvas_;
@@ -136,12 +140,15 @@ GomokuDrawable<width_s, height_s, ColourRepresentation>::markMove(
                              std::to_string(move.x_) + ", " +
                              std::to_string(move.y_) + ")");
   }
-  if (!board_[move.y_ * width_s + move.x_].empty()) {
+  if (!board_[move.y_ * width_s + move.x_].empty() &&
+      playerMac != std::get<GomokuNetworking::mac_address_t>(
+                       board_[move.y_ * width_s + move.x_].playerId())) {
     throw std::runtime_error("This tile has been already used: (" +
                              std::to_string(move.x_) + ", " +
                              std::to_string(move.y_) + ")");
+  } else if (board_[move.y_ * width_s + move.x_].empty()) {
+    board_[move.y_ * width_s + move.x_].playerId() = playerMac;
   }
-  board_[move.y_ * width_s + move.x_].playerId() = playerMac;
   return checkWinner(playerMac, move);
 }
 
@@ -191,9 +198,10 @@ GomokuDrawable<width_s, height_s, ColourRepresentation>::checkWinner(
 
     for (auto coords = std::make_pair(beginX, beginY); compare(coords);
          coords.first += stepX, coords.second += stepY) {
-      if (std::get<GomokuNetworking::mac_address_t>(
-              board_[calculateArrayCoord(coords.first, coords.second)]
-                  .playerId()) == playerId) {
+      auto variant =
+          board_[calculateArrayCoord(coords.first, coords.second)].playerId();
+      if (std::holds_alternative<GomokuNetworking::mac_address_t>(variant) &&
+          std::get<GomokuNetworking::mac_address_t>(variant) == playerId) {
         counter++;
       } else {
         counter = 0;
@@ -209,7 +217,10 @@ GomokuDrawable<width_s, height_s, ColourRepresentation>::checkWinner(
       checkLoop(move.x_, move.y_, 0, 1, consts::POINT_COUNT) ||
       checkLoop(move.x_, move.y_, 1, 1, consts::POINT_COUNT) ||
       checkLoop(move.x_, move.y_, -1, 1, consts::POINT_COUNT)) {
-    return playerId;
+    ESP_LOGI("TAG_", "playerId: " MACSTR, MAC2STR(playerId));
+    this->winner_ = playerId;
+    ESP_LOGI("TAG_", "winner: " MACSTR, MAC2STR((this->winner_.value())));
+    return this->winner_.value();
   }
   return {};
 }
@@ -237,9 +248,12 @@ void GomokuDrawable<width_s, height_s, ColourRepresentation>::drawTile(
   }
 
   if (!tile.empty()) {
+    auto diffX = (hitbox.second.x_ - hitbox.first.x_) / 2;
+    auto diffY = (hitbox.second.y_ - hitbox.first.y_) / 2;
+    auto middlePoint =
+        EspGL::Vect2(hitbox.first.x_ + diffX, hitbox.first.y_ + diffY);
     EspGL::Circle<ColourRepresentation>{
-        EspGL::Vect2(hitbox.second.x_ / 2, hitbox.second.y_ / 2),
-        consts::GOMOKU_PAWN_SIZE,
+        middlePoint, consts::GOMOKU_PAWN_SIZE,
         player2Colour_.at(
             std::get<GomokuNetworking::mac_address_t>(tile.playerId()))}
         .draw(target);

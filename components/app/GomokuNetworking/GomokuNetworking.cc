@@ -160,7 +160,7 @@ void GomokuNetworking::handleCommunicationHost() {
         pdPASS) {
       ESP_LOGI(TAG_, "Received message from " MACSTR,
                MAC2STR(receiveMsg.macAddress));
-        handleMessage(receiveMsg, sendersLiveParams, ackMessageQueue);
+      handleMessage(receiveMsg, sendersLiveParams, ackMessageQueue);
     }
   }
 }
@@ -203,14 +203,15 @@ void GomokuNetworking::handleCommunicationPlayer() {
   structs::GomokuEvent receiveMsg;
   while (!ifDeinit_) {
     // SENDING
-    if (sendingQueue_.getQueue(sendMsg) == pdPASS) {
+    if (sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY) == pdPASS) {
       sendMessage(sendMsg);
     }
-
+    ESP_LOGI(TAG_, "CHECK");
     // RECEIVING
     if (receiveQueue_.getQueue(receiveMsg, consts::ESPNOW_SEND_DELAY) ==
         pdPASS) {
-      ESP_LOGI(TAG_, "Received message");
+      ESP_LOGI(TAG_, "Received message from " MACSTR,
+               MAC2STR(receiveMsg.macAddress));
       gameQueue_.putQueue(receiveMsg);
     }
   }
@@ -316,6 +317,7 @@ void GomokuNetworking::receiveDataCallback(const uint8_t *macAddress,
   auto &receiveCallback =
       std::get<structs::GomokuEventReceiveCallback>(event.info);
   if (std::memcmp(macAddress, hostAddress_.data(), hostAddress_.size()) == 0) {
+    ESP_LOGE(TAG_, "RECEIVED MESSAGE FROM MYSELF");
     return;
   }
   if (macAddress == NULL || data == NULL || length <= 0) {
@@ -378,7 +380,8 @@ void GomokuNetworking::handleMessage(
     std::vector<structs::SenderParams> &sendersLiveParams,
     std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
         &ackMessageQueue) {
-  ESP_LOGI(TAG_, "Handling message from " MACSTR, MAC2STR(message.macAddress.data()));
+  ESP_LOGI(TAG_, "Handling message from " MACSTR,
+           MAC2STR(message.macAddress.data()));
   auto gomokuData = unpackData(message);
   auto it = std::find_if(sendersLiveParams.begin(), sendersLiveParams.end(),
                          [&](const auto &params) {
@@ -397,7 +400,7 @@ void GomokuNetworking::handleMessage(
                        [&](auto &ackMessage) {
                          return ackMessage.second.destinationMac ==
                                 message.macAddress;
-                       })){
+                       })) {
         it->ack = true;
       }
       // Check if we have all ACKS
@@ -409,14 +412,16 @@ void GomokuNetworking::handleMessage(
       break;
 
     case GomokuMessageStates::SENDING_MOVE_TO_HOST:
-      ESP_LOGI(TAG_, "New move from " MACSTR, MAC2STR(message.macAddress.data()));
+      ESP_LOGI(TAG_, "New move from " MACSTR,
+               MAC2STR(message.macAddress.data()));
       hostParams_.newMove = true;
       gameQueue_.putQueue(message);
       break;
 
     // IS CORRUPTED
     default:
-      ESP_LOGE(TAG_, "Message from" MACSTR " is corrupted!", MAC2STR(message.macAddress.data()));
+      ESP_LOGE(TAG_, "Message from" MACSTR " is corrupted!",
+               MAC2STR(message.macAddress.data()));
       break;
   }
 }

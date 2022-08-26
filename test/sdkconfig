@@ -129,7 +129,7 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# Example Configuration
+# GomokuNetworking Configuration
 #
 CONFIG_ESPNOW_WIFI_MODE_STATION=y
 # CONFIG_ESPNOW_WIFI_MODE_STATION_SOFTAP is not set
@@ -140,7 +140,7 @@ CONFIG_ESPNOW_SEND_COUNT=100
 CONFIG_ESPNOW_SEND_DELAY=1000
 CONFIG_ESPNOW_SEND_LEN=10
 # CONFIG_ESPNOW_ENABLE_LONG_RANGE is not set
-# end of Example Configuration
+# end of GomokuNetworking Configuration
 
 #
 # Compiler options

@@ -35,11 +35,14 @@ class HostDutiesState : public State {
   void sendEndOfGameMessage();
 
  private:
+  static bool coloursSent_;
   void updateColourConfig(
       std::array<GomokuNetworking::structs::Colour2Player,
                  GomokuNetworking::consts::MAX_GOMOKU_PLAYERS>& colour2Player);
   void sendColourConfig();
   void displayOrderMessage(GomokuNetworking::mac_address_t nextPlayer);
+  void handleHostMove();
+
   static constexpr char TAG_[] = "HostDutiesState";
   std::vector<GomokuNetworking::mac_address_t> macAddresses_;
   std::vector<GomokuNetworking::mac_address_t>::iterator currentPlayer_;

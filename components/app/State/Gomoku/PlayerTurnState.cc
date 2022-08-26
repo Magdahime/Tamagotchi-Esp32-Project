@@ -42,6 +42,7 @@ void PlayerTurnState::init() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
       .highlight();
+  redrawScreen();
 }
 
 void PlayerTurnState::mainLoop() {
@@ -49,8 +50,8 @@ void PlayerTurnState::mainLoop() {
       consts::USER_INPUT_WAIT_TIME);
   if (!event.empty()) {
     handleEvent(event);
+    redrawScreen();
   }
-  redrawScreen();
 }
 void PlayerTurnState::deinit() {}
 
@@ -77,12 +78,18 @@ void PlayerTurnState::handleGpioInput(int pressedButton) {
       ESP_LOGI(TAG_, "MIDDLE.");
       if (gomokuBoard_
               .board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
-              .empty())
-        sendMoveUpdateToHost(BoardCoordinate{rowCounter_, columnCounter_});
+              .empty()) {
+        auto newMove = BoardCoordinate{rowCounter_, columnCounter_};
+        Globals::game.gomokuBoard().markMove(
+            GomokuNetworking::GomokuNetworking::hostAddress(), newMove);
+
+        sendMoveUpdateToHost(newMove);
+
+      }
+
       else
-        displayErrorMessage("THIS TILE IS ALREADY TAKEN",
-                            EspGL::Vect2(Game::consts::SCREEN_WIDTH,
-                                         Game::consts::SCREEN_HEIGHT));
+        displayErrorMessage("THIS TILE IS ALREADY\nTAKEN!!!",
+                            EspGL::Vect2(0, 0));
       break;
 
     case static_cast<int>(Gpio::GpioInputs::GPIO_UP):
@@ -108,6 +115,7 @@ void PlayerTurnState::handleGpioInput(int pressedButton) {
 
 void PlayerTurnState::redrawScreen() {
   ESP_LOGD(TAG_, "RedrawingScreen.");
+  Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   gomokuBoard_.draw(Globals::game.screen());
 }
 
@@ -122,14 +130,25 @@ void PlayerTurnState::sendMoveUpdateToHost(BoardCoordinate move) {
                                {}};
   memcpy(sendData.payload.data(), reinterpret_cast<uint8_t*>(&updateMove),
          sizeof(structs::GomokuMoveUpdateFromPlayer));
-  sendData.crc =
-      esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
-                   GomokuNetworking::consts::ESPNOW_SEND_LEN);
-  structs::GomokuDataWithRecipient finalMessage{GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
-  GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
   if (myMac != GomokuNetworking::GomokuNetworking::gameHostAddress()) {
+    sendData.crc =
+        esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
+                     GomokuNetworking::consts::ESPNOW_SEND_LEN);
+    structs::GomokuDataWithRecipient finalMessage{
+        GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
+    GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
     Globals::game.setNextState(StateType::WaitingForTurn);
   } else {
+    sendData.state = GomokuMessageStates::SENDING_MOVE_TO_PLAYERS;
+    sendData.crc =
+        esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
+                     GomokuNetworking::consts::ESPNOW_SEND_LEN);
+    auto receiveCallback =
+        structs::GomokuEventReceiveCallback{.data = sendData};
+    auto event = structs::GomokuEvent{
+        .macAddress = GomokuNetworking::GomokuNetworking::gameHostAddress(),
+        .info = receiveCallback};
+    GomokuNetworking::GomokuNetworking::hostQueue().putQueue(event);
     Globals::game.setNextState(StateType::GameHostDuties);
   }
 }
