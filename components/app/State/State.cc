@@ -6,18 +6,12 @@
 namespace tamagotchi {
 namespace App {
 namespace State {
-void State::run() {
-  init();
-  loop();
-  deinit();
-  Globals::game.shiftState();
-}
-void State::loop() {
+
+void State::init() {
   Globals::game.eventQueue().clearQueue();
-  while (Globals::game.currentState() == Globals::game.nextState()) {
-    mainLoop();
-  }
+  stateInit();
 }
+void State::loop() { mainLoop(); }
 
 void State::displayErrorMessage(std::string message, EspGL::Vect2 placing) {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);

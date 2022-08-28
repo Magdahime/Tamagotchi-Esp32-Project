@@ -16,7 +16,7 @@ namespace State {
 
 void StartState::handleEvent(Event::Event event) {}
 
-void StartState::init() {
+void StartState::stateInit() {
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(

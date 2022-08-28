@@ -30,11 +30,11 @@ class State {
  public:
   virtual ~State() {}
   virtual void handleEvent(Event::Event event) = 0;
-  virtual void init() = 0;
+  virtual void init() final;
+  virtual void stateInit() = 0;
   virtual void mainLoop() = 0;
   virtual std::string toString() = 0;
   virtual void deinit() = 0;
-  virtual void run();
   void loop();
 
   void displayErrorMessage(std::string message, EspGL::Vect2 placing);

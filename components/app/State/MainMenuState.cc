@@ -55,7 +55,7 @@ void MainMenuState::handleEvent(Event::Event event) {
   }
 }
 
-void MainMenuState::init() {
+void MainMenuState::stateInit() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   ESP_LOGI(TAG_, "Drawing icons.");
   for (auto const& [key, val] : drawables_) {

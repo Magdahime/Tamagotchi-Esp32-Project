@@ -18,7 +18,7 @@ namespace State {
 bool HostDutiesState::coloursSent_ = false;
 
 void HostDutiesState::handleEvent(Event::Event event) {}
-void HostDutiesState::init() {
+void HostDutiesState::stateInit() {
   ESP_LOGI(TAG_, "Start HostDuties!");
   macAddresses_ = GomokuNetworking::GomokuNetworking::playersMacs();
   currentPlayer_ = macAddresses_.begin();

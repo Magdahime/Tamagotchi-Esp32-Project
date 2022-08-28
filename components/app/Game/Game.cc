@@ -35,7 +35,17 @@ Game::Game()
 void Game::run() {
   currentState_ = State::StateType::Start;
   nextState_ = State::StateType::Start;
-  shiftState();
+  while (currentState_ != State::StateType::End) {
+    states_[currentState_]->init();
+    while (currentState_ == nextState_) {
+      states_[currentState_]->loop();
+    }
+    states_[currentState_]->deinit();
+    shiftState();
+  }
+  states_[currentState_]->init();
+  states_[currentState_]->loop();
+  states_[currentState_]->deinit();
   ESP_LOGI(TAG_, "End of the Game.");
 }
 
@@ -82,10 +92,9 @@ void Game::initializeScreen() {
 }
 
 void Game::shiftState() {
-  auto nextState = states_[nextState_].get();
-  ESP_LOGI(TAG_, "Running new state: %s", nextState->toString().c_str());
+  const auto nextStatePtr = states_[nextState_].get();
+  ESP_LOGI(TAG_, "Running new state: %s", nextStatePtr->toString().c_str());
   currentState_ = nextState_;
-  nextState->run();
 }
 
 void Game::print(std::string message, EspGL::Hitbox position,

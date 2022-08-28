@@ -10,7 +10,7 @@ using namespace tamagotchi::App::GomokuNetworking;
 namespace tamagotchi::App::State {
 
 void EndGameState::handleEvent(Event::Event event) {}
-void EndGameState::init() {
+void EndGameState::stateInit() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   auto winner = Globals::game.gomokuBoard().winner();
   ESP_LOGI(TAG_, "Globals::game.gomokuBoard().winner(): " MACSTR,

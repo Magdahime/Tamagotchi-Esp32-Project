@@ -10,7 +10,7 @@ using namespace tamagotchi::App::GomokuNetworking;
 namespace tamagotchi::App::State {
 
 void WaitingForTurnState::handleEvent(Event::Event event) {}
-void WaitingForTurnState::init() {
+void WaitingForTurnState::stateInit() {
   myTurn_ = false;
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(

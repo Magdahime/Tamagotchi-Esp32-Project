@@ -30,7 +30,7 @@ void PlayerTurnState::handleEvent(Event::Event event) {
   }
 }
 
-void PlayerTurnState::init() {
+void PlayerTurnState::stateInit() {
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "#########\nIt is your\nturn now!:\n#########",

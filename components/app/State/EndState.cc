@@ -11,12 +11,6 @@ namespace State {
 
 void EndState::handleEvent(Event::Event event) {}
 
-void EndState::run() {
-  init();
-  mainLoop();
-  deinit();
-}
-
 void EndState::mainLoop() {
   ESP_LOGI(TAG_, "Serializing pet");
   Serializer::Serializer serializer;
@@ -24,13 +18,12 @@ void EndState::mainLoop() {
                        Globals::defaultValues::SERIALIZED_PET_PATH);
 }
 
-void EndState::init() {
+void EndState::stateInit() {
   ESP_LOGI(TAG_, "Filling window black");
   Globals::game.screen().fill(Globals::defaultValues::BACKGROUND_COLOUR);
   Globals::game.print(
       "###########\nGAME OVER\n###########",
-      {{0, 0},
-       {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
       EspGL::colours::GREEN);
 }
 
