@@ -24,7 +24,7 @@ class PlayerTurnState : public State {
   Gomoku::GomokuDrawable<Game::consts::GOMOKU_WIDTH,
                          Game::consts::GOMOKU_HEIGHT, uint16_t>& gomokuBoard_;
   void redrawScreen();
-  void handleGpioInput(int pressedButton);
+  void handleGpioInput(gpio_num_t pressedButton);
   void sendMoveUpdateToHost(GomokuNetworking::BoardCoordinate move);
   static constexpr char TAG_[] = "PlayerTurnState";
 };

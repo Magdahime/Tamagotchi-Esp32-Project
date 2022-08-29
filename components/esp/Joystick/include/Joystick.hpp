@@ -19,6 +19,7 @@ class Joystick {
   static void task(void *arg);
 
  private:
+  static void reset();
   static void handler(void *arg);
   static SemaphoreHandle_t mutex_;
   static int numberOfButtonInterrupts_;

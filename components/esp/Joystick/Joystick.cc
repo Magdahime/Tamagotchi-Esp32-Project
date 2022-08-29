@@ -25,16 +25,12 @@ void Joystick::task(void *arg) {
   Gpio::GpioDriver::setHandler(Gpio::GpioInputs::gpios, handler);
   bool savelastState, save;
   gpio_num_t savegpioNum;
-  portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
   while (xSemaphoreTake(mutex_, 0xffff) == pdTRUE) {
-    taskENTER_CRITICAL(&mux);
-
     save = numberOfButtonInterrupts_;
     savelastState = lastState_;
     savegpioNum = gpioNum_;
 
-    taskEXIT_CRITICAL(&mux);
     bool currentState =
         Gpio::GpioDriver::getLevel(static_cast<gpio_num_t>(savegpioNum));
 
@@ -44,7 +40,9 @@ void Joystick::task(void *arg) {
       memcpy(event.data_, static_cast<void *>(&gpioNum_), sizeof(gpioNum_));
       App::Globals::game.eventQueue().putQueue(event);
       numberOfButtonInterrupts_ = 0;
+      lastState_ = 0;
       gpioNum_ = static_cast<gpio_num_t>(0);
+      reset();
       ESP_LOGI(TAG_, "Pressed %s",
                Gpio::GpioInputs::gpio2string.at(savegpioNum));
     }
@@ -59,5 +57,12 @@ void IRAM_ATTR Joystick::handler(void *arg) {
   xSemaphoreGiveFromISR(mutex_, NULL);
   taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
 }
+
+void Joystick::reset() {
+  for (auto &gpio : Gpio::GpioInputs::gpios) {
+    Gpio::GpioDriver::setLevel(gpio, 0);
+  }
+}
+
 }  // namespace Joystick
 }  // namespace tamagotchi

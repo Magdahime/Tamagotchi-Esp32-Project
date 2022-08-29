@@ -81,7 +81,8 @@ void GomokuNetworking::task(void *pvParameters) {
 void GomokuNetworking::searchForFriends() {
   // Current number of players is 1, because it's us.
   int players = 1;
-  addPeerESP(consts::EXAMPLE_BROADCAST_MAC.data());
+  if (!esp_now_is_peer_exist(consts::EXAMPLE_BROADCAST_MAC.data()))
+    addPeerESP(consts::EXAMPLE_BROADCAST_MAC.data());
   ESP_LOGI(TAG_, "Creating PetGenerator");
   App::Pet::PetGenerator<uint16_t> petGenerator(
       Globals::defaultValues::PET_COMPONENTS_PATH);

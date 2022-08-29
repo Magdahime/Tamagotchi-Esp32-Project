@@ -12,11 +12,10 @@ PlayerTurnState::PlayerTurnState()
       gomokuBoard_(Globals::game.gomokuBoard()) {}
 
 void PlayerTurnState::handleEvent(Event::Event event) {
-  int pressedButton = 0;
+  gpio_num_t pressedButton;
   switch (event.type_) {
     case Event::EventTypes::gpio:
-      ESP_LOGI(TAG_, "GPIO EVENT");
-      pressedButton = *reinterpret_cast<int*>(event.data_);
+      pressedButton = *reinterpret_cast<gpio_num_t*>(event.data_);
       handleGpioInput(pressedButton);
       break;
 
@@ -46,6 +45,8 @@ void PlayerTurnState::stateInit() {
 }
 
 void PlayerTurnState::mainLoop() {
+  ESP_LOGI(TAG_, "EVENT QUEUE SIZE: %d",
+           tamagotchi::App::Globals::game.eventQueue().elementsCount());
   Event::Event event = tamagotchi::App::Globals::game.eventQueue().getQueue(
       consts::USER_INPUT_WAIT_TIME);
   if (!event.empty()) {
@@ -55,26 +56,26 @@ void PlayerTurnState::mainLoop() {
 }
 void PlayerTurnState::deinit() {}
 
-void PlayerTurnState::handleGpioInput(int pressedButton) {
+void PlayerTurnState::handleGpioInput(gpio_num_t pressedButton) {
   ESP_LOGI(TAG_, "handleGpioInput.");
   ESP_LOGI(TAG_, "ROW COUNTER %d, COLUMN COUNTER %d, TILE %d ", rowCounter_,
            columnCounter_, columnCounter_ * gomokuBoard_.width() + rowCounter_);
   gomokuBoard_.board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
       .dehighlight();
   switch (pressedButton) {
-    case static_cast<int>(Gpio::GpioInputs::GPIO_LEFT):
+    case Gpio::GpioInputs::GPIO_LEFT:
       ESP_LOGI(TAG_, "LEFT.");
       rowCounter_ =
           rowCounter_ > 0 ? rowCounter_ - 1 : gomokuBoard_.width() - 1;
       break;
 
-    case static_cast<int>(Gpio::GpioInputs::GPIO_RIGHT):
+    case Gpio::GpioInputs::GPIO_RIGHT:
       ESP_LOGI(TAG_, "RIGHT.");
       rowCounter_ =
           rowCounter_ < gomokuBoard_.width() - 1 ? rowCounter_ + 1 : 0;
       break;
 
-    case static_cast<int>(Gpio::GpioInputs::GPIO_MIDDLE):
+    case Gpio::GpioInputs::GPIO_MIDDLE:
       ESP_LOGI(TAG_, "MIDDLE.");
       if (gomokuBoard_
               .board()[columnCounter_ * gomokuBoard_.width() + rowCounter_]
@@ -92,13 +93,13 @@ void PlayerTurnState::handleGpioInput(int pressedButton) {
                             EspGL::Vect2(0, 0));
       break;
 
-    case static_cast<int>(Gpio::GpioInputs::GPIO_UP):
+    case Gpio::GpioInputs::GPIO_UP:
       ESP_LOGI(TAG_, "UP.");
       columnCounter_ =
           columnCounter_ > 0 ? columnCounter_ - 1 : gomokuBoard_.height() - 1;
       break;
 
-    case static_cast<int>(Gpio::GpioInputs::GPIO_DOWN):
+    case Gpio::GpioInputs::GPIO_DOWN:
       ESP_LOGI(TAG_, "DOWN.");
       columnCounter_ =
           columnCounter_ < gomokuBoard_.height() - 1 ? columnCounter_ + 1 : 0;

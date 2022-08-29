@@ -79,11 +79,13 @@ void HostDutiesState::mainLoop() {
 
   if (macAddresses_.empty()) {
     Globals::game.setNextState(StateType::EndMiniGame);
+    return;
   }
 
   if (currentPlayer_ == macAddresses_.end()) {
     ESP_LOGI(TAG_, "Host turn to make a move.");
     Globals::game.setNextState(StateType::PlayerTurn);
+    return;
   }
   EspGL::delay(GomokuNetworking::consts::ESPNOW_SEND_DELAY);
 }

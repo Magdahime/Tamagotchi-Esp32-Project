@@ -42,12 +42,15 @@ void EndGameState::stateInit() {
         {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
   }
-  EspGL::delay(3000);
+  EspGL::delay(5000);
   Globals::game.setNextState(StateType::MainMenu);
 }
 void EndGameState::mainLoop() {}
 void EndGameState::deinit() {
   vTaskDelete(GomokuNetworking::GomokuNetworking::gomokuNetworkingTask());
+  for (auto& peer : GomokuNetworking::GomokuNetworking::playersMacs()) {
+    esp_now_del_peer(peer.data());
+  }
 }
 
 }  // namespace tamagotchi::App::State

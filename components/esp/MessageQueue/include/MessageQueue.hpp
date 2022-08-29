@@ -18,8 +18,9 @@ class MessageQueue {
   void clearQueue();
   T getQueue(int ms = portMAX_DELAY);
   bool getQueue(T& elem, int ms = portMAX_DELAY);
-  bool empty() { return size_ == uxQueueSpacesAvailable(messageQueue_); }
+  bool empty() { return uxQueueMessagesWaiting(messageQueue_) == 0; }
   xQueueHandle& messageQueue() { return messageQueue_; }
+  int32_t elementsCount() { return uxQueueMessagesWaiting(messageQueue_); }
   int32_t size() { return size_; }
 
  private:
