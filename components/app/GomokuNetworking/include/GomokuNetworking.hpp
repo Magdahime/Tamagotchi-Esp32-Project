@@ -36,7 +36,7 @@ class GomokuNetworking {
   static mac_address_t gameHostAddress() { return gameHostAddress_; }
   static mac_address_t hostAddress() { return hostAddress_; }
   static std::vector<mac_address_t> playersMacs();
-  static structs::HostParams hostParams() { return hostParams_; }
+  static structs::HostParams &hostParams() { return hostParams_; }
   static MessageQueue::MessageQueue<structs::GomokuEvent> receiveQueue() {
     return receiveQueue_;
   }

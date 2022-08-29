@@ -29,11 +29,15 @@ void WaitingForTurnState::mainLoop() {
     auto& state = gomokuData.state;
     auto& payload = gomokuData.payload;
     structs::GomokuMoveUpdateFromPlayer* newMove;
-    if (state == GomokuNetworking::GomokuMessageStates::ERROR) return;
+    if (state == GomokuNetworking::GomokuMessageStates::ERROR) {
+      ESP_LOGE(TAG_, "ERROR MESSAGE");
+      return;
+    }
     switch (state) {
       case GomokuMessageStates::SENDING_ORDER:
         ESP_LOGI(TAG_, "SEND ORDER message");
-        sendAck(gomokuData.magic);
+        sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
+                gomokuData.magic);
         mac_address_t receiverAddress;
         memcpy(receiverAddress.data(), payload.data(), ESP_NOW_ETH_ALEN);
         if (receiverAddress ==
@@ -43,7 +47,8 @@ void WaitingForTurnState::mainLoop() {
         }
         break;
       case GomokuMessageStates::SENDING_MOVE_TO_PLAYERS:
-        sendAck(gomokuData.magic);
+        sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
+                gomokuData.magic);
         ESP_LOGI(TAG_, "UPDATE_BOARD message.");
         newMove = reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
             payload.data());
@@ -55,13 +60,15 @@ void WaitingForTurnState::mainLoop() {
               payload.data()));
         break;
       case GomokuMessageStates::END_OF_GAME:
-        sendAck(gomokuData.magic);
+        sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
+                gomokuData.magic);
         ESP_LOGI(TAG_, "END_OF_GAME message.");
         Globals::game.setNextState(StateType::EndMiniGame);
         break;
 
       case GomokuMessageStates::SENDING_COLOUR_CONFIG:
-        sendAck(gomokuData.magic);
+        sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
+                gomokuData.magic);
         ESP_LOGI(TAG_, "COLOUR_CONFIG message");
         updateGomokuPlayersColourInfo(payload);
       default:
@@ -73,6 +80,7 @@ void WaitingForTurnState::mainLoop() {
            GomokuNetworking::GomokuNetworking::hostQueue().empty());
 
   if (myTurn_ && GomokuNetworking::GomokuNetworking::hostQueue().empty()) {
+    myTurn_ = false;
     Globals::game.setNextState(StateType::PlayerTurn);
   }
   displayWaitingMessage();
@@ -96,21 +104,6 @@ void WaitingForTurnState::updateGomokuPlayersColourInfo(
     });
     (*it).second.setColour(EspGL::Colour16(elem.colourValue));
   }
-}
-
-void WaitingForTurnState::sendAck(uint32_t magic) {
-  ESP_LOGI(TAG_, "Sending ACK.");
-  structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
-                               GomokuMessageStates::ACK,
-                               0,
-                               magic,
-                               {}};
-  sendData.crc =
-      esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
-                   GomokuNetworking::consts::ESPNOW_SEND_LEN);
-  structs::GomokuDataWithRecipient finalMessage{
-      GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
-  GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
 }
 
 void WaitingForTurnState::displayWaitingMessage() {

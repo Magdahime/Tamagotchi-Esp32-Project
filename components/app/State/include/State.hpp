@@ -7,6 +7,7 @@
 #include "Drawable.hpp"
 #include "EspGLUtils.hpp"
 #include "Event.hpp"
+#include "GomokuNetworkingConf.hpp"
 #include "esp_log.h"
 
 namespace tamagotchi {
@@ -36,6 +37,7 @@ class State {
   virtual std::string toString() = 0;
   virtual void deinit() = 0;
   void loop();
+  void sendAck(GomokuNetworking::mac_address_t player, uint32_t magic);
 
   void displayErrorMessage(std::string message, EspGL::Vect2 placing);
 

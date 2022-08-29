@@ -45,15 +45,15 @@ void PlayerTurnState::stateInit() {
 }
 
 void PlayerTurnState::mainLoop() {
-  ESP_LOGI(TAG_, "EVENT QUEUE SIZE: %d",
-           tamagotchi::App::Globals::game.eventQueue().elementsCount());
   Event::Event event = tamagotchi::App::Globals::game.eventQueue().getQueue(
       consts::USER_INPUT_WAIT_TIME);
   if (!event.empty()) {
     handleEvent(event);
+    tamagotchi::App::Globals::game.eventQueue().clearQueue();
     redrawScreen();
   }
 }
+
 void PlayerTurnState::deinit() {}
 
 void PlayerTurnState::handleGpioInput(gpio_num_t pressedButton) {

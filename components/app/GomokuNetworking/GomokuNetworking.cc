@@ -207,7 +207,6 @@ void GomokuNetworking::handleCommunicationPlayer() {
     if (sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY) == pdPASS) {
       sendMessage(sendMsg);
     }
-    ESP_LOGI(TAG_, "CHECK");
     // RECEIVING
     if (receiveQueue_.getQueue(receiveMsg, consts::ESPNOW_SEND_DELAY) ==
         pdPASS) {
@@ -219,8 +218,6 @@ void GomokuNetworking::handleCommunicationPlayer() {
 }
 
 void GomokuNetworking::sendMessage(structs::GomokuDataWithRecipient message) {
-  ESP_LOGI(TAG_, "Sending message to " MACSTR ", magic: %d",
-           MAC2STR(message.destinationMac.data()), message.data.magic);
   auto result =
       esp_now_send(message.destinationMac.data(),
                    reinterpret_cast<uint8_t *>(&message.data), sendParams_.len);

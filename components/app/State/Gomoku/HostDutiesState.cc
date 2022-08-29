@@ -39,10 +39,10 @@ void HostDutiesState::mainLoop() {
   if (hostParams.newMove && hostParams.acksCollected) {
     ESP_LOGI(TAG_, "There is new move!");
     structs::GomokuEvent msg;
-    GomokuNetworking::GomokuNetworking::hostQueue().getQueue(msg);
-    auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
-    if (msg.macAddress == *(currentPlayer_) &&
-        gomokuData.state != GomokuMessageStates::ERROR) {
+    if ((GomokuNetworking::GomokuNetworking::hostQueue().getQueue(msg, 1000) ==
+         pdPASS) &&
+        msg.macAddress == *(currentPlayer_)) {
+      auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
       sendMoveUpdate(gomokuData.payload);
       auto result =
           updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
@@ -53,6 +53,7 @@ void HostDutiesState::mainLoop() {
         return;
       }
       currentPlayer_++;
+      hostParams.newMove = false;
       if (currentPlayer_ != macAddresses_.end()) {
         sendNotificationAboutCurrentPlayer();
         displayOrderMessage(*currentPlayer_);
