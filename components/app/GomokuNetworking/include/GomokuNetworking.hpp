@@ -82,6 +82,7 @@ class GomokuNetworking {
       std::vector<structs::SenderParams> &sendersLiveParams,
       std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
           &ackMessageQueue);
+  static void collectACKFromHost(structs::GomokuDataWithRecipient sendMsg);
   static void startCollectingACKs();
   static void handleMessage(
       structs::GomokuEvent &message,

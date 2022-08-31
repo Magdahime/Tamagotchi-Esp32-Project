@@ -140,27 +140,32 @@ void GomokuNetworking::handleCommunicationHost() {
     retransmit(sendersLiveParams, ackMessageQueue);
     // SENDING
     if (sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY) == pdPASS) {
-      ESP_LOGI(TAG_, "Sending message handleCommunicationHost");
-      auto it =
-          std::find_if(sendersLiveParams.begin(), sendersLiveParams.end(),
-                       [&](const auto &params) {
-                         return params.macAddress == sendMsg.destinationMac;
-                       });
-      if (it != sendersLiveParams.end()) {
-        it->ack = false;
-        it->timestamp = esp_timer_get_time();
-        uint32_t magic = sendMsg.data.magic;
-        ackMessageQueue.push_back({magic, sendMsg});
+      if (sendMsg.data.state == GomokuMessageStates::ACK) {
         sendMessage(sendMsg);
-        startCollectingACKs();
+      } else {
+        auto it =
+            std::find_if(sendersLiveParams.begin(), sendersLiveParams.end(),
+                         [&](const auto &params) {
+                           return params.macAddress == sendMsg.destinationMac;
+                         });
+        if (it != sendersLiveParams.end()) {
+          it->ack = false;
+          it->timestamp = esp_timer_get_time();
+          uint32_t magic = sendMsg.data.magic;
+          ackMessageQueue.push_back({magic, sendMsg});
+          sendMessage(sendMsg);
+          startCollectingACKs();
+        }
       }
     }
 
     //  RECEIVING
     if (receiveQueue_.getQueue(receiveMsg, consts::ESPNOW_SEND_DELAY) ==
         pdPASS) {
-      ESP_LOGI(TAG_, "Received message from " MACSTR,
-               MAC2STR(receiveMsg.macAddress));
+      ESP_LOGI(TAG_, "Received message from " MACSTR ", magic %d",
+               MAC2STR(receiveMsg.macAddress),
+               std::get<structs::GomokuEventReceiveCallback>(receiveMsg.info)
+                   .data.magic);
       handleMessage(receiveMsg, sendersLiveParams, ackMessageQueue);
     }
   }
@@ -201,18 +206,37 @@ void GomokuNetworking::retransmit(
 void GomokuNetworking::handleCommunicationPlayer() {
   ESP_LOGI(TAG_, "Start handleCommunicationPlayer");
   structs::GomokuDataWithRecipient sendMsg;
+  structs::GomokuDataWithRecipient retransmitMsg;
   structs::GomokuEvent receiveMsg;
+  bool ack = true;
   while (!ifDeinit_) {
     // SENDING
+    if (!ack) {
+      ESP_LOGI(TAG_, "Retransmit message about move to host ");
+      sendMessage(sendMsg);
+    }
     if (sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY) == pdPASS) {
+      if (sendMsg.data.state == GomokuMessageStates::SENDING_MOVE_TO_HOST) {
+        ack = false;
+        retransmitMsg = sendMsg;
+      }
       sendMessage(sendMsg);
     }
     // RECEIVING
     if (receiveQueue_.getQueue(receiveMsg, consts::ESPNOW_SEND_DELAY) ==
         pdPASS) {
-      ESP_LOGI(TAG_, "Received message from " MACSTR,
-               MAC2STR(receiveMsg.macAddress));
-      gameQueue_.putQueue(receiveMsg);
+      ESP_LOGI(TAG_, "Received message from " MACSTR ", magic %d",
+               MAC2STR(receiveMsg.macAddress),
+               std::get<structs::GomokuEventReceiveCallback>(receiveMsg.info)
+                   .data.magic);
+      if ((std::get<structs::GomokuEventReceiveCallback>(receiveMsg.info)
+               .data.state == GomokuMessageStates::ACK) &&
+          (receiveMsg.macAddress == gameHostAddress_) && ack == false) {
+        ack = true;
+        ESP_LOGI(TAG_, "ACK from host received!");
+      } else {
+        gameQueue_.putQueue(receiveMsg);
+      }
     }
   }
 }
@@ -221,6 +245,8 @@ void GomokuNetworking::sendMessage(structs::GomokuDataWithRecipient message) {
   auto result =
       esp_now_send(message.destinationMac.data(),
                    reinterpret_cast<uint8_t *>(&message.data), sendParams_.len);
+  ESP_LOGI(TAG_, "Sending data to " MACSTR ", magic %d",
+           MAC2STR(message.destinationMac), message.data.magic);
   if (result != ESP_OK) {
     ESP_LOGE(TAG_, "ESPNOW SEND ERROR: %d", result);
   }
@@ -302,9 +328,6 @@ void GomokuNetworking::sendDataCallback(const uint8_t *macAddress,
     ESP_LOGE(TAG_, "SEND CALLBACK ERROR - MAC ADDRESS NULL");
     return;
   }
-  ESP_LOGI("GomokuNetworking::sendDataCallback",
-           "Sending message to " MACSTR " status: %d", MAC2STR(macAddress),
-           status);
 }
 
 void GomokuNetworking::receiveDataCallback(const uint8_t *macAddress,
@@ -442,5 +465,8 @@ void GomokuNetworking::removeFromAckMessageQueue(
                       [&](auto &pair) { return pair.first == id; });
   }
 }
+
+void GomokuNetworking::collectACKFromHost(
+    structs::GomokuDataWithRecipient sendMsg) {}
 
 }  // namespace tamagotchi::App::GomokuNetworking

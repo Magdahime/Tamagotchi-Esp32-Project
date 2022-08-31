@@ -21,7 +21,6 @@ void WaitingForTurnState::stateInit() {
 void WaitingForTurnState::mainLoop() {
   ESP_LOGI(TAG_, "Waiting for my turn");
   structs::GomokuEvent msg;
-
   if (GomokuNetworking::GomokuNetworking::hostQueue().getQueue(
           msg, GomokuNetworking::consts::ESPNOW_SEND_DELAY) == pdPASS) {
     ESP_LOGI(TAG_, "Message from " MACSTR, MAC2STR(msg.macAddress));
@@ -71,13 +70,20 @@ void WaitingForTurnState::mainLoop() {
                 gomokuData.magic);
         ESP_LOGI(TAG_, "COLOUR_CONFIG message");
         updateGomokuPlayersColourInfo(payload);
+        break;
+
       default:
+        ESP_LOGE(TAG_, "UNKNOWN STATE: %d", state);
+        sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
+                gomokuData.magic);
         break;
     }
   }
   ESP_LOGI(TAG_, "MY TURN: %d", myTurn_);
   ESP_LOGI(TAG_, "QUEUE_EMPTY : %d",
            GomokuNetworking::GomokuNetworking::hostQueue().empty());
+  ESP_LOGI(TAG_, "NUMBER OF ELEMENTS : %d",
+           GomokuNetworking::GomokuNetworking::hostQueue().elementsCount());
 
   if (myTurn_ && GomokuNetworking::GomokuNetworking::hostQueue().empty()) {
     myTurn_ = false;

@@ -43,6 +43,7 @@ void HostDutiesState::mainLoop() {
          pdPASS) &&
         msg.macAddress == *(currentPlayer_)) {
       auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
+      sendAck(*currentPlayer_, gomokuData.magic);
       sendMoveUpdate(gomokuData.payload);
       auto result =
           updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(

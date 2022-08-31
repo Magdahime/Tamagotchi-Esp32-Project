@@ -25,7 +25,7 @@ void State::displayErrorMessage(std::string message, EspGL::Vect2 placing) {
 }
 
 void State::sendAck(mac_address_t player, uint32_t magic) {
-  ESP_LOGI("State", "Sending ACK.");
+  ESP_LOGI("State", "Sending ACK magic: %d.", magic);
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
                                GomokuMessageStates::ACK,
                                0,
