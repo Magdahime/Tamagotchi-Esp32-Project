@@ -22,9 +22,9 @@ void EndGameState::stateInit() {
     Globals::game.print(
         message,
         {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
-        EspGL::colours::GREEN);
+        EspGL::colours::YELLOW);
   } else if (!Globals::game.gomokuBoard().full()) {
-    std::string message = "Winner is player:";
+    std::string message = "Winner is\nplayer:";
     Globals::game.print(
         message,
         {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
@@ -46,11 +46,6 @@ void EndGameState::stateInit() {
   Globals::game.setNextState(StateType::MainMenu);
 }
 void EndGameState::mainLoop() {}
-void EndGameState::deinit() {
-  vTaskDelete(GomokuNetworking::GomokuNetworking::gomokuNetworkingTask());
-  for (auto& peer : GomokuNetworking::GomokuNetworking::playersMacs()) {
-    esp_now_del_peer(peer.data());
-  }
-}
+void EndGameState::deinit() { GomokuNetworking::GomokuNetworking::setDeinit(); }
 
 }  // namespace tamagotchi::App::State

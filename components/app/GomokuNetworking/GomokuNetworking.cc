@@ -59,7 +59,9 @@ TaskHandle_t &GomokuNetworking::run() {
 }
 
 void GomokuNetworking::deinit() {
-  esp_now_deinit();
+  for (auto &peer : GomokuNetworking::GomokuNetworking::playersMacs()) {
+    esp_now_del_peer(peer.data());
+  }
   vTaskDelete(gomokuNetworkingTask_);
 }
 
@@ -135,11 +137,15 @@ void GomokuNetworking::handleCommunicationHost() {
                            .retransmitCounter = 0};
                  });
 
-  while (!ifDeinit_) {
+  while (!ifDeinit_ || !sendingQueue_.empty()) {
+    ESP_LOGI(TAG_, "NUMBER OF ELEMENTS : %d", sendingQueue_.elementsCount());
     // CHECKING IF WE NEED TO RETRANSMIT
     retransmit(sendersLiveParams, ackMessageQueue);
     // SENDING
-    if (sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY) == pdPASS) {
+    const auto queueResult =
+        sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY);
+    ESP_LOGI(TAG_, "QUEUE RESULT %d", queueResult);
+    if (queueResult == pdPASS) {
       if (sendMsg.data.state == GomokuMessageStates::ACK) {
         sendMessage(sendMsg);
       } else {
@@ -149,6 +155,7 @@ void GomokuNetworking::handleCommunicationHost() {
                            return params.macAddress == sendMsg.destinationMac;
                          });
         if (it != sendersLiveParams.end()) {
+          ESP_LOGI(TAG_, "it != sendersLiveParams.end()");
           it->ack = false;
           it->timestamp = esp_timer_get_time();
           uint32_t magic = sendMsg.data.magic;

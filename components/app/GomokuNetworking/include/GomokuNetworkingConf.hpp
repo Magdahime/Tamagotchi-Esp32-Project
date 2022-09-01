@@ -36,7 +36,7 @@ constexpr int SENDING_INVITE_DELAY = 2000;
 
 constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
-constexpr int ESPNOW_SEND_DELAY = 3000;
+constexpr int ESPNOW_SEND_DELAY = 1000;
 
 constexpr int ESPNOW_RETRANSMIT_THRESHOLD_MS = 5000;
 

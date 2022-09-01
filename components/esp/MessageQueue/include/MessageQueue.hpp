@@ -66,6 +66,7 @@ T MessageQueue<T>::getQueue(int ms) {
   T message;
   if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(ms)) == pdPASS) {
     xQueueReceive(messageQueue_, &(message), (TickType_t)ms);
+    xSemaphoreGive(mutex_);
   }
   return message;
 }
@@ -73,7 +74,9 @@ T MessageQueue<T>::getQueue(int ms) {
 template <typename T>
 bool MessageQueue<T>::getQueue(T& elem, int ms) {
   if (xSemaphoreTake(mutex_, pdMS_TO_TICKS(ms)) == pdPASS) {
-    return xQueueReceive(messageQueue_, &(elem), (TickType_t)ms);
+    auto result = xQueueReceive(messageQueue_, &(elem), (TickType_t)ms);
+    xSemaphoreGive(mutex_);
+    return result;
   }
   return false;
 }
