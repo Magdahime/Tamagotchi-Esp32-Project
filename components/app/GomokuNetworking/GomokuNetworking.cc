@@ -126,10 +126,9 @@ void GomokuNetworking::searchForFriends() {
 
     if (addPeer(petGenerator, msg.macAddress, gomokuData, players)) {
       players++;
+      chooseHost(msg.macAddress, gomokuData);
     }
-
     ESP_LOGI(TAG_, "Current number of players: %d ", players);
-    chooseHost(msg.macAddress, gomokuData);
 
     if ((players == consts::MAX_GOMOKU_PLAYERS &&
          gameHostAddress_ == hostAddress_) ||
@@ -148,6 +147,7 @@ void GomokuNetworking::searchForFriends() {
 
 void GomokuNetworking::handleCommunicationHost() {
   ESP_LOGI(TAG_, "Start handleCommunicationHost");
+  sendStartGameMessage();
   std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
       ackMessageQueue;
   structs::GomokuDataWithRecipient sendMsg;
@@ -358,6 +358,11 @@ void GomokuNetworking::sendDataCallback(const uint8_t *macAddress,
     ESP_LOGE(TAG_, "SEND CALLBACK ERROR - MAC ADDRESS NULL");
     return;
   }
+
+  if (status != ESP_NOW_SEND_SUCCESS) {
+    ESP_LOGE(TAG_, "ERROR WHEN SENDING MESSAGE");
+    return;
+  }
 }
 
 void GomokuNetworking::receiveDataCallback(const uint8_t *macAddress,
@@ -402,9 +407,9 @@ void GomokuNetworking::prepareData() {
 }
 
 structs::GomokuData GomokuNetworking::unpackData(structs::GomokuEvent event) {
-  auto &receiveCallback =
+  const auto &receiveCallback =
       std::get<structs::GomokuEventReceiveCallback>(event.info);
-  auto &gomokuData = receiveCallback.data;
+  auto gomokuData = receiveCallback.data;
   int16_t receivedCrc = gomokuData.crc;
   gomokuData.crc = 0;
   int16_t calculatedCrc =
@@ -493,6 +498,23 @@ void GomokuNetworking::removeFromAckMessageQueue(
     ackMessageQueue.erase(it);
     it = std::find_if(ackMessageQueue.begin(), ackMessageQueue.end(),
                       [&](auto &pair) { return pair.first == id; });
+  }
+}
+
+void GomokuNetworking::sendStartGameMessage() {
+  ESP_LOGI(TAG_, "Sending START of game message");
+  structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
+                               GomokuMessageStates::START_OF_GAME,
+                               0,
+                               0,
+                               {}};
+  for (auto mac : playersMacs()) {
+    sendData.magic = esp_random();
+    sendData.crc =
+        esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const *>(&sendData),
+                     consts::ESPNOW_SEND_LEN);
+    structs::GomokuDataWithRecipient finalMessage{mac, sendData};
+    sendingQueue_.putQueue(finalMessage);
   }
 }
 

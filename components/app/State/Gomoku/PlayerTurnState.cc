@@ -129,6 +129,7 @@ void PlayerTurnState::sendMoveUpdateToHost(BoardCoordinate move) {
                                {}};
   memcpy(sendData.payload.data(), reinterpret_cast<uint8_t*>(&updateMove),
          sizeof(structs::GomokuMoveUpdateFromPlayer));
+
   if (myMac != GomokuNetworking::GomokuNetworking::gameHostAddress()) {
     sendData.magic = esp_random();
     sendData.crc =
@@ -140,17 +141,14 @@ void PlayerTurnState::sendMoveUpdateToHost(BoardCoordinate move) {
     Globals::game.setNextState(StateType::WaitingForTurn);
   } else {
     sendData.state = GomokuMessageStates::SENDING_MOVE_TO_PLAYERS;
-    sendData.magic = esp_random();
-    sendData.crc =
-        esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
-                     GomokuNetworking::consts::ESPNOW_SEND_LEN);
-
-    auto receiveCallback =
-        structs::GomokuEventReceiveCallback{.data = sendData};
-    auto event = structs::GomokuEvent{
-        .macAddress = GomokuNetworking::GomokuNetworking::gameHostAddress(),
-        .info = receiveCallback};
-    GomokuNetworking::GomokuNetworking::hostQueue().putQueue(event);
+    for (auto mac : GomokuNetworking::GomokuNetworking::playersMacs()) {
+      sendData.magic = esp_random();
+      sendData.crc =
+          esp_crc16_le(UINT16_MAX, reinterpret_cast<uint8_t const*>(&sendData),
+                       GomokuNetworking::consts::ESPNOW_SEND_LEN);
+      structs::GomokuDataWithRecipient finalMessage{mac, sendData};
+      GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
+    }
     Globals::game.setNextState(StateType::GameHostDuties);
   }
 }

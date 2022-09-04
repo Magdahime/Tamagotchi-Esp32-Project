@@ -15,28 +15,23 @@ namespace tamagotchi {
 namespace App {
 namespace State {
 
-bool HostDutiesState::coloursSent_ = false;
+bool HostDutiesState::init_ = false;
 
 void HostDutiesState::handleEvent(Event::Event event) {}
 void HostDutiesState::stateInit() {
   ESP_LOGI(TAG_, "Start HostDuties!");
   macAddresses_ = GomokuNetworking::GomokuNetworking::playersMacs();
-  sendStartGameMessage();
-  currentPlayer_ = macAddresses_.begin();
-  handleHostMove();
-  if (!coloursSent_) {
+  if (!init_) {
     sendColourConfig();
-    coloursSent_ = true;
+    init_ = true;
   }
-  EspGL::delay(GomokuNetworking::consts::ESPNOW_SEND_DELAY);
+  currentPlayer_ = macAddresses_.begin();
   sendNotificationAboutCurrentPlayer();
   displayOrderMessage(*currentPlayer_);
 }
 
 void HostDutiesState::mainLoop() {
   auto hostParams = GomokuNetworking::GomokuNetworking::hostParams();
-  ESP_LOGI(TAG_, "hostParams.acksCollected %d ", hostParams.acksCollected);
-  ESP_LOGI(TAG_, "hostParams.newMove  %d ", hostParams.newMove);
   if (hostParams.newMove && hostParams.acksCollected) {
     ESP_LOGI(TAG_, "There is new move!");
     structs::GomokuEvent msg;
@@ -61,7 +56,6 @@ void HostDutiesState::mainLoop() {
         displayOrderMessage(*currentPlayer_);
       }
     }
-    ESP_LOGI(TAG_, "hostParams.newMove = false;");
     hostParams.newMove = false;
   }
 
@@ -126,6 +120,8 @@ void HostDutiesState::sendAll(structs::GomokuData sendData) {
     structs::GomokuDataWithRecipient finalMessage{mac, sendData};
     GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
   }
+  ESP_LOGI(TAG_, "ELEMS: %d",
+           GomokuNetworking::GomokuNetworking::sendingQueue().elementsCount());
 }
 
 bool HostDutiesState::updateBoard(
@@ -136,22 +132,12 @@ bool HostDutiesState::updateBoard(
   return Globals::game.gomokuBoard().isWinner();
 }
 
-void HostDutiesState::deinit() { coloursSent_ = false; }
+void HostDutiesState::deinit() {}
 
 void HostDutiesState::sendEndOfGameMessage() {
   ESP_LOGI(TAG_, "Sending end of game message");
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
                                GomokuMessageStates::END_OF_GAME,
-                               0,
-                               0,
-                               {}};
-  sendAll(sendData);
-}
-
-void HostDutiesState::sendStartGameMessage() {
-  ESP_LOGI(TAG_, "Sending START of game message");
-  structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
-                               GomokuMessageStates::START_OF_GAME,
                                0,
                                0,
                                {}};
@@ -231,14 +217,6 @@ void HostDutiesState::displayOrderMessage(mac_address_t nextPlayer) {
                          [&](auto pair) { return pair.first == nextPlayer; });
   (*it).second.setStart(EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2));
   (*it).second.draw(Globals::game.screen());
-}
-
-void HostDutiesState::handleHostMove() {
-  structs::GomokuEvent msg;
-  if (GomokuNetworking::GomokuNetworking::hostQueue().getQueue(msg, 1000) ==
-      pdPASS) {
-    sendAll(GomokuNetworking::GomokuNetworking::unpackData(msg));
-  }
 }
 
 }  // namespace State

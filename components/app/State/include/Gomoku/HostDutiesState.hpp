@@ -31,11 +31,11 @@ class HostDutiesState : public State {
           payload);
   bool updateBoard(
       GomokuNetworking::structs::GomokuMoveUpdateFromPlayer* nextMove);
-  void sendStartGameMessage();
   void sendEndOfGameMessage();
+  static void setInit() { init_ = false; }
 
  private:
-  static bool coloursSent_;
+  static bool init_;
   void updateColourConfig(
       std::array<GomokuNetworking::structs::Colour2Player,
                  GomokuNetworking::consts::MAX_GOMOKU_PLAYERS>& colour2Player);

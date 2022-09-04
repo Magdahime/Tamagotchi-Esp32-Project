@@ -25,7 +25,7 @@ void WaitingForTurnState::mainLoop() {
           msg, GomokuNetworking::consts::ESPNOW_SEND_DELAY) == pdPASS) {
     ESP_LOGI(TAG_, "Message from " MACSTR, MAC2STR(msg.macAddress));
     auto gomokuData = GomokuNetworking::GomokuNetworking::unpackData(msg);
-    auto& state = gomokuData.state;
+    const auto& state = gomokuData.state;
     auto& payload = gomokuData.payload;
     structs::GomokuMoveUpdateFromPlayer* newMove;
     if (state == GomokuNetworking::GomokuMessageStates::ERROR) {
@@ -34,9 +34,11 @@ void WaitingForTurnState::mainLoop() {
     }
     switch (state) {
       case GomokuMessageStates::START_OF_GAME:
+        ESP_LOGI(TAG_, "START GAME message");
         sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
                 gomokuData.magic);
         break;
+
       case GomokuMessageStates::SENDING_ORDER:
         ESP_LOGI(TAG_, "SEND ORDER message");
         sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
@@ -44,11 +46,14 @@ void WaitingForTurnState::mainLoop() {
         mac_address_t receiverAddress;
         memcpy(receiverAddress.data(), payload.data(), ESP_NOW_ETH_ALEN);
         if (receiverAddress ==
-            GomokuNetworking::GomokuNetworking::hostAddress()) {
+                GomokuNetworking::GomokuNetworking::hostAddress() &&
+            lastMyTurnMagic_ != gomokuData.magic) {
+          lastMyTurnMagic_ = gomokuData.magic;
           ESP_LOGI(TAG_, "MY_TURN message");
           myTurn_ = true;
         }
         break;
+
       case GomokuMessageStates::SENDING_MOVE_TO_PLAYERS:
         sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
                 gomokuData.magic);
@@ -62,6 +67,7 @@ void WaitingForTurnState::mainLoop() {
           updateBoard(reinterpret_cast<structs::GomokuMoveUpdateFromPlayer*>(
               payload.data()));
         break;
+
       case GomokuMessageStates::END_OF_GAME:
         sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
                 gomokuData.magic);

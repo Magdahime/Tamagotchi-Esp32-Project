@@ -5,7 +5,9 @@
 
 #include "Game.hpp"
 #include "Globals.hpp"
+#include "Gomoku/HostDutiesState.hpp"
 #include "GomokuNetworkingConf.hpp"
+
 using namespace tamagotchi::App::GomokuNetworking;
 namespace tamagotchi::App::State {
 
@@ -54,6 +56,9 @@ void EndGameState::mainLoop() {
     break;
   }
 }
-void EndGameState::deinit() { GomokuNetworking::GomokuNetworking::setDeinit(); }
+void EndGameState::deinit() {
+  GomokuNetworking::GomokuNetworking::setDeinit();
+  HostDutiesState::setInit();
+}
 
 }  // namespace tamagotchi::App::State
