@@ -42,10 +42,19 @@ void EndGameState::stateInit() {
         {{0, 0}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
         EspGL::colours::GREEN);
   }
-  EspGL::delay(5000);
-  Globals::game.setNextState(StateType::MainMenu);
+  Globals::game.print(
+      "Click to continue...",
+      {{0, 280}, {Game::consts::SCREEN_WIDTH, Game::consts::SCREEN_HEIGHT}},
+      EspGL::colours::GREEN, 1);
 }
-void EndGameState::mainLoop() {}
+void EndGameState::mainLoop() {
+  while (tamagotchi::App::Globals::game.eventQueue()
+             .getQueue(consts::USER_INPUT_WAIT_TIME)
+             .type_ == Event::EventTypes::gpio) {
+    Globals::game.setNextState(StateType::MainMenu);
+    break;
+  }
+}
 void EndGameState::deinit() { GomokuNetworking::GomokuNetworking::setDeinit(); }
 
 }  // namespace tamagotchi::App::State
