@@ -69,6 +69,10 @@ class GomokuDrawable
                          return tile.empty() == false;
                        });
   }
+  void clear() {
+    std::for_each(board_.begin(), board_.end(),
+                  [&](GomokuTile<ColourRepresentation> tile) { tile.clear(); });
+  }
 
  private:
   static constexpr char TAG_[] = "GomokuDrawable";

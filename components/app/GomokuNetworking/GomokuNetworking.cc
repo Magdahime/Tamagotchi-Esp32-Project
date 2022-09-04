@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include <algorithm>
+#include <array>
 #include <utility>
 #include <variant>
 
@@ -45,6 +46,15 @@ bool GomokuNetworking::ifDeinit_ = false;
 ///////////////////////////////////////////////////////////////////////////
 
 void GomokuNetworking::init() {
+  sendParams_ = {.unicast = false,
+                 .state = GomokuMessageStates::BROADCAST,
+                 .magic = esp_random(),
+                 .len = consts::ESPNOW_SEND_LEN,
+                 {0},
+                 {0}};
+  hostParams_ = {.newMove = false,
+                 .acksCollected = false,
+                 .disconnectedPlayers{consts::MAX_GOMOKU_PLAYERS}};
   esp_read_mac(hostAddress_.data(), ESP_MAC_WIFI_SOFTAP);
   esp_read_mac(gameHostAddress_.data(), ESP_MAC_WIFI_SOFTAP);
   sendParams_.destinationMac = consts::EXAMPLE_BROADCAST_MAC;
@@ -62,6 +72,11 @@ void GomokuNetworking::deinit() {
   for (auto &peer : GomokuNetworking::GomokuNetworking::playersMacs()) {
     esp_now_del_peer(peer.data());
   }
+  playersParams_.clear();
+  receiveQueue_.clearQueue();
+  sendingQueue_.clearQueue();
+  gameQueue_.clearQueue();
+  ifDeinit_ = false;
   vTaskDelete(gomokuNetworkingTask_);
 }
 
@@ -90,28 +105,38 @@ void GomokuNetworking::searchForFriends() {
       Globals::defaultValues::PET_COMPONENTS_PATH);
   ESP_LOGI(TAG_, "Created PetGenerator");
 
-  while (sendParams_.state == GomokuMessageStates::BROADCAST) {
-    if (players == consts::MAX_GOMOKU_PLAYERS) break;
+  while (true) {
     sendGameInvite();
-    auto msg = receiveQueue_.getQueue(consts::MAX_DELAY);
-    if (std::holds_alternative<structs::GomokuEventReceiveCallback>(msg.info)) {
-      auto gomokuData = unpackData(msg);
-      ESP_LOGI(TAG_, "RECEIVE  BROADCAST DATA FROM: " MACSTR ", LEN: %d",
-               MAC2STR(msg.macAddress.data()), sizeof(gomokuData));
+    auto msg = receiveQueue_.getQueue(consts::ESPNOW_SEND_DELAY);
 
-      if (gomokuData.state == GomokuMessageStates::ERROR) {
-        ESP_LOGE(TAG_, "DATA FROM: " MACSTR " is corrupted.",
-                 MAC2STR(msg.macAddress.data()));
-        continue;
-      }
-      if (addPeer(petGenerator, msg.macAddress, gomokuData, players)) players++;
-      ESP_LOGI(TAG_, "Current number of players: %d ", players);
-      chooseHost(msg.macAddress, gomokuData);
-      if (sendParams_.state == GomokuMessageStates::BROADCAST &&
-          players == consts::MAX_GOMOKU_PLAYERS) {
-        ESP_LOGI(TAG_, "Stopping sending data to broadcast.");
-        sendParams_.state = GomokuMessageStates::UNICAST;
-      }
+    if (!std::holds_alternative<structs::GomokuEventReceiveCallback>(
+            msg.info)) {
+      continue;
+    }
+
+    auto gomokuData = unpackData(msg);
+    ESP_LOGI(TAG_, "RECEIVE  BROADCAST DATA FROM: " MACSTR ", LEN: %d",
+             MAC2STR(msg.macAddress.data()), sizeof(gomokuData));
+
+    if (gomokuData.state == GomokuMessageStates::ERROR) {
+      ESP_LOGE(TAG_, "DATA FROM: " MACSTR " is corrupted.",
+               MAC2STR(msg.macAddress.data()));
+      continue;
+    }
+
+    if (addPeer(petGenerator, msg.macAddress, gomokuData, players)) {
+      players++;
+    }
+
+    ESP_LOGI(TAG_, "Current number of players: %d ", players);
+    chooseHost(msg.macAddress, gomokuData);
+
+    if ((players == consts::MAX_GOMOKU_PLAYERS &&
+         gameHostAddress_ == hostAddress_) ||
+        gomokuData.state == GomokuMessageStates::START_OF_GAME) {
+      ESP_LOGI(TAG_, "Stopping sending data to broadcast.");
+      sendParams_.state = GomokuMessageStates::UNICAST;
+      break;
     }
   }
 
@@ -144,7 +169,6 @@ void GomokuNetworking::handleCommunicationHost() {
     // SENDING
     const auto queueResult =
         sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY);
-    ESP_LOGI(TAG_, "QUEUE RESULT %d", queueResult);
     if (queueResult == pdPASS) {
       if (sendMsg.data.state == GomokuMessageStates::ACK) {
         sendMessage(sendMsg);
@@ -155,7 +179,6 @@ void GomokuNetworking::handleCommunicationHost() {
                            return params.macAddress == sendMsg.destinationMac;
                          });
         if (it != sendersLiveParams.end()) {
-          ESP_LOGI(TAG_, "it != sendersLiveParams.end()");
           it->ack = false;
           it->timestamp = esp_timer_get_time();
           uint32_t magic = sendMsg.data.magic;
@@ -326,7 +349,7 @@ void GomokuNetworking::sendGameInvite() {
   if (result != ESP_OK) {
     ESP_LOGE(TAG_, "ESPNOW SEND ERROR: %d", result);
   }
-  vTaskDelay(consts::SENDING_INVITE_DELAY / portTICK_PERIOD_MS);
+  vTaskDelay(consts::ESPNOW_SEND_DELAY);
 }
 
 void GomokuNetworking::sendDataCallback(const uint8_t *macAddress,

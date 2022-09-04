@@ -32,13 +32,12 @@ constexpr char LMK[] = "lmk1234567890123";
 
 constexpr int QUEUE_SIZE = 10;
 constexpr int MAX_DELAY = 512;
-constexpr int SENDING_INVITE_DELAY = 2000;
 
 constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
-constexpr int ESPNOW_SEND_DELAY = 1000;
+constexpr int ESPNOW_SEND_DELAY = 100;
 
-constexpr int ESPNOW_RETRANSMIT_THRESHOLD_MS = 5000;
+constexpr int ESPNOW_RETRANSMIT_THRESHOLD_MS = 10000;
 
 constexpr int ESP_NOW_RETRANSMIT_MAX = 5;
 constexpr int ESPNOW_PAYLOAD_MAX = 150;
@@ -65,6 +64,7 @@ constexpr uint8_t SENDING_MOVE_TO_PLAYERS = 0b00010010;
 constexpr uint8_t SENDING_MOVE_TO_HOST = 0b00011110;
 constexpr uint8_t SENDING_ORDER = 0b00111110;
 constexpr uint8_t DEAD_PLAYER = 0b10000010;
+constexpr uint8_t START_OF_GAME = 0b10000001;
 constexpr uint8_t END_OF_GAME = 0b11111111;
 
 }  // namespace GomokuMessageStates

@@ -46,6 +46,12 @@ class GomokuTile {
     return playerId_;
   }
 
+  void clear() {
+    highlighted_ = false;
+    previouslyHighlighted_ = false;
+    playerId_ = std::monostate{};
+  }
+
  private:
   bool highlighted_;
   bool previouslyHighlighted_;

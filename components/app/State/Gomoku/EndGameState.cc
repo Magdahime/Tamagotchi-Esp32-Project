@@ -34,7 +34,6 @@ void EndGameState::stateInit() {
                            [&](auto pair) { return pair.first == winner; });
     (*it).second.setStart(EspGL::Vect2(0, Game::consts::SCREEN_HEIGHT / 2));
     (*it).second.draw(Globals::game.screen());
-
   } else {
     std::string message = "Draw!\nBetter luck next\ntime!";
     Globals::game.print(

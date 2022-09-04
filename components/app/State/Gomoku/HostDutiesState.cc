@@ -21,6 +21,7 @@ void HostDutiesState::handleEvent(Event::Event event) {}
 void HostDutiesState::stateInit() {
   ESP_LOGI(TAG_, "Start HostDuties!");
   macAddresses_ = GomokuNetworking::GomokuNetworking::playersMacs();
+  sendStartGameMessage();
   currentPlayer_ = macAddresses_.begin();
   handleHostMove();
   if (!coloursSent_) {
@@ -135,12 +136,22 @@ bool HostDutiesState::updateBoard(
   return Globals::game.gomokuBoard().isWinner();
 }
 
-void HostDutiesState::deinit() {}
+void HostDutiesState::deinit() { coloursSent_ = false; }
 
 void HostDutiesState::sendEndOfGameMessage() {
   ESP_LOGI(TAG_, "Sending end of game message");
   structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
                                GomokuMessageStates::END_OF_GAME,
+                               0,
+                               0,
+                               {}};
+  sendAll(sendData);
+}
+
+void HostDutiesState::sendStartGameMessage() {
+  ESP_LOGI(TAG_, "Sending START of game message");
+  structs::GomokuData sendData{structs::GomokuCommunicationType::UNICAST,
+                               GomokuMessageStates::START_OF_GAME,
                                0,
                                0,
                                {}};

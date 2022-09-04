@@ -33,6 +33,10 @@ void WaitingForTurnState::mainLoop() {
       return;
     }
     switch (state) {
+      case GomokuMessageStates::START_OF_GAME:
+        sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),
+                gomokuData.magic);
+        break;
       case GomokuMessageStates::SENDING_ORDER:
         ESP_LOGI(TAG_, "SEND ORDER message");
         sendAck(GomokuNetworking::GomokuNetworking::gameHostAddress(),

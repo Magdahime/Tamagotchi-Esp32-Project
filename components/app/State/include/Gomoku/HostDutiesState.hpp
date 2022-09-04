@@ -31,7 +31,7 @@ class HostDutiesState : public State {
           payload);
   bool updateBoard(
       GomokuNetworking::structs::GomokuMoveUpdateFromPlayer* nextMove);
-
+  void sendStartGameMessage();
   void sendEndOfGameMessage();
 
  private:
