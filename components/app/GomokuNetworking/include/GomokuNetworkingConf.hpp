@@ -37,7 +37,7 @@ constexpr int ESPNOW_CHANNEL = 1;
 constexpr int ESPNOW_SEND_COUNT = 100;
 constexpr int ESPNOW_SEND_DELAY = 100;
 
-constexpr int ESPNOW_RETRANSMIT_THRESHOLD_MS = 10000;
+constexpr int ESPNOW_RETRANSMIT_THRESHOLD_MS = 1000;
 
 constexpr int ESP_NOW_RETRANSMIT_MAX = 5;
 constexpr int ESPNOW_PAYLOAD_MAX = 150;

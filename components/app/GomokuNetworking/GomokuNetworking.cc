@@ -42,7 +42,7 @@ structs::HostParams GomokuNetworking::hostParams_ = {
     .acksCollected = false,
     .disconnectedPlayers{consts::MAX_GOMOKU_PLAYERS}};
 bool GomokuNetworking::ifDeinit_ = false;
-
+int GomokuNetworking::retransmitTimestamp_ = 0;
 ///////////////////////////////////////////////////////////////////////////
 
 void GomokuNetworking::init() {
@@ -76,6 +76,7 @@ void GomokuNetworking::deinit() {
   receiveQueue_.clearQueue();
   sendingQueue_.clearQueue();
   gameQueue_.clearQueue();
+  Globals::game.gomokuBoard().clear();
   ifDeinit_ = false;
   vTaskDelete(gomokuNetworkingTask_);
 }
@@ -91,7 +92,6 @@ void GomokuNetworking::task(void *pvParameters) {
   } else {
     handleCommunicationPlayer();
   }
-
   deinit();
 }
 
@@ -204,6 +204,13 @@ void GomokuNetworking::retransmit(
     std::vector<structs::SenderParams> &sendersLiveParams,
     std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
         &ackMessageQueue) {
+  const auto timeNow = esp_timer_get_time();
+  bool needsRetransmit =
+      ((timeNow - retransmitTimestamp_) / consts::MICRO2MILI) >
+              consts::ESPNOW_RETRANSMIT_THRESHOLD_MS
+          ? true
+          : false;
+  if (needsRetransmit == false) return;
   ESP_LOGI(TAG_, "Start retransmit");
   // NOTHING TO DO ALL ACKS
   if (std::all_of(sendersLiveParams.begin(), sendersLiveParams.end(),
@@ -212,6 +219,14 @@ void GomokuNetworking::retransmit(
     ESP_LOGI(TAG_, "All ACKS");
     return;
   }
+  retransmitTimestamp_ = timeNow;
+  ESP_LOGI(TAG_, "MESSAGES TO RETRANSMIT: %d", ackMessageQueue.size());
+  for (auto &msg : ackMessageQueue) {
+    ESP_LOGI(TAG_, "Retransmit to: " MACSTR,
+             MAC2STR(msg.second.destinationMac.data()));
+    sendMessage(msg.second);
+  }
+
   for (auto &senderParams : sendersLiveParams) {
     if (senderParams.ack != true) {
       if (senderParams.timestamp != 0 &&
@@ -224,12 +239,6 @@ void GomokuNetworking::retransmit(
         hostParams_.disconnectedPlayers.putQueue(senderParams.macAddress);
       }
     }
-  }
-  ESP_LOGI(TAG_, "MESSAGES TO RETRANSMIT: %d", ackMessageQueue.size());
-  for (auto &message : ackMessageQueue) {
-    ESP_LOGI(TAG_, "Retransmit to: " MACSTR,
-             MAC2STR(message.second.destinationMac.data()));
-    sendMessage(message.second);
   }
 }
 
@@ -478,7 +487,7 @@ void GomokuNetworking::handleMessage(
 
     // IS CORRUPTED
     default:
-      ESP_LOGE(TAG_, "Message from" MACSTR " is corrupted!",
+      ESP_LOGE(TAG_, "Received message from: " MACSTR " of unexpected state!",
                MAC2STR(message.macAddress.data()));
       break;
   }

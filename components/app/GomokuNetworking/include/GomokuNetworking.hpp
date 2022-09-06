@@ -65,6 +65,7 @@ class GomokuNetworking {
   static structs::HostParams hostParams_;
   static mac_address_t gameHostAddress_;
   static mac_address_t hostAddress_;
+  static int32_t retransmitTimestamp_;
   static constexpr char TAG_[] = "GomokuNetworking";
   static std::vector<std::pair<mac_address_t, Pet::BitmapPet<uint16_t>>>
       playersParams_;
