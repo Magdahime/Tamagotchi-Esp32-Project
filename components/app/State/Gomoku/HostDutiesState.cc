@@ -79,7 +79,8 @@ void HostDutiesState::mainLoop() {
     return;
   }
 
-  if (currentPlayer_ == macAddresses_.end()) {
+  if (currentPlayer_ == macAddresses_.end() &&
+      GomokuNetworking::GomokuNetworking::hostQueue().elementsCount() == 0) {
     ESP_LOGI(TAG_, "Host turn to make a move.");
     Globals::game.setNextState(StateType::PlayerTurn);
     return;

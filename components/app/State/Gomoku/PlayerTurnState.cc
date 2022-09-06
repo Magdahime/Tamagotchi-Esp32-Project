@@ -138,6 +138,9 @@ void PlayerTurnState::sendMoveUpdateToHost(BoardCoordinate move) {
     structs::GomokuDataWithRecipient finalMessage{
         GomokuNetworking::GomokuNetworking::gameHostAddress(), sendData};
     GomokuNetworking::GomokuNetworking::sendingQueue().putQueue(finalMessage);
+    ESP_LOGI(
+        TAG_, "AFTER SENDING MOVE OT HOST %d",
+        GomokuNetworking::GomokuNetworking::sendingQueue().elementsCount());
     Globals::game.setNextState(StateType::WaitingForTurn);
   } else {
     sendData.state = GomokuMessageStates::SENDING_MOVE_TO_PLAYERS;

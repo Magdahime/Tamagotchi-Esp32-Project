@@ -163,7 +163,6 @@ void GomokuNetworking::handleCommunicationHost() {
                  });
 
   while (!ifDeinit_ || !sendingQueue_.empty()) {
-    ESP_LOGI(TAG_, "NUMBER OF ELEMENTS : %d", sendingQueue_.elementsCount());
     // CHECKING IF WE NEED TO RETRANSMIT
     retransmit(sendersLiveParams, ackMessageQueue);
     // SENDING
@@ -226,6 +225,7 @@ void GomokuNetworking::retransmit(
       }
     }
   }
+  ESP_LOGI(TAG_, "MESSAGES TO RETRANSMIT: %d", ackMessageQueue.size());
   for (auto &message : ackMessageQueue) {
     ESP_LOGI(TAG_, "Retransmit to: " MACSTR,
              MAC2STR(message.second.destinationMac.data()));
@@ -245,6 +245,8 @@ void GomokuNetworking::handleCommunicationPlayer() {
       ESP_LOGI(TAG_, "Retransmit message about move to host ");
       sendMessage(sendMsg);
     }
+    ESP_LOGI(TAG_, "NUMBERS OF SENDING QUEUE: %d",
+             sendingQueue_.elementsCount());
     if (sendingQueue_.getQueue(sendMsg, consts::ESPNOW_SEND_DELAY) == pdPASS) {
       if (sendMsg.data.state == GomokuMessageStates::SENDING_MOVE_TO_HOST) {
         ack = false;
@@ -490,14 +492,16 @@ void GomokuNetworking::removeFromAckMessageQueue(
     uint32_t id,
     std::list<std::pair<uint32_t, structs::GomokuDataWithRecipient>>
         &ackMessageQueue) {
-  ESP_LOGI(TAG_, "RemoveFromAckMessageQueue");
+  ESP_LOGI(TAG_, "RemoveFromAckMessageQueue %d", id);
   auto it = std::find_if(ackMessageQueue.begin(), ackMessageQueue.end(),
                          [&](auto &pair) { return pair.first == id; });
+  ESP_LOGI(TAG_, "MESSAGES BEFORE REMOVE: %d", ackMessageQueue.size());
   while (it != ackMessageQueue.end()) {
     ESP_LOGI(TAG_, "Remove a message of magic %d", id);
     ackMessageQueue.erase(it);
     it = std::find_if(ackMessageQueue.begin(), ackMessageQueue.end(),
                       [&](auto &pair) { return pair.first == id; });
+    ESP_LOGI(TAG_, "MESSAGES AFTER REMOVE: %d", ackMessageQueue.size());
   }
 }
 
